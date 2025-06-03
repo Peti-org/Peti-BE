@@ -10,6 +10,7 @@ import java.sql.Date;
 import java.util.UUID;
 
 @Entity
+@Table(name = "pet", schema = "peti", catalog = "peti")
 public class Pet {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id

@@ -48,7 +48,7 @@ public class UserService {
             user.setFirstName(userDetails.getFirstName());
             user.setLastName(userDetails.getLastName());
             user.setEmail(userDetails.getEmail());
-            user.setPhoneNumber(userDetails.getPhoneNumber());
+//            user.setPhoneNumber(userDetails.getPhoneNumber());
             user.setPassword(userDetails.getPassword());
 
             User updatedUser = userRepository.save(user);
@@ -63,11 +63,11 @@ public class UserService {
     
     private UserDto convertToDto(User user) {
         UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setFirstName(user.getFirstName());
-        userDto.setLastName(user.getLastName());
-        userDto.setEmail(user.getEmail());
-        userDto.setPhoneNumber(user.getPhoneNumber());
+//        userDto.setId(user.getId());
+//        userDto.setFirstName(user.getFirstName());
+//        userDto.setLastName(user.getLastName());
+//        userDto.setEmail(user.getEmail());
+//        userDto.setPhoneNumber(user.getPhoneNumber());
         return userDto;
     }
 }

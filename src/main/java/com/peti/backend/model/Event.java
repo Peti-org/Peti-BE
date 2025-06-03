@@ -12,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Setter
 @Getter
+@Table(name = "event", schema = "peti", catalog = "peti")
 public class Event {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
@@ -34,7 +35,7 @@ public class Event {
   @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
   private User userByUserId;
   @ManyToOne
-  @JoinColumn(name = "caretaker_id", referencedColumnName = "caretaker_id")
+  @JoinColumn(name = "caretaker_id", referencedColumnName = "caretaker_id", nullable = false)
   private Caretaker caretakerByCaretakerId;
 
   @Override

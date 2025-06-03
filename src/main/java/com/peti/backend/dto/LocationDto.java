@@ -1,5 +1,9 @@
 package com.peti.backend.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@AllArgsConstructor
 public class LocationDto {
     private Long id;
     private String address;

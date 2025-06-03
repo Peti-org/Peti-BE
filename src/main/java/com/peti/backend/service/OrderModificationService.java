@@ -19,15 +19,15 @@ public class OrderModificationService {
     
     private OrderModificationDto mapToDto(OrderModification orderModification){
         OrderModificationDto orderModificationDto = new OrderModificationDto();
-        orderModificationDto.setModificationDate(orderModification.getModificationDate());
-        orderModificationDto.setOrderId(orderModification.getId().getOrderId());
-        orderModificationDto.setModificationType(orderModification.getModificationType());
+//        orderModificationDto.setModificationDate(orderModification.getModificationDate());
+//        orderModificationDto.setOrderId(orderModification.getId().getOrderId());
+//        orderModificationDto.setModificationType(orderModification.getModificationType());
         return orderModificationDto;
     }
     private OrderModification mapToEntity(OrderModificationDto orderModificationDto){
         OrderModification orderModification = new OrderModification();
-        orderModification.setModificationDate(orderModificationDto.getModificationDate());
-        orderModification.setModificationType(orderModificationDto.getModificationType());
+//        orderModification.setModificationDate(orderModificationDto.getModificationDate());
+//        orderModification.setModificationType(orderModificationDto.getModificationType());
         return orderModification;
     }
 
@@ -37,12 +37,13 @@ public class OrderModificationService {
     }
 
     public Optional<OrderModificationDto> getOrderModificationById(Long id) {
-        Optional<OrderModification> orderModification = orderModificationRepository.findById(id);
-        if (orderModification.isPresent()){
-            return Optional.of(mapToDto(orderModification.get()));
-        }else {
-            return Optional.empty();
-        }
+//        Optional<OrderModification> orderModification = orderModificationRepository.findById(id);
+//        if (orderModification.isPresent()){
+//            return Optional.of(mapToDto(orderModification.get()));
+//        }else {
+//            return Optional.empty();
+//        }
+        return Optional.empty();
     }
 
     public OrderModificationDto saveOrderModification(OrderModificationDto orderModificationDto) {
@@ -51,21 +52,21 @@ public class OrderModificationService {
         return mapToDto(savedOrderModification);
     }
 
-    public void deleteOrderModification(Long id) {
-        orderModificationRepository.deleteById(id);
-    }
+//    public void deleteOrderModification(Long id) {
+//        orderModificationRepository.deleteById(id);
+//    }
 
-    public OrderModificationDto updateOrderModification(Long id, OrderModificationDto updatedOrderModificationDto) {
-        Optional<OrderModification> existingOrderModification = orderModificationRepository.findById(id);
-        if (existingOrderModification.isPresent()) {
-            OrderModification updatedOrderModification = mapToEntity(updatedOrderModificationDto);
-            OrderModification orderModification = existingOrderModification.get();
-            orderModification.setModificationDate(updatedOrderModification.getModificationDate());
-            orderModification.setModificationType(updatedOrderModification.getModificationType());
-            orderModification.setId(updatedOrderModification.getId());
-
-            return mapToDto(orderModificationRepository.save(orderModification));
-        }
-        return null;
-    }
+//    public OrderModificationDto updateOrderModification(Long id, OrderModificationDto updatedOrderModificationDto) {
+//        Optional<OrderModification> existingOrderModification = orderModificationRepository.findById(id);
+//        if (existingOrderModification.isPresent()) {
+//            OrderModification updatedOrderModification = mapToEntity(updatedOrderModificationDto);
+//            OrderModification orderModification = existingOrderModification.get();
+//            orderModification.setModificationDate(updatedOrderModification.getModificationDate());
+//            orderModification.setModificationType(updatedOrderModification.getModificationType());
+//            orderModification.setId(updatedOrderModification.getId());
+//
+//            return mapToDto(orderModificationRepository.save(orderModification));
+//        }
+//        return null;
+//    }
 }

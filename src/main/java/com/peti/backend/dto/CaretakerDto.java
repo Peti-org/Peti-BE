@@ -1,49 +1,23 @@
 package com.peti.backend.dto;
 
+import com.peti.backend.model.Caretaker;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@Getter
+@Setter
 public class CaretakerDto {
-    private Long id;
+    private String id;
     private String name;
     private String email;
-    private String phoneNumber;
     private String address;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public CaretakerDto(Caretaker caretaker) {
+        this.id = caretaker.getCaretakerId().toString();
+        this.name = caretaker.getUserByUserId().getFirstName();
+        this.email = caretaker.getUserByUserId().getEmail();
+        this.email = caretaker.getUserByUserId().getLocationByLocationId().getCity();
     }
 }

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: peti
+      POSTGRES_USER: seller
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - ./peti-db.sql:/docker-entrypoint-initdb.d/01-peti-db.sql
+      - ./mock-data.sql:/docker-entrypoint-initdb.d/02-mock-data.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5437:5432"
+    networks:
+      - peti-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seller -d peti"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: peti/backend:v1.1
+    container_name: peti-app
+    environment:
+      # Database connection settings
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/peti
+      SPRING_DATASOURCE_USERNAME: seller
+      SPRING_DATASOURCE_PASSWORD: 1111
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+
+    ports:
+      - "8083:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - peti-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  peti-network:
+    driver: bridge

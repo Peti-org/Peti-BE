@@ -35,13 +35,13 @@ public class BreedController {
         return new ResponseEntity<>(breedService.createBreed(breedDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BreedDto> updateBreed(@PathVariable Long id, @RequestBody BreedDto breedDto) {
-        if (!breedService.getBreedById(id).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(breedService.updateBreed(id, breedDto), HttpStatus.OK);
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<BreedDto> updateBreed(@PathVariable Long id, @RequestBody BreedDto breedDto) {
+//        if (!breedService.getBreedById(id).isPresent()) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(breedService.updateBreed(id, breedDto), HttpStatus.OK);
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteBreed(@PathVariable Long id) {

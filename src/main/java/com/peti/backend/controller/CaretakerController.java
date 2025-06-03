@@ -29,15 +29,15 @@ public class CaretakerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<CaretakerDto> createCaretaker(@RequestBody CaretakerDto caretakerDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(caretakerService.createCaretaker(caretakerDto));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<CaretakerDto> updateCaretaker(@PathVariable Long id, @RequestBody CaretakerDto caretakerDto) {
-        return ResponseEntity.ok(caretakerService.updateCaretaker(id, caretakerDto));
-    }
+//    @PostMapping
+//    public ResponseEntity<CaretakerDto> createCaretaker(@RequestBody CaretakerDto caretakerDto) {
+//        return ResponseEntity.status(HttpStatus.CREATED).body(caretakerService.createCaretaker(caretakerDto));
+//    }
+//
+//    @PutMapping("/{id}")
+//    public ResponseEntity<CaretakerDto> updateCaretaker(@PathVariable Long id, @RequestBody CaretakerDto caretakerDto) {
+//        return ResponseEntity.ok(caretakerService.updateCaretaker(id, caretakerDto));
+//    }
 
     @DeleteMapping("/{caretakerId}")
     public ResponseEntity<Void> deleteCaretaker(@PathVariable("caretakerId") Long caretakerId) {

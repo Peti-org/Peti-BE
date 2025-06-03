@@ -16,10 +16,10 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto) {
-        return new ResponseEntity<>(orderService.createOrder(orderDto), HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto) {
+//        return new ResponseEntity<>(orderService.createOrder(orderDto), HttpStatus.CREATED);
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
@@ -33,12 +33,12 @@ public class OrderController {
         return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
-        return orderService.updateOrder(id, orderDto)
-                .map(orderDtoResp -> new ResponseEntity<>(orderDtoResp, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
+//        return orderService.updateOrder(id, orderDto)
+//                .map(orderDtoResp -> new ResponseEntity<>(orderDtoResp, HttpStatus.OK))
+//                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {

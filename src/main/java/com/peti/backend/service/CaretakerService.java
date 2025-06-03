@@ -19,12 +19,12 @@ public class CaretakerService {
     
         private CaretakerDto mapToDto(Caretaker caretaker) {
         CaretakerDto caretakerDto = new CaretakerDto();
-        caretakerDto.setId(caretaker.getId());
-        caretakerDto.setName(caretaker.getName());
-        caretakerDto.setSurname(caretaker.getSurname());
-        caretakerDto.setPhone(caretaker.getPhone());
-        caretakerDto.setMail(caretaker.getMail());
-        caretakerDto.setRating(caretaker.getRating());
+//        caretakerDto.setId(caretaker.getId());
+//        caretakerDto.setName(caretaker.getName());
+//        caretakerDto.setSurname(caretaker.getSurname());
+//        caretakerDto.setPhone(caretaker.getPhone());
+//        caretakerDto.setMail(caretaker.getMail());
+//        caretakerDto.setRating(caretaker.getRating());
         return caretakerDto;
     }
 
@@ -47,7 +47,7 @@ public class CaretakerService {
 
     public CaretakerDto updateCaretaker(Long id, Caretaker caretaker) {
         if (caretakerRepository.existsById(id)) {
-            caretaker.setId(id);
+//            caretaker.setId(id);
             return mapToDto(caretakerRepository.save(caretaker));
         }
         return null;

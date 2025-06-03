@@ -1,7 +1,6 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.LocationDto;
-import com.peti.backend.mapper.LocationMapper;
 import com.peti.backend.model.Location;
 import com.peti.backend.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,7 @@ public class LocationService {
     }
     public static class LocationMapper {
         public static LocationDto toDto(Location location) {
-            return new LocationDto(location.getId(), location.getCity(), location.getCountry());
+            return new LocationDto((long) location.getLocationId(), location.getCity(),location.getCity(), location.getCountry(), location.getCountry());
         }
 
     }

@@ -35,15 +35,15 @@ public class PetService {
 
     private PetDto mapToDto(Pet pet) {
         PetDto dto = new PetDto();
-        dto.setId(pet.getId());
-        dto.setName(pet.getName());
-        dto.setAge(pet.getAge());
-        if(pet.getBreed()!=null){
-            dto.setBreedId(pet.getBreed().getId());
-        }
-        if(pet.getCaretaker()!=null){
-            dto.setCaretakerId(pet.getCaretaker().getId());
-        }
+//        dto.setId(pet.getId());
+//        dto.setName(pet.getName());
+//        dto.setAge(pet.getAge());
+//        if(pet.getBreed()!=null){
+//            dto.setBreedId(pet.getBreed().getId());
+//        }
+//        if(pet.getCaretaker()!=null){
+//            dto.setCaretakerId(pet.getCaretaker().getId());
+//        }
 
 
         return dto;
@@ -51,10 +51,10 @@ public class PetService {
 
     public Optional<Pet> updatePet(Long id, Pet petDetails) {
         return petRepository.findById(id).map(pet -> {
-            pet.setName(petDetails.getName());
-            pet.setBreed(petDetails.getBreed());
-            pet.setAge(petDetails.getAge());
-            pet.setCaretaker(petDetails.getCaretaker());
+//            pet.setName(petDetails.getName());
+//            pet.setBreed(petDetails.getBreed());
+//            pet.setAge(petDetails.getAge());
+//            pet.setCaretaker(petDetails.getCaretaker());
             return petRepository.save(pet);
         });
     

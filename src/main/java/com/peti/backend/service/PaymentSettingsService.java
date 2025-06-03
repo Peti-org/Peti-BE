@@ -45,13 +45,13 @@ public class PaymentSettingsService {
     private PaymentSettingsDto convertToDto(PaymentSettings paymentSettings){
         PaymentSettingsDto paymentSettingsDto = new PaymentSettingsDto();
 
-        paymentSettingsDto.setUserId(paymentSettings.getId().getUserId());
-        paymentSettingsDto.setCaretakerId(paymentSettings.getId().getCaretakerId());
-        paymentSettingsDto.setPaymentMethod(paymentSettings.getPaymentMethod());
-        paymentSettingsDto.setAccountNumber(paymentSettings.getAccountNumber());
-        paymentSettingsDto.setExpiryDate(paymentSettings.getExpiryDate());
-        paymentSettingsDto.setCvv(paymentSettings.getCvv());
-        paymentSettingsDto.setCardholderName(paymentSettings.getCardholderName());
+//        paymentSettingsDto.setUserId(paymentSettings.getId().getUserId());
+//        paymentSettingsDto.setCaretakerId(paymentSettings.getId().getCaretakerId());
+//        paymentSettingsDto.setPaymentMethod(paymentSettings.getPaymentMethod());
+//        paymentSettingsDto.setAccountNumber(paymentSettings.getAccountNumber());
+//        paymentSettingsDto.setExpiryDate(paymentSettings.getExpiryDate());
+//        paymentSettingsDto.setCvv(paymentSettings.getCvv());
+//        paymentSettingsDto.setCardholderName(paymentSettings.getCardholderName());
 
         return paymentSettingsDto;
     }

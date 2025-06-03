@@ -28,24 +28,24 @@ public class LocationController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<LocationDto> createLocation(@RequestBody LocationDto locationDto) {
-        return new ResponseEntity<>(locationService.saveLocation(locationDto), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<LocationDto> updateLocation(@PathVariable Long id, @RequestBody LocationDto locationDto) {
-        return locationService.updateLocation(id, locationDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLocation(@PathVariable Long id) {
-        if (locationService.deleteLocation(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<LocationDto> createLocation(@RequestBody LocationDto locationDto) {
+//        return new ResponseEntity<>(locationService.createLocation(locationDto), HttpStatus.CREATED);
+//    }
+//
+//    @PutMapping("/{id}")
+//    public ResponseEntity<LocationDto> updateLocation(@PathVariable Long id, @RequestBody LocationDto locationDto) {
+//        return locationService.updateLocation(id, locationDto)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteLocation(@PathVariable Long id) {
+//        if (locationService.deleteLocation(id)) {
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }

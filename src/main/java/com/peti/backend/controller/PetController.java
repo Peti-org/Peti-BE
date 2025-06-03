@@ -16,15 +16,15 @@ public class PetController {
     @Autowired
     private PetService petService;
 
-    @PostMapping
-    public ResponseEntity<PetDto> createPet(@RequestBody PetDto petDto) {
-        PetDto createdPet = petService.createPet(petDto);
-         if (createdPet != null) {
-            return new ResponseEntity<>(createdPet, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
+//    @PostMapping
+//    public ResponseEntity<PetDto> createPet(@RequestBody PetDto petDto) {
+//        PetDto createdPet = petService.createPet(petDto);
+//         if (createdPet != null) {
+//            return new ResponseEntity<>(createdPet, HttpStatus.CREATED);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
     @GetMapping("/{id}")
     public ResponseEntity<PetDto> getPetById(@PathVariable Long id) {
@@ -38,19 +38,19 @@ public class PetController {
         return ResponseEntity.ok(petService.getAllPets());
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PetDto> updatePet(@PathVariable Long id, @RequestBody PetDto petDto) {
-        return petService.updatePet(id, petDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePet(@PathVariable Long id) {
-        if (petService.deletePet(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<PetDto> updatePet(@PathVariable Long id, @RequestBody PetDto petDto) {
+//        return petService.updatePet(id, petDto)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deletePet(@PathVariable Long id) {
+//        if (petService.deletePet(id)) {
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }

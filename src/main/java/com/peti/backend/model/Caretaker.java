@@ -11,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Table(name = "caretaker", schema = "peti", catalog = "peti")
 public class Caretaker {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
@@ -21,6 +22,11 @@ public class Caretaker {
   @Column(name = "caretaker_preference", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
   private Object caretakerPreference;
+
+  @Basic
+  @Column(name = "rating ", nullable = false)
+  private int rating;
+
   @Basic
   @Column(name = "caretaker_is_deleted", nullable = false)
   private boolean caretakerIsDeleted;

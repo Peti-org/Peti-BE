@@ -36,30 +36,29 @@ public class OrderService {
         return mapOrderToDto(savedOrder);
     }
 
-    public OrderDto updateOrder(Long id, Order order) {
-        Optional<Order> orderOptional = orderRepository.findById(id);
-        if (orderOptional.isPresent()) {
-            Order existingOrder = orderOptional.get();
-            existingOrder.setDate(order.getDate());
-            existingOrder.setPet(order.getPet());
-            existingOrder.setUser(order.getUser());
-            Order updatedOrder = orderRepository.save(existingOrder);
-            return mapOrderToDto(updatedOrder);
-
-        }
-        return null;
-    }
+//    public OrderDto updateOrder(Long id, Order order) {
+//        Optional<Order> orderOptional = orderRepository.findById(id);
+//        if (orderOptional.isPresent()) {
+//            Order existingOrder = orderOptional.get();
+//            existingOrder.setDate(order.getDate());
+//            existingOrder.setPet(order.getPet());
+//            existingOrder.setUser(order.getUser());
+//            Order updatedOrder = orderRepository.save(existingOrder);
+//            return mapOrderToDto(updatedOrder);
+//
+//        }
+//        return null;
+//    }
 
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
     }
     private OrderDto mapOrderToDto(Order order) {
         OrderDto orderDto = new OrderDto();
-        orderDto.setId(order.getId());
-        orderDto.setDate(order.getDate());
-        orderDto.setPet(order.getPet());
-        orderDto.setUser(order.getUser());
+//        orderDto.setId(order.getId());
+//        orderDto.setDate(order.getDate());
+//        orderDto.setPet(order.getPet());
+//        orderDto.setUser(order.getUser());
         return orderDto;
     }
     }
-}

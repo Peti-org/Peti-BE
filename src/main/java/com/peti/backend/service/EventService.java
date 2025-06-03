@@ -1,7 +1,5 @@
 package com.peti.backend.service;
 
-import com.peti.backend.dto.EventDto;
-import com.peti.backend.model.Caretaker;
 import com.peti.backend.model.Event;
 import com.peti.backend.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,15 +26,15 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    public Optional<Event> updateEvent(Long id, Event eventDetails) {
-        return eventRepository.findById(id).map(event -> {
-            event.setName(eventDetails.getName());
-            event.setDescription(eventDetails.getDescription());
-            event.setDate(eventDetails.getDate());
-            event.setLocation(eventDetails.getLocation());
-            return eventRepository.save(event);
-        });
-    }
+//    public Optional<Event> updateEvent(Long id, Event eventDetails) {
+//        return eventRepository.findById(id).map(event -> {
+//            event.setName(eventDetails.getName());
+//            event.setDescription(eventDetails.getDescription());
+//            event.setDate(eventDetails.getDate());
+//            event.setLocation(eventDetails.getLocation());
+//            return eventRepository.save(event);
+//        });
+//    }
 
     public boolean deleteEvent(Long id) {
         if (eventRepository.existsById(id)) {

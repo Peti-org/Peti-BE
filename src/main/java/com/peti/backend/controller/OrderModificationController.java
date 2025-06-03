@@ -33,19 +33,19 @@ public class OrderModificationController {
         return new ResponseEntity<>(orderModificationService.saveOrderModification(orderModificationDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderModificationDto> updateOrderModification(@PathVariable Long id, @RequestBody OrderModificationDto orderModificationDto){
-         return Optional.ofNullable(orderModificationService.updateOrderModification(id, orderModificationDto))
-               .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderModification(@PathVariable Long id) {
-        if (orderModificationService.deleteOrderModification(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<OrderModificationDto> updateOrderModification(@PathVariable Long id, @RequestBody OrderModificationDto orderModificationDto){
+//         return Optional.ofNullable(orderModificationService.updateOrderModification(id, orderModificationDto))
+//               .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteOrderModification(@PathVariable Long id) {
+//        if (orderModificationService.deleteOrderModification(id)) {
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 }
