@@ -7,6 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "breed", schema = "peti", catalog = "peti")
 public class Breed {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id

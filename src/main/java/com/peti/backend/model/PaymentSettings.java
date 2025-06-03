@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "payment_settings", schema = "public", catalog = "peti")
+@Table(name = "payment_settings", schema = "peti", catalog = "peti")
 @IdClass(PaymentSettingsPK.class)
 @Getter
 @Setter

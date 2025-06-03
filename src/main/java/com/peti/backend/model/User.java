@@ -11,6 +11,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Table(name = "user", schema = "peti", catalog = "peti")
 public class User {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
