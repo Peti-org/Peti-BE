@@ -2,6 +2,7 @@ package com.peti.backend.controller;
 
 import com.peti.backend.dto.CaretakerSlotDto;
 import com.peti.backend.service.CaretakerSlotService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/slots")
+@Tag(name = "Catalog", description = "Operation that is needed for catalog page")
 public class CaretackerSlotController {
 
   private final CaretakerSlotService slotService;

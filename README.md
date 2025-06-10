@@ -135,3 +135,8 @@ You can connect to the PostgreSQL database using any PostgreSQL client:
 Once the application is running, you can access:
 - API endpoints at `http://localhost:8083`
 - Health check at `http://localhost:8083/api/ping`
+- Swagger `http://localhost:8082/swagger-ui/index.html`
+
+
+
+
