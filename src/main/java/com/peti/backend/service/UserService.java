@@ -1,15 +1,14 @@
 package com.peti.backend.service;
 
+import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.UserDto;
 import com.peti.backend.model.User;
 import com.peti.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -26,7 +25,7 @@ public class UserService {
         return userDtos;
     }
 
-    public Optional<UserDto> getUserById(Long id) {
+    public Optional<UserDto> getUserById(UUID id) {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             return Optional.of(convertToDto(userOptional.get()));
@@ -39,7 +38,7 @@ public class UserService {
         return convertToDto(savedUser);
     }
 
-    public Optional<UserDto> updateUser(Long id, User userDetails) {
+    public Optional<UserDto> updateUser(UUID id, User userDetails) {
         Optional<User> userOptional = userRepository.findById(id);
 
         if (userOptional.isPresent()) {
@@ -57,17 +56,11 @@ public class UserService {
         return Optional.empty();
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
-    
+
     private UserDto convertToDto(User user) {
-        UserDto userDto = new UserDto();
-//        userDto.setId(user.getId());
-//        userDto.setFirstName(user.getFirstName());
-//        userDto.setLastName(user.getLastName());
-//        userDto.setEmail(user.getEmail());
-//        userDto.setPhoneNumber(user.getPhoneNumber());
-        return userDto;
+        return UserDto.fromUser(user, new CityDto());
     }
 }

@@ -33,8 +33,8 @@ public class LocationService {
     public Optional<LocationDto> updateLocation(Long id, Location locationDetails) {
         return locationRepository.findById(id)
                 .map(existingLocation -> {
-                    existingLocation.setCity(locationDetails.getCity());
-                    existingLocation.setCountry(locationDetails.getCountry());
+//                    existingLocation.setCity(locationDetails.getCity());
+//                    existingLocation.setCountry(locationDetails.getCountry());
                     return existingLocation;
                 })
                 .map(locationRepository::save)
@@ -46,7 +46,7 @@ public class LocationService {
     }
     public static class LocationMapper {
         public static LocationDto toDto(Location location) {
-            return new LocationDto((long) location.getLocationId(), location.getCity(),location.getCity(), location.getCountry(), location.getCountry());
+            return new LocationDto((long) location.getLocationId(), "1", "1", "1", "1");
         }
 
     }
