@@ -1,40 +1,54 @@
 package com.peti.backend.dto;
 
+import com.peti.backend.model.User;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+@Getter
+@Setter
 public class UserDto {
-    private Long id;
-    private String name;
-    private String email;
-    private String password;
 
-    public Long getId() {
-        return id;
+  private UUID userId;
+  private String email;
+  private String firstName;
+  private String lastName;
+  private LocalDate birthDate;
+  private UUID caretakersByUserId;
+  //add pets collections
+  //add location
+  private CityDto city;
+
+  /**
+   * Converts a User entity to a UserDto
+   *
+   * @param user the User entity to convert
+   * @return a new UserDto with data from the User entity
+   */
+  public static UserDto fromUser(User user, CityDto city) {
+    if (user == null) {
+      return null;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    UserDto userDto = new UserDto();
+    userDto.setUserId(user.getUserId());
+    userDto.setEmail(user.getEmail());
+    userDto.setFirstName(user.getFirstName());
+    userDto.setLastName(user.getLastName());
+    userDto.setBirthDate(user.getBirthday().toLocalDate());
 
-    public String getName() {
-        return name;
-    }
+    // Set city information
+    userDto.setCity(city);
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    // If there's at least one caretaker, set the first one's ID
+//    if (user.getCaretakersByUserId() != null && !user.getCaretakersByUserId().isEmpty()) {
+//      user.getCaretakersByUserId().stream().findFirst().ifPresent(caretaker ->
+//              userDto.setCaretakersByUserId(caretaker.getCaretakerId())
+//      );
+//    }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    return userDto;
+  }
 }

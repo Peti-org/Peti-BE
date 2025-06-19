@@ -1,8 +1,13 @@
 package com.peti.backend.dto;
 
+import com.peti.backend.model.Location;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+@Setter
+@Getter
 @AllArgsConstructor
 public class LocationDto {
     private Long id;
@@ -11,43 +16,11 @@ public class LocationDto {
     private String country;
     private String postalCode;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
+    public Location toLocation() {
+        Location location = new Location();
+//        location.setAddress(address); //TODO: fix address set up in future
+//        location.setCity(city);
+//        location.setCountry(country);
+        return location;
     }
 }
