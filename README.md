@@ -100,6 +100,9 @@ If you encounter port conflicts, either:
 - Check application logs: `docker compose logs app`
 - Verify the Docker image was built successfully
 
+**After Changing Database:**
+- Delete Volume
+
 ### Useful Commands
 
 ```bash
