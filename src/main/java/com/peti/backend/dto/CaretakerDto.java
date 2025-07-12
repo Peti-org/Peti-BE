@@ -18,6 +18,6 @@ public class CaretakerDto {
         this.id = caretaker.getCaretakerId().toString();
         this.name = caretaker.getUserByUserId().getFirstName();
         this.email = caretaker.getUserByUserId().getEmail();
-        this.email = caretaker.getUserByUserId().getLocationByLocationId().getCity();
+        this.address = caretaker.getUserByUserId().getCityByCityId().getCity();
     }
 }

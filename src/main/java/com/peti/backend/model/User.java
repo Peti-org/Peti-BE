@@ -1,27 +1,35 @@
 package com.peti.backend.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
+
+import static com.peti.backend.service.RoleService.convertToAuthority;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "user", schema = "peti", catalog = "peti")
-public class User {
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class User implements UserDetails {
+  @GeneratedValue(strategy = GenerationType.UUID)
   @Id
   @Column(name = "user_id", nullable = false)
+  @EqualsAndHashCode.Include
   private UUID userId;
   @Basic
   @Column(name = "first_name", nullable = false, length = 50)
   private String firstName;
   @Basic
-  @Column(name = "last_name", nullable = true, length = 50)
+  @Column(name = "last_name", length = 50)
   private String lastName;
   @Basic
   @Column(name = "email", nullable = false, length = 50)
@@ -40,54 +48,49 @@ public class User {
   private String userDataFolder;
   @OneToMany(mappedBy = "userByUserId")
   private Collection<Caretaker> caretakersByUserId;
-//  @OneToMany(mappedBy = "userByUserId")
-//  private Collection<PaymentSettings> paymentSettingsByUserId;
+  //  @OneToMany(mappedBy = "userByUserId")
+  //  private Collection<PaymentSettings> paymentSettingsByUserId;
   @OneToMany(mappedBy = "userByUserId")
   private Collection<Pet> petsByUserId;
   @ManyToOne
-  @JoinColumn(name = "location_id", referencedColumnName = "location_id", nullable = false)
+  @JoinColumn(name = "location_id", referencedColumnName = "location_id", nullable = true)
   private Location locationByLocationId;
 
+  @ManyToOne
+  @JoinColumn(name = "city_id", referencedColumnName = "city_id", nullable = false)
+  private City cityByCityId;
+
+  @ManyToOne
+  @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
+  private Role role;
+
   @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return Collections.singletonList(convertToAuthority(role));
+  }
 
-    User user = (User) o;
+  @Override
+  public String getUsername() {
+    return email;
+  }
 
-    if (userIsDeleted != user.userIsDeleted)
-      return false;
-    if (userId != null ? !userId.equals(user.userId) : user.userId != null)
-      return false;
-    if (firstName != null ? !firstName.equals(user.firstName) : user.firstName != null)
-      return false;
-    if (lastName != null ? !lastName.equals(user.lastName) : user.lastName != null)
-      return false;
-    if (email != null ? !email.equals(user.email) : user.email != null)
-      return false;
-    if (birthday != null ? !birthday.equals(user.birthday) : user.birthday != null)
-      return false;
-    if (password != null ? !password.equals(user.password) : user.password != null)
-      return false;
-    if (userDataFolder != null ? !userDataFolder.equals(user.userDataFolder) : user.userDataFolder != null)
-      return false;
-
+  @Override
+  public boolean isAccountNonExpired() {
     return true;
   }
 
   @Override
-  public int hashCode() {
-    int result = userId != null ? userId.hashCode() : 0;
-    result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
-    result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
-    result = 31 * result + (email != null ? email.hashCode() : 0);
-    result = 31 * result + (birthday != null ? birthday.hashCode() : 0);
-    result = 31 * result + (password != null ? password.hashCode() : 0);
-    result = 31 * result + (userIsDeleted ? 1 : 0);
-    result = 31 * result + (userDataFolder != null ? userDataFolder.hashCode() : 0);
-    return result;
+  public boolean isAccountNonLocked() {
+    return true;
   }
 
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return true;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return true;
+  }
 }

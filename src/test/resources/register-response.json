@@ -1,0 +1,11 @@
+{
+  "userId": "11111111-1111-1111-1111-111111111111",
+  "email": "test@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "birthDate": "1990-01-01",
+  "city": { "id": 1, "name": "Test City" },
+  "roleName": "USER",
+  "token": "test_token"
+}
+

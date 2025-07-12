@@ -1,9 +1,8 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.UserDto;
+import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
