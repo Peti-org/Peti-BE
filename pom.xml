@@ -108,14 +108,6 @@
   <build>
     <finalName>application</finalName>
     <plugins>
-<!--      <plugin>-->
-<!--        <groupId>org.liquibase</groupId>-->
-<!--        <artifactId>liquibase-maven-plugin</artifactId>-->
-<!--        <version>${liquibase.version}</version>-->
-<!--        <configuration>-->
-<!--          <propertyFile>/src/main/resources/application.properties</propertyFile>-->
-<!--        </configuration>-->
-<!--      </plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
