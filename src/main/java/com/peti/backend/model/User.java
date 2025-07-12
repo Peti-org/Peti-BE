@@ -4,14 +4,15 @@ import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
+
+import static com.peti.backend.service.RoleService.convertToAuthority;
 
 @Entity
 @Getter
@@ -47,8 +48,8 @@ public class User implements UserDetails {
   private String userDataFolder;
   @OneToMany(mappedBy = "userByUserId")
   private Collection<Caretaker> caretakersByUserId;
-//  @OneToMany(mappedBy = "userByUserId")
-//  private Collection<PaymentSettings> paymentSettingsByUserId;
+  //  @OneToMany(mappedBy = "userByUserId")
+  //  private Collection<PaymentSettings> paymentSettingsByUserId;
   @OneToMany(mappedBy = "userByUserId")
   private Collection<Pet> petsByUserId;
   @ManyToOne
@@ -59,9 +60,13 @@ public class User implements UserDetails {
   @JoinColumn(name = "city_id", referencedColumnName = "city_id", nullable = false)
   private City cityByCityId;
 
+  @ManyToOne
+  @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
+  private Role role;
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
+    return Collections.singletonList(convertToAuthority(role));
   }
 
   @Override

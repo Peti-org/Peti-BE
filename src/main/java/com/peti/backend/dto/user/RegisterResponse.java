@@ -1,6 +1,9 @@
-package com.peti.backend.dto;
+package com.peti.backend.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.peti.backend.dto.CityDto;
 import com.peti.backend.model.User;
+import com.peti.backend.service.CityService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,17 +12,17 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class UserDto {
+public class RegisterResponse {
 
   private UUID userId;
   private String email;
   private String firstName;
   private String lastName;
   private LocalDate birthDate;
-  private UUID caretakersByUserId;
-  //add pets collections
-  //add location
   private CityDto city;
+  private String roleName;
+  @JsonUnwrapped
+  private AuthResponse authResponse;
 
   /**
    * Converts a User entity to a UserDto
@@ -27,27 +30,20 @@ public class UserDto {
    * @param user the User entity to convert
    * @return a new UserDto with data from the User entity
    */
-  public static UserDto fromUser(User user, CityDto city) {
+  public static RegisterResponse fromUser(User user, AuthResponse authResponse, CityDto cityDto) {
     if (user == null) {
       return null;
     }
 
-    UserDto userDto = new UserDto();
+    RegisterResponse userDto = new RegisterResponse();
     userDto.setUserId(user.getUserId());
     userDto.setEmail(user.getEmail());
     userDto.setFirstName(user.getFirstName());
     userDto.setLastName(user.getLastName());
     userDto.setBirthDate(user.getBirthday().toLocalDate());
-
-    // Set city information
-    userDto.setCity(city);
-
-    // If there's at least one caretaker, set the first one's ID
-//    if (user.getCaretakersByUserId() != null && !user.getCaretakersByUserId().isEmpty()) {
-//      user.getCaretakersByUserId().stream().findFirst().ifPresent(caretaker ->
-//              userDto.setCaretakersByUserId(caretaker.getCaretakerId())
-//      );
-//    }
+    userDto.setRoleName(user.getRole().getRoleName());
+    userDto.setAuthResponse(authResponse);
+    userDto.setCity(cityDto);
 
     return userDto;
   }

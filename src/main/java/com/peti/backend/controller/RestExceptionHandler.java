@@ -4,13 +4,22 @@ package com.peti.backend.controller;
 import com.peti.backend.dto.exception.BadRequestException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
@@ -21,6 +30,26 @@ public class RestExceptionHandler {
     errorDetail.setProperty("description", exception.getMessage());
     return errorDetail;
   }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
+    Map<String, String> errors = exception.getBindingResult().getFieldErrors().stream()
+            .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
+    errorDetail.setProperty("errors", errors);
+    return errorDetail;
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Email already exists");
+  }
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ProblemDetail handleUerNotFoundException(UsernameNotFoundException exception) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+  }
+
 
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleSecurityException(Exception exception) {

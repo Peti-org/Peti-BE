@@ -33,6 +33,10 @@ public class City {
   private String country;
 
   @Basic
+  @Column(name = "country_code", nullable = false, length = 20)
+  private String countryCode;
+
+  @Basic
   @Column(name = "city", nullable = false, length = 40)
   private String city;
 

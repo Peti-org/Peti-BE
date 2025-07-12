@@ -1,21 +1,25 @@
 package com.peti.backend.security;
 
 
+import com.peti.backend.dto.user.AuthResponse;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -32,6 +36,11 @@ public class JwtService {
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
+  }
+
+  public AuthResponse generateAuthResponse(UserDetails userDetails) {
+    String token = generateToken(userDetails);
+    return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond());
   }
 
   public String generateToken(UserDetails userDetails) {
@@ -53,11 +62,11 @@ public class JwtService {
   ) {
     return Jwts
             .builder()
-            .setClaims(extraClaims)
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+            .claims(extraClaims)
+            .subject(userDetails.getUsername())
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + expiration))
+            .signWith(SignatureAlgorithm.HS256, getSignInKey())
             .compact();
   }
 
@@ -75,11 +84,15 @@ public class JwtService {
   }
 
   private Claims extractAllClaims(String token) {
-    return Jwts.parser()
-            .verifyWith(getSignInKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+    try {
+      return Jwts.parser()
+              .verifyWith(getSignInKey())
+              .build()
+              .parseSignedClaims(token)
+              .getPayload();
+    } catch (SignatureException | ExpiredJwtException e) { // Invalid signature or expired token
+      throw new AccessDeniedException("Access denied: " + e.getMessage());
+    }
   }
 
   private SecretKey getSignInKey() {

@@ -76,6 +76,7 @@ CREATE TABLE city
     longitude     decimal(18, 8) NULL,
     latitude      decimal(18, 8) NULL,
     country       varchar(20) NOT NULL,
+    country_code  varchar(2)  NOT NULL,
     city          varchar(40) NOT NULL,
     location_info varchar(100) NULL,
     CONSTRAINT city_pk PRIMARY KEY (city_id)
@@ -150,9 +151,18 @@ CREATE TABLE "user"
     password         varchar(72) NOT NULL,
     location_id      int NULL,
     city_id          int         NOT NULL,
+    role_id          int         NOT NULL,
     user_is_deleted  boolean     NOT NULL,
     user_data_folder varchar(50) NOT NULL,
     CONSTRAINT user_pk PRIMARY KEY (user_id)
+);
+
+-- Table: role
+CREATE TABLE "role"
+(
+    role_id   int         NOT NULL,
+    role_name varchar(20) NOT NULL,
+    CONSTRAINT role_pk PRIMARY KEY (role_id)
 );
 
 -- foreign keys
@@ -276,6 +286,23 @@ ALTER TABLE "user"
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE
 ;
+
+-- Reference: user_city (table: user)
+ALTER TABLE "user"
+    ADD CONSTRAINT user_role
+        FOREIGN KEY (role_id)
+            REFERENCES role (role_id)
+            ON DELETE RESTRICT
+            NOT DEFERRABLE
+                INITIALLY IMMEDIATE
+;
+
+-- Reference: user_email_constraint (table: user)
+ALTER TABLE "user"
+    ADD CONSTRAINT user_email_constraint
+        UNIQUE (email)
+;
+
 
 
 GRANT

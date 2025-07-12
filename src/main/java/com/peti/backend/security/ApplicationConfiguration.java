@@ -5,6 +5,8 @@ import com.peti.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
+
   private final UserRepository userRepository;
 
   @Bean
@@ -36,11 +39,19 @@ public class ApplicationConfiguration {
 
   @Bean
   AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-    authProvider.setUserDetailsService(userDetailsService());
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
     authProvider.setPasswordEncoder(passwordEncoder());
-
     return authProvider;
   }
+
+//  @Bean
+//  public RoleHierarchy roleHierarchy() {
+//    RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+//    String hierarchy = "ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF > ROLE_USER";
+//    roleHierarchy.setHierarchy(hierarchy);
+//    return roleHierarchy;
+//  }
+
+  //https://www.baeldung.com/role-and-privilege-for-spring-security-registration
+  //https://developer.auth0.com/resources/guides/web-app/spring/basic-role-based-access-control
 }

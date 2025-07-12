@@ -29,4 +29,10 @@ public class CityDto {
         cityEntity.setLatitude(latitude);
         return cityEntity;
     }
+
+    public City toCityWithId() {
+        City cityEntity = new City();
+        cityEntity.setCityId(id);
+        return cityEntity;
+    }
 }

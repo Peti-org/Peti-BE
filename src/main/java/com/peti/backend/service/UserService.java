@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.CityDto;
-import com.peti.backend.dto.UserDto;
+import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.User;
 import com.peti.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

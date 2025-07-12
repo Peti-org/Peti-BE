@@ -17,12 +17,13 @@ public class CityService {
   private final CityRepository cityRepository;
 
   public Optional<CityDto> fetchById(Integer id) {
-    return cityRepository.findById(id).map(this::convertToDto);
+    return cityRepository.findById(id).map(CityService::convertToDto);
   }
 
-  public List<CityDto> fetchCitiesByCountry(String country) {
-    return cityRepository.findByCountry(country).stream()
-            .map(this::convertToDto)
+  public List<CityDto> fetchCitiesByCountryCode(String countryCode) {
+    String formattedCountryCode = countryCode.toUpperCase();
+    return cityRepository.findByCountryCode(formattedCountryCode).stream()
+            .map(CityService::convertToDto)
             .collect(Collectors.toList());
   }
 
@@ -46,14 +47,14 @@ public class CityService {
               }
               return cityRepository.save(existingCity);
             })
-            .map(this::convertToDto);
+            .map(CityService::convertToDto);
   }
 
   public void deleteCity(Integer id) {
     cityRepository.deleteById(id);
   }
 
-  private CityDto convertToDto(City city) {
+  public static CityDto convertToDto(City city) {
     return new CityDto(
             city.getCityId(),
             city.getCity(),

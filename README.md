@@ -140,3 +140,13 @@ Once the application is running, you can access:
 
 
 
+### Info to read to get known with project set up
+
+- Spring security configuration: https://medium.com/@minadev/authentication-and-authorization-with-spring-security-bf22e985f2cb
+- https://medium.com/@ihor.polataiko/spring-security-guide-part-1-introduction-c2709ff1bd98
+- https://www.baeldung.com/spring-deprecated-websecurityconfigureradapter
+- 
+
+
+### Service Specification
+For countries code uses ISO 3166-1 alpha-2 standard.
