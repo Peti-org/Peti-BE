@@ -1,8 +1,10 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.user.*;
-import com.peti.backend.security.AuthenticationService;
-import com.peti.backend.security.JwtService;
+import com.peti.backend.dto.user.AuthResponse;
+import com.peti.backend.dto.user.LoginUserDto;
+import com.peti.backend.dto.user.RegisterResponse;
+import com.peti.backend.dto.user.RegisterUserDto;
+import com.peti.backend.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.peti.backend.security;
+package com.peti.backend.service;
 
 import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.exception.BadRequestException;
@@ -8,8 +8,7 @@ import com.peti.backend.dto.user.RegisterResponse;
 import com.peti.backend.dto.user.RegisterUserDto;
 import com.peti.backend.model.User;
 import com.peti.backend.repository.UserRepository;
-import com.peti.backend.service.CityService;
-import com.peti.backend.service.RoleService;
+import com.peti.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,8 +30,8 @@ public class AuthenticationService {
   public RegisterResponse signup(RegisterUserDto registrationData) {
     // Validation for city existence
     CityDto cityDto = cityService.fetchById(registrationData.getCityId())
-            .orElseThrow(() -> new BadRequestException(
-                    String.format("Selected city with id %s not found", registrationData.getCityId())));
+        .orElseThrow(() -> new BadRequestException(
+            String.format("Selected city with id %s not found", registrationData.getCityId())));
 
     User user = registrationData.toUser(passwordEncoder);
     user.setCityByCityId(cityDto.toCityWithId());
@@ -47,7 +46,7 @@ public class AuthenticationService {
     authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
 
     User user = userRepository.findByEmail(input.getEmail())
-            .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+        .orElseThrow(() -> new BadRequestException("Invalid email or password"));
     return jwtService.generateAuthResponse(user);
   }
 }

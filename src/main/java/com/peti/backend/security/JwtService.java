@@ -1,28 +1,26 @@
 package com.peti.backend.security;
 
-
 import com.peti.backend.dto.user.AuthResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import javax.crypto.SecretKey;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
+
   @Value("${security.jwt.secret-key}")
   private String secretKey;
 
@@ -33,41 +31,32 @@ public class JwtService {
     return extractClaim(token, Claims::getSubject);
   }
 
-  public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+  public AuthResponse generateAuthResponse(UserDetails userDetails) {
+    String token = generateToken(new HashMap<>(), userDetails);
+    return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond());
+  }
+
+  private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
-  public AuthResponse generateAuthResponse(UserDetails userDetails) {
-    String token = generateToken(userDetails);
-    return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond());
-  }
-
-  public String generateToken(UserDetails userDetails) {
-    return generateToken(new HashMap<>(), userDetails);
-  }
-
-  public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+  private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
     return buildToken(extraClaims, userDetails, jwtExpiration);
   }
 
-  public long getExpirationTime() {
-    return jwtExpiration;
-  }
-
   private String buildToken(
-          Map<String, Object> extraClaims,
-          UserDetails userDetails,
-          long expiration
-  ) {
+      Map<String, Object> extraClaims,
+      UserDetails userDetails,
+      long expiration) {
     return Jwts
-            .builder()
-            .claims(extraClaims)
-            .subject(userDetails.getUsername())
-            .issuedAt(new Date(System.currentTimeMillis()))
-            .expiration(new Date(System.currentTimeMillis() + expiration))
-            .signWith(SignatureAlgorithm.HS256, getSignInKey())
-            .compact();
+        .builder()
+        .claims(extraClaims)
+        .subject(userDetails.getUsername())
+        .issuedAt(new Date(System.currentTimeMillis()))
+        .expiration(new Date(System.currentTimeMillis() + expiration))
+        .signWith(getSignInKey())
+        .compact();
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -86,10 +75,10 @@ public class JwtService {
   private Claims extractAllClaims(String token) {
     try {
       return Jwts.parser()
-              .verifyWith(getSignInKey())
-              .build()
-              .parseSignedClaims(token)
-              .getPayload();
+          .verifyWith(getSignInKey())
+          .build()
+          .parseSignedClaims(token)
+          .getPayload();
     } catch (SignatureException | ExpiredJwtException e) { // Invalid signature or expired token
       throw new AccessDeniedException("Access denied: " + e.getMessage());
     }

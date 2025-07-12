@@ -13,15 +13,15 @@ import java.util.Optional;
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
   @Query(value = """
-          SELECT r.role_id, r.role_name
-          FROM peti.role r
-          WHERE r.role_id >= (
-              SELECT  role.role_id
-              FROM peti.role role
-              WHERE role.role_name = :name
-              LIMIT 1
-          )
-          """, nativeQuery = true)
+      SELECT r.role_id, r.role_name
+      FROM peti.role r
+      WHERE r.role_id >= (
+          SELECT  role.role_id
+          FROM peti.role role
+          WHERE role.role_name = :name
+          LIMIT 1
+      )
+      """, nativeQuery = true)
   List<Role> findRolesGreaterThanSelected(@Param("name") String roleName);
 
   Optional<Role> findTopByOrderByRoleIdDesc();

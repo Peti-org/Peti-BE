@@ -5,8 +5,6 @@ import com.peti.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
-import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,7 +22,7 @@ public class ApplicationConfiguration {
   @Bean
   UserDetailsService userDetailsService() {
     return username -> userRepository.findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
   @Bean
@@ -43,15 +41,4 @@ public class ApplicationConfiguration {
     authProvider.setPasswordEncoder(passwordEncoder());
     return authProvider;
   }
-
-//  @Bean
-//  public RoleHierarchy roleHierarchy() {
-//    RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-//    String hierarchy = "ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF > ROLE_USER";
-//    roleHierarchy.setHierarchy(hierarchy);
-//    return roleHierarchy;
-//  }
-
-  //https://www.baeldung.com/role-and-privilege-for-spring-security-registration
-  //https://developer.auth0.com/resources/guides/web-app/spring/basic-role-based-access-control
 }
