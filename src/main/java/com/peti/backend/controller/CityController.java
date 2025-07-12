@@ -37,7 +37,6 @@ public class CityController {
   }
 
   @GetMapping("/country/{country_code}")
-  @PreAuthorize("permitAll()")
   public ResponseEntity<List<CityDto>> getCitiesByCountry(@PathVariable("country_code") String countryCode) {
     List<CityDto> cities = cityService.fetchCitiesByCountryCode(countryCode);
     return ResponseEntity.ok(cities);

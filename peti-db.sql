@@ -306,32 +306,32 @@ ALTER TABLE "user"
 
 --  For local run only
 
-GRANT
-  USAGE
-  ON
-  SCHEMA
-  peti TO seller;
-
--- Grant SELECT, INSERT, UPDATE, DELETE on all existing tables in the peti schema
-GRANT
-  SELECT,
-  INSERT
-  ,
-  UPDATE,
-  DELETE
-  ON ALL TABLES IN SCHEMA peti TO seller;
-
--- Grant permissions on future tables that will be created in the peti schema
-ALTER
-  DEFAULT PRIVILEGES IN SCHEMA peti GRANT
-  SELECT,
-  INSERT
-  ,
-  UPDATE,
-  DELETE
-  ON TABLES TO seller;
-
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA peti TO seller;
+-- GRANT
+--   USAGE
+--   ON
+--   SCHEMA
+--   peti TO seller;
+--
+-- -- Grant SELECT, INSERT, UPDATE, DELETE on all existing tables in the peti schema
+-- GRANT
+--   SELECT,
+--   INSERT
+--   ,
+--   UPDATE,
+--   DELETE
+--   ON ALL TABLES IN SCHEMA peti TO seller;
+--
+-- -- Grant permissions on future tables that will be created in the peti schema
+-- ALTER
+--   DEFAULT PRIVILEGES IN SCHEMA peti GRANT
+--   SELECT,
+--   INSERT
+--   ,
+--   UPDATE,
+--   DELETE
+--   ON TABLES TO seller;
+--
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA peti TO seller;
 
 -- End of file.
 
