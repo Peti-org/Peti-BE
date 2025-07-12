@@ -3,7 +3,7 @@
 -- DROP DATABASE peti;
 
 -- CREATE DATABASE peti
---     WITH 
+--     WITH
 --     OWNER = lyndexter
 --     ENCODING = 'UTF8'
 --     LC_COLLATE = 'Ukrainian_Ukraine.1252'
@@ -72,7 +72,7 @@ CREATE TABLE event
 -- Table: city
 CREATE TABLE city
 (
-  city_id       int            NOT NULL,
+  city_id       SERIAL         NOT NULL,
   longitude     decimal(18, 8) NULL,
   latitude      decimal(18, 8) NULL,
   country       varchar(20)    NOT NULL,
@@ -304,6 +304,7 @@ ALTER TABLE "user"
 ;
 
 
+--  For local run only
 
 GRANT
   USAGE
@@ -330,7 +331,16 @@ ALTER
   DELETE
   ON TABLES TO seller;
 
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA peti TO seller;
+
 -- End of file.
+
+
+
+
+
+
+
 
 
 -- -- Create user 'seller' with password '1111' only if it doesn't exist

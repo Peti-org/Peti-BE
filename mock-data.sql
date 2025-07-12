@@ -6,13 +6,13 @@ SET search_path TO peti;
 -- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. city
-INSERT INTO city (city_id, longitude, latitude, country, country_code, city, location_info)
+INSERT INTO city (longitude, latitude, country, country_code, city, location_info)
 VALUES
-  (1, 30.5234, 50.4501, 'Ukraine', 'UA', 'Kyiv', 'Capital of Ukraine'),
-  (2, 24.0297, 49.8397, 'Ukraine', 'UA', 'Lviv', 'Western Ukraine cultural center'),
-  (3, 35.0462, 48.4647, 'Ukraine', 'UA', 'Dnipro', 'Eastern Ukraine industrial center'),
-  (4, 22.0462, 12.4647, 'Great Britain', 'GB', 'London', 'London is a capital of Great Britain'),
-  (5, 12.0462, 48.4647, 'USA', 'US', 'New York', 'New York is a city in the USA');
+  (30.5234, 50.4501, 'Ukraine', 'UA', 'Kyiv', 'Capital of Ukraine'),
+  (24.0297, 49.8397, 'Ukraine', 'UA', 'Lviv', 'Western Ukraine cultural center'),
+  (35.0462, 48.4647, 'Ukraine', 'UA', 'Dnipro', 'Eastern Ukraine industrial center'),
+  (22.0462, 12.4647, 'Great Britain', 'GB', 'London', 'London is a capital of Great Britain'),
+  (12.0462, 48.4647, 'USA', 'US', 'New York', 'New York is a city in the USA');
 
 -- 2. location
 INSERT INTO location (location_id, longitude, latitude, address)

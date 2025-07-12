@@ -5,6 +5,7 @@ import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.CityService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,15 +45,15 @@ public class CityController {
 
   @HasAdminRole
   @PostMapping
-  public ResponseEntity<CityDto> createCity(@RequestBody CityDto cityDto) {
+  public ResponseEntity<CityDto> createCity(@Valid @RequestBody CityDto cityDto) {
     //todo add validation for country code
     CityDto createdCity = cityService.addNewCity(cityDto);
-    return new ResponseEntity<>(createdCity, HttpStatus.CREATED);
+    return new ResponseEntity<>(createdCity, HttpStatus.OK);
   }
 
   @HasAdminRole
   @PutMapping("/{id}")
-  public ResponseEntity<CityDto> updateCity(@PathVariable Integer id, @RequestBody CityDto cityDto) {
+  public ResponseEntity<CityDto> updateCity(@PathVariable Integer id, @Valid @RequestBody CityDto cityDto) {
     return cityService.modifyCity(id, cityDto)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

@@ -1,0 +1,8 @@
+{
+  "email": "homer@gmail.com",
+  "password": "secret123",
+  "firstName": "Homer",
+  "lastName": "Hryshchuk",
+  "birthDate": "2000-07-12",
+  "cityId": 1
+}
