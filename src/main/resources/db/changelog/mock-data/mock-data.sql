@@ -1,9 +1,6 @@
--- Database: peti
+-- liquibase formatted sql
 
-
-SET search_path TO peti;
--- Use uuid-ossp extension to generate UUIDs if needed
--- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- changeset lyndexter:1701096714332-1
 
 -- 1. city
 INSERT INTO city (longitude, latitude, country, country_code, city, location_info)

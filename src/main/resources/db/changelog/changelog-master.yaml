@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/migration/0.0.1-init.sql
+  - includeAll:
+      path: db/changelog/mock-data/
+#  - includeAll:
+#      path: db/changelog/scripts/

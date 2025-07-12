@@ -10,15 +10,15 @@ services:
       POSTGRES_PASSWORD: 1111
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     volumes:
-      - ./peti-db.sql:/docker-entrypoint-initdb.d/01-peti-db.sql
-      - ./mock-data.sql:/docker-entrypoint-initdb.d/02-mock-data.sql
+      - ./src/main/resources/db/setup/create-scheme.sql:/docker-entrypoint-initdb.d/01-init-scheme.sql
+      - ./src/main/resources/db/setup/grant-permissions.sql:/docker-entrypoint-initdb.d/02-grant-permission.sql
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5437:5432"
     networks:
       - peti-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U seller -d peti"]
+      test: [ "CMD-SHELL", "pg_isready -U seller -d peti" ]
       interval: 10s
       timeout: 5s
       retries: 5
