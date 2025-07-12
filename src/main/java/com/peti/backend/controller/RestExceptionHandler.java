@@ -59,6 +59,11 @@ public class RestExceptionHandler {
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  public ProblemDetail handleAccessDeniedException(AccessDeniedException exception) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+  }
+
 
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleSecurityException(Exception exception) {
@@ -78,11 +83,6 @@ public class RestExceptionHandler {
     if (exception instanceof AccountStatusException) {
       errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
       errorDetail.setProperty("description", "The account is locked");
-    }
-
-    if (exception instanceof AccessDeniedException) {
-      errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-      errorDetail.setProperty("description", "You are not authorized to access this resource");
     }
 
     if (exception instanceof SignatureException) {

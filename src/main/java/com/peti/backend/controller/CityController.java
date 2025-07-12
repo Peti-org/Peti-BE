@@ -45,7 +45,6 @@ public class CityController {
   @HasAdminRole
   @PostMapping
   public ResponseEntity<CityDto> createCity(@Valid @RequestBody CityDto cityDto) {
-    //todo add validation for country code
     CityDto createdCity = cityService.addNewCity(cityDto);
     return new ResponseEntity<>(createdCity, HttpStatus.OK);
   }

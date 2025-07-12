@@ -4,6 +4,7 @@ import com.peti.backend.dto.user.AuthResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -79,7 +80,7 @@ public class JwtService {
           .build()
           .parseSignedClaims(token)
           .getPayload();
-    } catch (SignatureException | ExpiredJwtException e) { // Invalid signature or expired token
+    } catch (SignatureException | MalformedJwtException | ExpiredJwtException e) { // Invalid signature or expired token
       throw new AccessDeniedException("Access denied: " + e.getMessage());
     }
   }
