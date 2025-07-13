@@ -21,6 +21,7 @@ public class ApplicationConfiguration {
 
   @Bean
   UserDetailsService userDetailsService() {
+    //todo here 3 queries goes to db fetch user, fetch role, fetch city - need to think if can be simplified
     return username -> userRepository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
@@ -33,12 +34,5 @@ public class ApplicationConfiguration {
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
-  }
-
-  @Bean
-  AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
   }
 }
