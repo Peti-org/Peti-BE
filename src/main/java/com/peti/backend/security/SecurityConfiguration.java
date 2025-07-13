@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
   @Bean
@@ -31,12 +33,13 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/api/cities/country/**").permitAll()
+            .requestMatchers("/api/ping").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/api-docs/**").permitAll()
             .anyRequest().authenticated())
-        //            .exceptionHandling(configurer ->  configurer.authenticationEntryPoint(new
-        //            JwtAuthenticationEntryPoint())
-        //                    .accessDeniedHandler(new AppAccessDeniedHandler())) //Todo: add exception handling
+//                    .exceptionHandling(configurer ->  configurer.authenticationEntryPoint(new
+//                    JwtAuthenticationEntryPoint())
+//                            .accessDeniedHandler(new AppAccessDeniedHandler())) //Todo: add exception handling maybe no need
         .authenticationManager(authenticationManager)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
@@ -45,9 +48,8 @@ public class SecurityConfiguration {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-
     configuration.setAllowedOrigins(List.of("http://localhost:8082", "http://localhost:8080"));
-    configuration.setAllowedMethods(List.of("GET", "POST"));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
