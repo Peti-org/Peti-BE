@@ -1,73 +1,74 @@
 package com.peti.backend.service;
 
-import com.peti.backend.dto.PetDto;
+import com.peti.backend.dto.pet.PetDto;
+import com.peti.backend.dto.pet.RequestPetDto;
+import com.peti.backend.model.Breed;
 import com.peti.backend.model.Pet;
+import com.peti.backend.model.User;
 import com.peti.backend.repository.PetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
+import jakarta.persistence.EntityManager;
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PetService {
 
-    @Autowired private PetRepository petRepository;
+  private final PetRepository petRepository;
+  private final EntityManager entityManager;
 
-    public List<PetDto> getAllPets() {
-        List<Pet> pets = petRepository.findAll();
-        List<PetDto> petDtos = new ArrayList<>();
-        for (Pet pet : pets) {
-            petDtos.add(mapToDto(pet));
-        }
-        return petDtos;
-    }
+  public List<PetDto> getAllPets(User user) {
+    List<Pet> pets = petRepository.findAllByPetOwner_UserId(user.getUserId());
+    return pets.stream()
+        .map(PetDto::from)
+        .toList();
+  }
 
-    public Optional<PetDto> getPetById(Long id) {
-        return petRepository.findById(id).map(this::mapToDto);
-    }
+  public Optional<PetDto> getPetById(UUID id, User user) {
+    return petRepository.findById(id)
+        .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
+        .map(PetDto::from);
+  }
 
-    public PetDto createPet(Pet pet) {
-        Pet savedPet = petRepository.save(pet);
-        return mapToDto(savedPet);
-    }
+  public PetDto createPet(RequestPetDto requestPet, User user) {
+    Pet savedPet = petRepository.save(toPet(requestPet, user.getUserId()));
+    return PetDto.from(savedPet);
+  }
 
-    private PetDto mapToDto(Pet pet) {
-        PetDto dto = new PetDto();
-//        dto.setId(pet.getId());
-//        dto.setName(pet.getName());
-//        dto.setAge(pet.getAge());
-//        if(pet.getBreed()!=null){
-//            dto.setBreedId(pet.getBreed().getId());
-//        }
-//        if(pet.getCaretaker()!=null){
-//            dto.setCaretakerId(pet.getCaretaker().getId());
-//        }
+  public Optional<PetDto> updatePet(UUID id, RequestPetDto requestPetDto, User user) {
+    return petRepository.findById(id)
+        .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
+        .map(pet -> {
+          pet.setName(requestPetDto.getName());
+          pet.setBirthday(Date.valueOf(requestPetDto.getDateOfBirth()));
+          pet.setContext("{\"test\": \"test\"}");
+          pet.setBreed(new Breed(requestPetDto.getBreedId()));
+          return petRepository.save(pet);
+        })
+        .map(PetDto::from);
+  }
 
-
-        return dto;
-    }
-
-    public Optional<Pet> updatePet(Long id, Pet petDetails) {
-        return petRepository.findById(id).map(pet -> {
-//            pet.setName(petDetails.getName());
-//            pet.setBreed(petDetails.getBreed());
-//            pet.setAge(petDetails.getAge());
-//            pet.setCaretaker(petDetails.getCaretaker());
-            return petRepository.save(pet);
+  public Optional<PetDto> deletePet(UUID id, User user) {
+    return petRepository.findById(id)
+        .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
+        .map(pet -> {
+          petRepository.deleteById(id);
+          return PetDto.from(pet);
         });
-    
-    
-    }
+  }
 
-    public Optional<PetDto> deletePet(Long id) {
-        if (petRepository.existsById(id)) {
-            Optional<Pet> petOptional=petRepository.findById(id);
-            if(!petOptional.isPresent())return Optional.empty();
-            petRepository.deleteById(id);
-            return Optional.of(mapToDto(petOptional.get()));
-        }
-        return Optional.empty();
-    }
+  private Pet toPet(RequestPetDto petDto, UUID petOwnerId) {
+    Pet pet = new Pet();
+    pet.setName(petDto.getName());
+    pet.setBirthday(Date.valueOf(petDto.getDateOfBirth()));
+    pet.setBreed(entityManager.getReference(Breed.class, petDto.getBreedId()));
+    pet.setPetOwner(entityManager.getReference(User.class, petOwnerId));
+    pet.setContext("{\"test\": \"test\"}");
+    pet.setPetDataFolder("default");//todo write anouther based on id
+    return pet;
+  }
 }

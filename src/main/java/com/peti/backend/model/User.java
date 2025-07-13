@@ -3,6 +3,7 @@ package com.peti.backend.model;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import static com.peti.backend.service.RoleService.convertToAuthority;
 @Setter
 @Table(name = "user", schema = "peti", catalog = "peti")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
 public class User implements UserDetails {
   @GeneratedValue(strategy = GenerationType.UUID)
   @Id
@@ -50,7 +52,7 @@ public class User implements UserDetails {
   private Collection<Caretaker> caretakersByUserId;
   //  @OneToMany(mappedBy = "userByUserId")
   //  private Collection<PaymentSettings> paymentSettingsByUserId;
-  @OneToMany(mappedBy = "userByUserId")
+  @OneToMany(mappedBy = "petOwner")
   private Collection<Pet> petsByUserId;
   @ManyToOne
   @JoinColumn(name = "location_id", referencedColumnName = "location_id", nullable = true)
@@ -63,6 +65,10 @@ public class User implements UserDetails {
   @ManyToOne
   @JoinColumn(name = "role_id", referencedColumnName = "role_id", nullable = false)
   private Role role;
+
+  public User(UUID userId) {
+    this.userId = userId;
+  }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -25,4 +25,6 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
   List<Role> findRolesGreaterThanSelected(@Param("name") String roleName);
 
   Optional<Role> findTopByOrderByRoleIdDesc();
+
+  Optional<Role> findByRoleName(String roleName);
 }

@@ -1,54 +1,58 @@
 package com.peti.backend.controller;
 
 import com.peti.backend.dto.BreedDto;
-import com.peti.backend.model.Breed;
+import com.peti.backend.security.annotation.HasAdminRole;
+import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.BreedService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/breeds")
+@RequiredArgsConstructor
+@Tag(name = "Breed", description = "Operations for managing breeds")
+@SecurityRequirement(name = "bearerAuth")
 public class BreedController {
 
-    @Autowired
-    private BreedService breedService;
+  private final BreedService breedService;
 
-    @GetMapping
-    public ResponseEntity<List<BreedDto>> getAllBreeds() {
-        return new ResponseEntity<>(breedService.getAllBreeds(), HttpStatus.OK);
-    }
+  @HasUserRole
+  @GetMapping
+  public ResponseEntity<List<BreedDto>> getAllBreeds() {
+    return ResponseEntity.ok(breedService.getAllBreeds());
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BreedDto> getBreedById(@PathVariable Long id) {
-        Optional<BreedDto> breedDto = breedService.getBreedById(id);
-        return breedDto.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+  @HasAdminRole
+  @PostMapping
+  public ResponseEntity<BreedDto> createBreed(@Valid @RequestBody BreedDto breedDto) {
+    return ResponseEntity.ok(breedService.createBreed(breedDto));
+  }
 
-    @PostMapping
-    public ResponseEntity<BreedDto> createBreed(@RequestBody BreedDto breedDto) {
-        return new ResponseEntity<>(breedService.createBreed(breedDto), HttpStatus.CREATED);
-    }
+  @HasAdminRole
+  @PutMapping("/{id}")
+  public ResponseEntity<BreedDto> updateBreed(@PathVariable Integer id, @Valid @RequestBody BreedDto breedDto) {
+    return breedService.updateBreed(id, breedDto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<BreedDto> updateBreed(@PathVariable Long id, @RequestBody BreedDto breedDto) {
-//        if (!breedService.getBreedById(id).isPresent()) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return new ResponseEntity<>(breedService.updateBreed(id, breedDto), HttpStatus.OK);
-//    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteBreed(@PathVariable Long id) {
-        if (!breedService.getBreedById(id).isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        breedService.deleteBreed(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+  @HasAdminRole
+  @DeleteMapping("/{id}")
+  public ResponseEntity<BreedDto> deleteBreed(@PathVariable Integer id) {
+    return breedService.deleteBreed(id)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
 }

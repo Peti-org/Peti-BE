@@ -55,13 +55,13 @@ VALUES
    '$2a$10$DxZ/I/5twj09Mte7Q/W.ceJnZF5o3eg0PRUTMlucttSHAWysuN0Rm', null, 1, false, 'default', 1);
 
 -- 5. breed
-INSERT INTO breed (breed_id, pet_type, breed_name)
+INSERT INTO breed (pet_type, breed_name)
 VALUES
-  (1, 'Dog', 'Labrador Retriever'),
-  (2, 'Dog', 'German Shepherd'),
-  (3, 'Cat', 'Siamese'),
-  (4, 'Cat', 'British Shorthair'),
-  (5, 'Parrot', 'Cockatiel');
+  ('Dog', 'Labrador Retriever'),
+  ('Dog', 'German Shepherd'),
+  ('Cat', 'Siamese'),
+  ('Cat', 'British Shorthair'),
+  ('Parrot', 'Cockatiel');
 
 -- 6. pet
 INSERT INTO pet (pet_id, user_id, name, birthday, breed_id, context, pet_data_folder)

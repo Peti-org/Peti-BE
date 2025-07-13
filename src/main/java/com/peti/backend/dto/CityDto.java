@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CityDto {
 
-  private Integer id;
+  private Long id;
   @NotEmpty(message = "City cannot be blank")
   private String city;
   @NotEmpty(message = "Country cannot be blank")

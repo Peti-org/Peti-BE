@@ -6,9 +6,9 @@
 -- Table: breed
 CREATE TABLE breed
 (
-  breed_id   int         NOT NULL,
-  pet_type   varchar(50) NOT NULL,
-  breed_name varchar(50) NOT NULL,
+  breed_id   INT GENERATED ALWAYS AS IDENTITY NOT NULL,
+  pet_type   varchar(50)                      NOT NULL,
+  breed_name varchar(50)                      NOT NULL,
   CONSTRAINT breed_pk PRIMARY KEY (breed_id)
 );
 
@@ -55,13 +55,13 @@ CREATE TABLE event
 -- Table: city
 CREATE TABLE city
 (
-  city_id       SERIAL         NOT NULL,
-  longitude     decimal(18, 8) NULL,
-  latitude      decimal(18, 8) NULL,
-  country       varchar(20)    NOT NULL,
-  country_code  varchar(2)     NOT NULL,
-  city          varchar(40)    NOT NULL,
-  location_info varchar(100)   NULL,
+  city_id       BIGINT GENERATED ALWAYS AS IDENTITY NOT NULL,
+  longitude     decimal(18, 8)                      NULL,
+  latitude      decimal(18, 8)                      NULL,
+  country       varchar(20)                         NOT NULL,
+  country_code  varchar(2)                          NOT NULL,
+  city          varchar(40)                         NOT NULL,
+  location_info varchar(100)                        NULL,
   CONSTRAINT city_pk PRIMARY KEY (city_id)
 );
 
@@ -117,7 +117,7 @@ CREATE TABLE pet
   user_id         uuid        NOT NULL,
   name            varchar(50) NOT NULL,
   birthday        date        NOT NULL,
-  breed_id        int         NOT NULL,
+  breed_id        INT         NOT NULL,
   context         jsonb       NOT NULL,
   pet_data_folder varchar(50) NOT NULL,
   CONSTRAINT pet_pk PRIMARY KEY (pet_id)
@@ -133,7 +133,7 @@ CREATE TABLE "user"
   birthday         date        NOT NULL,
   password         varchar(72) NOT NULL,
   location_id      int         NULL,
-  city_id          int         NOT NULL,
+  city_id          BIGINT      NOT NULL,
   role_id          int         NOT NULL,
   user_is_deleted  boolean     NOT NULL,
   user_data_folder varchar(50) NOT NULL,
