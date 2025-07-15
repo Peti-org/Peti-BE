@@ -1,13 +1,10 @@
 package com.peti.backend.security;
 
-
 import com.peti.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +18,7 @@ public class ApplicationConfiguration {
 
   @Bean
   UserDetailsService userDetailsService() {
+    //todo here 3 queries goes to db fetch user, fetch role, fetch city - need to think if can be simplified
     return username -> userRepository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
@@ -33,12 +31,5 @@ public class ApplicationConfiguration {
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
-  }
-
-  @Bean
-  AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
   }
 }

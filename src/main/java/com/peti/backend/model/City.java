@@ -18,7 +18,7 @@ public class City {
   @Id
   @EqualsAndHashCode.Include
   @Column(name = "city_id", nullable = false)
-  private int cityId;
+  private Long cityId;
 
   @Basic
   @Column(name = "longitude", precision = 8)

@@ -1,11 +1,23 @@
 package com.peti.backend.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.peti.backend.model.Role;
 import com.peti.backend.repository.RoleRepository;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
@@ -122,5 +132,34 @@ public class RoleServiceTest {
     Collection<? extends GrantedAuthority> results = roleService.getReachableGrantedAuthorities(authorities);
     assertTrue(results.isEmpty());
     verify(roleRepository, never()).findRolesGreaterThanSelected(anyString());
+  }
+
+  @Test
+  public void testUpdateRoles_PopulatesRolesAndHierarchy() {
+    Role careTakerRole = new Role();
+    careTakerRole.setRoleId(3);
+    careTakerRole.setRoleName("CARETAKER");
+
+    when(roleRepository.findByRoleName("USER")).thenReturn(Optional.of(role2));
+    when(roleRepository.findByRoleName("CARETAKER")).thenReturn(Optional.of(careTakerRole));
+    when(roleRepository.findByRoleName("ADMIN")).thenReturn(Optional.of(role1));
+    when(roleRepository.findAll()).thenReturn(Arrays.asList(role1, role2, careTakerRole));
+    when(roleRepository.findRolesGreaterThanSelected("ADMIN")).thenReturn(List.of());
+    when(roleRepository.findRolesGreaterThanSelected("USER")).thenReturn(List.of());
+    when(roleRepository.findRolesGreaterThanSelected("CARETAKER")).thenReturn(List.of());
+
+    roleService.updateRoles();
+
+    assertEquals(role2, roleService.getUserRole());
+    assertEquals(careTakerRole, roleService.getCareTakerRole());
+    assertEquals(role1, roleService.getAdminRole());
+  }
+
+  // Test updateRoles() throws when a role is missing
+  @Test
+  public void testUpdateRoles_ThrowsWhenRoleMissing() {
+    when(roleRepository.findByRoleName("USER")).thenReturn(Optional.empty());
+
+    assertThrows(NoSuchElementException.class, () -> roleService.updateRoles());
   }
 }

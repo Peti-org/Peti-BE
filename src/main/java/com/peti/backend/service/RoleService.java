@@ -4,8 +4,12 @@ import com.peti.backend.model.Role;
 import com.peti.backend.repository.RoleRepository;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,8 +23,29 @@ public class RoleService implements RoleHierarchy {
 
   private final RoleRepository roleRepository;
 
+  @Getter
+  private Role userRole;
+  @Getter
+  private Role careTakerRole;
+  @Getter
+  private Role adminRole;
+
+  private Map<String, List<Role>> roleHierarchyMap;
+
   public static SimpleGrantedAuthority convertToAuthority(Role role) {
     return new SimpleGrantedAuthority(ROLE_PREFIX + role.getRoleName());
+  }
+
+  @EventListener(ApplicationReadyEvent.class)
+  public void updateRoles() {
+    userRole = roleRepository.findByRoleName("USER").orElseThrow();
+    careTakerRole = roleRepository.findByRoleName("CARETAKER").orElseThrow();
+    adminRole = roleRepository.findByRoleName("ADMIN").orElseThrow();
+    roleHierarchyMap = roleRepository.findAll().stream()
+        .collect(Collectors.toMap(
+            Role::getRoleName,
+            role -> roleRepository.findRolesGreaterThanSelected(role.getRoleName())
+        ));
   }
 
   public List<Role> getAllRoles() {
@@ -43,10 +68,8 @@ public class RoleService implements RoleHierarchy {
         .map(GrantedAuthority::getAuthority)
         .filter(auth -> auth.startsWith(ROLE_PREFIX))
         .map(auth -> auth.substring(ROLE_PREFIX.length()))
-        .flatMap(auth -> roleRepository.findRolesGreaterThanSelected(auth).stream())
+        .flatMap(auth -> roleHierarchyMap.getOrDefault(auth, List.of()).stream())
         .map(RoleService::convertToAuthority)
         .collect(Collectors.toList());
   }
-
-
 }

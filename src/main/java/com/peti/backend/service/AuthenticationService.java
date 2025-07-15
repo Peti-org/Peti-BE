@@ -35,7 +35,7 @@ public class AuthenticationService {
 
     User user = registrationData.toUser(passwordEncoder);
     user.setCityByCityId(cityDto.toCityWithId());
-    user.setRole(roleService.getLowestRole());
+    user.setRole(roleService.getUserRole());
 
     User registeredUser = userRepository.save(user);
     AuthResponse authResponse = jwtService.generateAuthResponse(registeredUser);

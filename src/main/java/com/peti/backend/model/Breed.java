@@ -1,14 +1,25 @@
 package com.peti.backend.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
+@NoArgsConstructor
 @Table(name = "breed", schema = "peti", catalog = "peti")
 public class Breed {
+
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
   @Column(name = "breed_id", nullable = false)
@@ -20,30 +31,7 @@ public class Breed {
   @Column(name = "breed_name", nullable = false, length = 50)
   private String breedName;
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-
-    Breed breed = (Breed) o;
-
-    if (breedId != breed.breedId)
-      return false;
-    if (petType != null ? !petType.equals(breed.petType) : breed.petType != null)
-      return false;
-    if (breedName != null ? !breedName.equals(breed.breedName) : breed.breedName != null)
-      return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = breedId;
-    result = 31 * result + (petType != null ? petType.hashCode() : 0);
-    result = 31 * result + (breedName != null ? breedName.hashCode() : 0);
-    return result;
+  public Breed(int breedId) {
+    this.breedId = breedId;
   }
 }

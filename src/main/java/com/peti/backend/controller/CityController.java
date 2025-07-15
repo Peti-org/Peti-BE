@@ -5,6 +5,7 @@ import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.CityService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/cities")
 @RequiredArgsConstructor
+@Tag(name = "City", description = "Operations for managing cities")
 @SecurityRequirement(name = "bearerAuth")
 public class CityController {
 
@@ -30,7 +32,7 @@ public class CityController {
 
   @HasUserRole
   @GetMapping("/{id}")
-  public ResponseEntity<CityDto> getCityById(@PathVariable Integer id) {
+  public ResponseEntity<CityDto> getCityById(@PathVariable Long id) {
     return cityService.fetchById(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -51,7 +53,7 @@ public class CityController {
 
   @HasAdminRole
   @PutMapping("/{id}")
-  public ResponseEntity<CityDto> updateCity(@PathVariable Integer id, @Valid @RequestBody CityDto cityDto) {
+  public ResponseEntity<CityDto> updateCity(@PathVariable Long id, @Valid @RequestBody CityDto cityDto) {
     return cityService.modifyCity(id, cityDto)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -59,7 +61,7 @@ public class CityController {
 
   @HasAdminRole
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteCity(@PathVariable Integer id) {
+  public ResponseEntity<Void> deleteCity(@PathVariable Long id) {
     cityService.deleteCity(id);
     return ResponseEntity.noContent().build();
   }

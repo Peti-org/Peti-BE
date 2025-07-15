@@ -1,6 +1,11 @@
 package com.peti.backend.security;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -8,15 +13,11 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 public class JwtServiceTest {
 
-  private JwtService jwtService;
   // A valid 256\-bit key encoded in Base64 (32 bytes)
   private final String testSecretKey = "e68194748dc4b3deb09c7d28bfb1c441a2f3450667fb76fab80b60a1cf160ff9";
+  private JwtService jwtService;
 
   @BeforeEach
   void setUp() {

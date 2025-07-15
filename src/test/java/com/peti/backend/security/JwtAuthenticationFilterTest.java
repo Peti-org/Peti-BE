@@ -3,7 +3,9 @@ package com.peti.backend.security;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -57,7 +58,8 @@ public class JwtAuthenticationFilterTest {
   public void testFilterWithoutAuthorizationHeader() throws ServletException, IOException {
     when(request.getHeader("Authorization")).thenReturn(null);
 
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, handlerExceptionResolver);
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService,
+        handlerExceptionResolver);
     filter.doFilterInternal(request, response, filterChain);
 
     verify(filterChain, times(1)).doFilter(request, response);
@@ -68,7 +70,8 @@ public class JwtAuthenticationFilterTest {
   public void testFilterWithInvalidAuthorizationHeader() throws ServletException, IOException {
     when(request.getHeader("Authorization")).thenReturn("Invalid token");
 
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, handlerExceptionResolver);
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService,
+        handlerExceptionResolver);
     filter.doFilterInternal(request, response, filterChain);
 
     verify(filterChain, times(1)).doFilter(request, response);
@@ -85,7 +88,8 @@ public class JwtAuthenticationFilterTest {
     when(userDetailsService.loadUserByUsername(email)).thenReturn(userDetails);
     when(jwtService.isTokenValid(token, userDetails)).thenReturn(true);
 
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, handlerExceptionResolver);
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService,
+        handlerExceptionResolver);
     filter.doFilterInternal(request, response, filterChain);
 
     verify(filterChain, times(1)).doFilter(request, response);
@@ -101,7 +105,8 @@ public class JwtAuthenticationFilterTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
     when(jwtService.extractUsername(token)).thenThrow(new RuntimeException("Token extraction failed"));
 
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService, handlerExceptionResolver);
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService,
+        handlerExceptionResolver);
     filter.doFilterInternal(request, response, filterChain);
 
     verify(handlerExceptionResolver, times(1))

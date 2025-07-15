@@ -27,7 +27,7 @@ public class CityService {
     );
   }
 
-  public Optional<CityDto> fetchById(Integer id) {
+  public Optional<CityDto> fetchById(Long id) {
     return cityRepository.findById(id).map(CityService::convertToDto);
   }
 
@@ -43,7 +43,7 @@ public class CityService {
     return convertToDto(savedCity);
   }
 
-  public Optional<CityDto> modifyCity(Integer id, CityDto cityDto) {
+  public Optional<CityDto> modifyCity(Long id, CityDto cityDto) {
     return cityRepository.findById(id)
         .map(existingCity -> {
           existingCity.setCity(cityDto.getCity());
@@ -64,7 +64,7 @@ public class CityService {
         .map(CityService::convertToDto);
   }
 
-  public void deleteCity(Integer id) {
+  public void deleteCity(Long id) {
     cityRepository.deleteById(id);
   }
 }
