@@ -1,9 +1,8 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.PaymentSettingsDto;
-import com.peti.backend.model.Location;
-import com.peti.backend.model.PaymentSettings;
-import com.peti.backend.model.PaymentSettingsPK;
+import com.peti.backend.model.domain.PaymentSettings;
+import com.peti.backend.model.domain.PaymentSettingsPK;
 import com.peti.backend.repository.PaymentSettingsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

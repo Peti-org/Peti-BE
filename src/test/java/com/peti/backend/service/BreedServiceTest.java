@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.BreedDto;
-import com.peti.backend.model.Breed;
+import com.peti.backend.model.domain.Breed;
 import com.peti.backend.repository.BreedRepository;
 import java.util.Collections;
 import java.util.List;

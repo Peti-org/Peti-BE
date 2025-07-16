@@ -32,8 +32,8 @@ public class JwtService {
     return extractClaim(token, Claims::getSubject);
   }
 
-  public AuthResponse generateAuthResponse(UserDetails userDetails) {
-    String token = generateToken(new HashMap<>(), userDetails);
+  public AuthResponse generateAuthResponse(String username) {
+    String token = generateToken(new HashMap<>(), username);
     return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond());
   }
 
@@ -42,18 +42,15 @@ public class JwtService {
     return claimsResolver.apply(claims);
   }
 
-  private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-    return buildToken(extraClaims, userDetails, jwtExpiration);
+  private String generateToken(Map<String, Object> extraClaims, String username) {
+    return buildToken(extraClaims, username, jwtExpiration);
   }
 
-  private String buildToken(
-      Map<String, Object> extraClaims,
-      UserDetails userDetails,
-      long expiration) {
+  private String buildToken(Map<String, Object> extraClaims, String username, long expiration) {
     return Jwts
         .builder()
         .claims(extraClaims)
-        .subject(userDetails.getUsername())
+        .subject(username)
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(new Date(System.currentTimeMillis() + expiration))
         .signWith(getSignInKey())

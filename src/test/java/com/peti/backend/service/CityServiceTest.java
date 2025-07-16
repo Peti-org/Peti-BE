@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.CityDto;
-import com.peti.backend.model.City;
+import com.peti.backend.model.domain.City;
 import com.peti.backend.repository.CityRepository;
 import java.util.Collections;
 import java.util.List;

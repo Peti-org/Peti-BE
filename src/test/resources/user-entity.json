@@ -1,0 +1,15 @@
+{
+  "userId" : "22222222-2222-2222-2222-222222222222",
+  "email" : "john.doe@example.com",
+  "firstName" : "John",
+  "lastName" : "Doe",
+  "birthday" : "2000-01-01",
+  "cityByCityId" : {
+    "cityId" : 1
+  },
+  "password" : "$2a$10$7Q9Q9Q9Q9Q9Q9Q9Q9Q9Q9u",
+  "role" : {
+    "roleId" : 3,
+    "name" : "USER"
+  }
+}

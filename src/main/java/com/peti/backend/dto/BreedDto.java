@@ -1,6 +1,6 @@
 package com.peti.backend.dto;
 
-import com.peti.backend.model.Breed;
+import com.peti.backend.model.domain.Breed;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;

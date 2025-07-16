@@ -1,12 +1,11 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.OrderModificationDto;
-import com.peti.backend.model.OrderModification;
+import com.peti.backend.model.domain.OrderModification;
 import com.peti.backend.repository.OrderModificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ public class OrderModificationService {
 
     @Autowired
     private OrderModificationRepository orderModificationRepository;
-    
+
     private OrderModificationDto mapToDto(OrderModification orderModification){
         OrderModificationDto orderModificationDto = new OrderModificationDto();
 //        orderModificationDto.setModificationDate(orderModification.getModificationDate());

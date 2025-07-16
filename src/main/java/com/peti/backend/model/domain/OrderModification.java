@@ -1,4 +1,4 @@
-package com.peti.backend.model;
+package com.peti.backend.model.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

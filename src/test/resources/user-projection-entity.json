@@ -1,0 +1,8 @@
+{
+  "userId" : "22222222-2222-2222-2222-222222222222",
+  "email" : "user@example.com",
+  "password" : "Str0ngP@ssw0rd",
+  "roleId" : "3",
+  "authorities" : []
+}
+

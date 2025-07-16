@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.CaretakerSlotDto;
-import com.peti.backend.model.CaretakerSlot;
+import com.peti.backend.model.domain.CaretakerSlot;
 import com.peti.backend.repository.CaretakerSlotRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

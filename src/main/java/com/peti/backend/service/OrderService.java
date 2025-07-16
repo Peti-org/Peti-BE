@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.OrderDto;
-import com.peti.backend.model.Order;
+import com.peti.backend.model.domain.Order;
 import com.peti.backend.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

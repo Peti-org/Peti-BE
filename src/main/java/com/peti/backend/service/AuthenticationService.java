@@ -6,12 +6,14 @@ import com.peti.backend.dto.user.AuthResponse;
 import com.peti.backend.dto.user.LoginUserDto;
 import com.peti.backend.dto.user.RegisterResponse;
 import com.peti.backend.dto.user.RegisterUserDto;
-import com.peti.backend.model.User;
-import com.peti.backend.repository.UserRepository;
+import com.peti.backend.dto.user.UserDto;
+import com.peti.backend.model.domain.User;
 import com.peti.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final CityService cityService;
   private final RoleService roleService;
   private final JwtService jwtService;
@@ -37,16 +39,20 @@ public class AuthenticationService {
     user.setCityByCityId(cityDto.toCityWithId());
     user.setRole(roleService.getUserRole());
 
-    User registeredUser = userRepository.save(user);
-    AuthResponse authResponse = jwtService.generateAuthResponse(registeredUser);
-    return RegisterResponse.fromUser(registeredUser, authResponse, cityDto);
+    // todo check if really user has city in representation and role (don't has fixxxxx)
+    UserDto registeredUser = userService.createUser(user);
+
+    // Set city for the registered user, as a database doesn't return it automatically
+    registeredUser.setCity(cityDto);
+    AuthResponse authResponse = jwtService.generateAuthResponse(registeredUser.getEmail());
+    return RegisterResponse.fromUser(registeredUser, authResponse);
   }
 
   public AuthResponse authenticate(LoginUserDto input) {
-    authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
 
-    User user = userRepository.findByEmail(input.getEmail())
-        .orElseThrow(() -> new BadRequestException("Invalid email or password"));
-    return jwtService.generateAuthResponse(user);
+    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    return jwtService.generateAuthResponse(userDetails.getUsername());
   }
 }
