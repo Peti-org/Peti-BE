@@ -1,19 +1,27 @@
-package com.peti.backend.model;
+package com.peti.backend.model.domain;
 
-import jakarta.persistence.*;
+import static com.peti.backend.service.RoleService.convertToAuthority;
+
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.sql.Date;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.sql.Date;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.UUID;
-
-import static com.peti.backend.service.RoleService.convertToAuthority;
 
 @Entity
 @Getter
@@ -22,6 +30,7 @@ import static com.peti.backend.service.RoleService.convertToAuthority;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 public class User implements UserDetails {
+
   @GeneratedValue(strategy = GenerationType.UUID)
   @Id
   @Column(name = "user_id", nullable = false)

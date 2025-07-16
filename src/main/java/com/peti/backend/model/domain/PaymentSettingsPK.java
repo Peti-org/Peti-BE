@@ -1,4 +1,4 @@
-package com.peti.backend.model;
+package com.peti.backend.model.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;

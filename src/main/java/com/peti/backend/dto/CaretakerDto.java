@@ -1,6 +1,6 @@
 package com.peti.backend.dto;
 
-import com.peti.backend.model.Caretaker;
+import com.peti.backend.model.domain.Caretaker;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

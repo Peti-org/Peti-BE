@@ -2,9 +2,10 @@ package com.peti.backend.service;
 
 import com.peti.backend.dto.pet.PetDto;
 import com.peti.backend.dto.pet.RequestPetDto;
-import com.peti.backend.model.Breed;
-import com.peti.backend.model.Pet;
-import com.peti.backend.model.User;
+import com.peti.backend.model.domain.Breed;
+import com.peti.backend.model.domain.Pet;
+import com.peti.backend.model.domain.User;
+import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.PetRepository;
 import jakarta.persistence.EntityManager;
 import java.sql.Date;
@@ -21,25 +22,25 @@ public class PetService {
   private final PetRepository petRepository;
   private final EntityManager entityManager;
 
-  public List<PetDto> getAllPets(User user) {
+  public List<PetDto> getAllPets(UserProjection user) {
     List<Pet> pets = petRepository.findAllByPetOwner_UserId(user.getUserId());
     return pets.stream()
         .map(PetDto::from)
         .toList();
   }
 
-  public Optional<PetDto> getPetById(UUID id, User user) {
+  public Optional<PetDto> getPetById(UUID id, UserProjection user) {
     return petRepository.findById(id)
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
         .map(PetDto::from);
   }
 
-  public PetDto createPet(RequestPetDto requestPet, User user) {
+  public PetDto createPet(RequestPetDto requestPet, UserProjection user) {
     Pet savedPet = petRepository.save(toPet(requestPet, user.getUserId()));
     return PetDto.from(savedPet);
   }
 
-  public Optional<PetDto> updatePet(UUID id, RequestPetDto requestPetDto, User user) {
+  public Optional<PetDto> updatePet(UUID id, RequestPetDto requestPetDto, UserProjection user) {
     return petRepository.findById(id)
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
         .map(pet -> {
@@ -52,7 +53,7 @@ public class PetService {
         .map(PetDto::from);
   }
 
-  public Optional<PetDto> deletePet(UUID id, User user) {
+  public Optional<PetDto> deletePet(UUID id, UserProjection user) {
     return petRepository.findById(id)
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
         .map(pet -> {

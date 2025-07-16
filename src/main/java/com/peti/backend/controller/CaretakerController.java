@@ -1,10 +1,8 @@
 package com.peti.backend.controller;
 
 import com.peti.backend.dto.CaretakerDto;
-import com.peti.backend.model.Caretaker;
 import com.peti.backend.service.CaretakerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

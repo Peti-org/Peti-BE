@@ -1,12 +1,11 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.CaretakerDto;
-import com.peti.backend.model.Caretaker;
+import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.repository.CaretakerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ public class CaretakerService {
 
     @Autowired
     private CaretakerRepository caretakerRepository;
-    
+
         private CaretakerDto mapToDto(Caretaker caretaker) {
         CaretakerDto caretakerDto = new CaretakerDto();
 //        caretakerDto.setId(caretaker.getId());

@@ -1,6 +1,6 @@
 package com.peti.backend.dto;
 
-import com.peti.backend.model.CaretakerSlot;
+import com.peti.backend.model.domain.CaretakerSlot;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +19,7 @@ public class CaretakerSlotDto {
   private Date date;
 
   private Time timeFrom;
-  
+
   private Time timeTo;
 
   private String type;

@@ -1,9 +1,8 @@
 package com.peti.backend.dto;
 
-import com.peti.backend.model.Location;
+import com.peti.backend.model.domain.Location;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Setter

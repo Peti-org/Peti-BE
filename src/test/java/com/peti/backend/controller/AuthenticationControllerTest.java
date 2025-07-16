@@ -38,8 +38,8 @@ public class AuthenticationControllerTest {
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(registerResponse.getEmail(), response.getBody().getEmail());
-    assertEquals(registerResponse.getRoleName(), response.getBody().getRoleName());
+    assertEquals(registerResponse.getUserDto().getEmail(), response.getBody().getUserDto().getEmail());
+    assertEquals(registerResponse.getUserDto().getRoleName(), response.getBody().getUserDto().getRoleName());
   }
 
   @Test

@@ -1,7 +1,7 @@
 package com.peti.backend.dto.pet;
 
 import com.peti.backend.dto.BreedDto;
-import com.peti.backend.model.Pet;
+import com.peti.backend.model.domain.Pet;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

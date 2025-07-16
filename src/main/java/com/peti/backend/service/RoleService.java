@@ -1,6 +1,6 @@
 package com.peti.backend.service;
 
-import com.peti.backend.model.Role;
+import com.peti.backend.model.domain.Role;
 import com.peti.backend.repository.RoleRepository;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +31,7 @@ public class RoleService implements RoleHierarchy {
   private Role adminRole;
 
   private Map<String, List<Role>> roleHierarchyMap;
+  private Map<Integer, Role> roleMapById;
 
   public static SimpleGrantedAuthority convertToAuthority(Role role) {
     return new SimpleGrantedAuthority(ROLE_PREFIX + role.getRoleName());
@@ -46,14 +47,16 @@ public class RoleService implements RoleHierarchy {
             Role::getRoleName,
             role -> roleRepository.findRolesGreaterThanSelected(role.getRoleName())
         ));
+    roleMapById = roleRepository.findAll().stream()
+        .collect(Collectors.toMap(Role::getRoleId, role -> role));
+  }
+
+  public Role getRoleById(Integer roleId) {
+    return roleMapById.get(roleId);
   }
 
   public List<Role> getAllRoles() {
     return roleRepository.findAll();
-  }
-
-  public Role getRoleById(Integer id) {
-    return roleRepository.findById(id).orElse(null);
   }
 
   public Role getLowestRole() {

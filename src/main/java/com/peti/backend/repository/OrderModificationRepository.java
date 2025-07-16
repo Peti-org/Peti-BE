@@ -1,7 +1,7 @@
 package com.peti.backend.repository;
 
-import com.peti.backend.model.OrderModification;
-import com.peti.backend.model.OrderModificationPK;
+import com.peti.backend.model.domain.OrderModification;
+import com.peti.backend.model.domain.OrderModificationPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.peti.backend.service;
 
-import com.peti.backend.model.Event;
+import com.peti.backend.model.domain.Event;
 import com.peti.backend.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

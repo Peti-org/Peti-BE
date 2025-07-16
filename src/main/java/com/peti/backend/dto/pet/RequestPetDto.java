@@ -1,17 +1,11 @@
 package com.peti.backend.dto.pet;
 
-import com.peti.backend.model.Breed;
-import com.peti.backend.model.Pet;
-import com.peti.backend.model.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

@@ -1,6 +1,6 @@
 package com.peti.backend.repository;
 
-import com.peti.backend.model.Role;
+import com.peti.backend.model.domain.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -11,12 +11,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.peti.backend.model.Role;
+import com.peti.backend.model.domain.Role;
 import com.peti.backend.repository.RoleRepository;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class RoleServiceTest {
@@ -48,6 +50,19 @@ public class RoleServiceTest {
     role2 = new Role();
     role2.setRoleId(2);
     role2.setRoleName("USER");
+
+    Map<String, List<Role>> roleHierarchyMap = Map.of(
+        "ADMIN", List.of(role1, role2),
+        "USER", List.of(role2)
+    );
+    Map<Integer, Role> roleMapById = Map.of(
+        1, role1,
+        2, role2
+    );
+
+    ReflectionTestUtils.setField(roleService, "roleHierarchyMap", roleHierarchyMap);
+    ReflectionTestUtils.setField(roleService, "roleMapById", roleMapById);
+
   }
 
   @Test
@@ -62,21 +77,17 @@ public class RoleServiceTest {
 
   @Test
   public void testGetRoleById_Found() {
-    when(roleRepository.findById(1)).thenReturn(Optional.of(role1));
-
     Role result = roleService.getRoleById(1);
     assertNotNull(result);
     assertEquals("ADMIN", result.getRoleName());
-    verify(roleRepository).findById(1);
+    verify(roleRepository, never()).findById(1);
   }
 
   @Test
   public void testGetRoleById_NotFound() {
-    when(roleRepository.findById(100)).thenReturn(Optional.empty());
-
     Role result = roleService.getRoleById(100);
     assertNull(result);
-    verify(roleRepository).findById(100);
+    verify(roleRepository, never()).findById(100);
   }
 
   @Test
@@ -106,21 +117,23 @@ public class RoleServiceTest {
 
   @Test
   public void testGetReachableGrantedAuthorities() {
+    //todo need to refactor method and test
     // Given an authority with prefix "ROLE_"
     GrantedAuthority authority = () -> "ROLE_ADMIN";
     List<GrantedAuthority> authorities = Collections.singletonList(authority);
 
     Role extraRole = new Role();
     extraRole.setRoleId(3);
-    extraRole.setRoleName("SUPERADMIN");
-    when(roleRepository.findRolesGreaterThanSelected("ADMIN"))
-        .thenReturn(Collections.singletonList(extraRole));
+    extraRole.setRoleName("ADMIN");
+//    when(roleRepository.findRolesGreaterThanSelected("ADMIN"))
+//        .thenReturn(Collections.singletonList(extraRole));
 
     Collection<? extends GrantedAuthority> results = roleService.getReachableGrantedAuthorities(authorities);
     assertFalse(results.isEmpty());
+    assertEquals(2, results.size());
     assertTrue(results.stream()
-        .anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN")));
-    verify(roleRepository).findRolesGreaterThanSelected("ADMIN");
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+    verify(roleRepository, never()).findRolesGreaterThanSelected("USER");
   }
 
   @Test

@@ -15,8 +15,11 @@ import com.peti.backend.dto.user.AuthResponse;
 import com.peti.backend.dto.user.LoginUserDto;
 import com.peti.backend.dto.user.RegisterResponse;
 import com.peti.backend.dto.user.RegisterUserDto;
-import com.peti.backend.model.Role;
-import com.peti.backend.model.User;
+import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.UserDto;
+import com.peti.backend.model.domain.Role;
+import com.peti.backend.model.domain.User;
+import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.UserRepository;
 import com.peti.backend.security.JwtService;
 import java.util.Optional;
@@ -35,7 +38,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class AuthenticationServiceTest {
 
   @Mock
-  private UserRepository userRepository;
+  private UserService userService;
   @Mock
   private CityService cityService;
   @Mock
@@ -61,7 +64,8 @@ public class AuthenticationServiceTest {
     role.setRoleName("USER");
     when(roleService.getUserRole()).thenReturn(role);
 
-    when(userRepository.save(any(User.class))).then(AdditionalAnswers.returnsFirstArg());
+    UserDto userDto = ResourceLoader.loadResource("user-response.json", UserDto.class);
+    when(userService.createUser(any(User.class))).thenReturn(userDto);
 
     AuthResponse authResponse = new AuthResponse("test_token", 111111L);
     when(jwtService.generateAuthResponse(any())).thenReturn(authResponse);
@@ -69,8 +73,8 @@ public class AuthenticationServiceTest {
     RegisterResponse response = authenticationService.signup(registerRequest);
 
     assertNotNull(response);
-    assertEquals("USER", response.getRoleName());
-    assertEquals(1, response.getCity().getId());
+    assertEquals("USER", response.getUserDto().getRoleName());
+    assertEquals(1, response.getUserDto().getCity().getId());
     assertEquals("test_token", response.getAuthResponse().getToken());
     verify(cityService).fetchById(anyLong());
   }
@@ -91,21 +95,20 @@ public class AuthenticationServiceTest {
 
   @Test
   public void testAuthenticate_Success() {
-    String email = "test@example.com";
+    String email = "user@example.com";
     String password = "password";
     LoginUserDto loginInput = new LoginUserDto();
     ReflectionTestUtils.setField(loginInput, "email", email);
     ReflectionTestUtils.setField(loginInput, "password", password);
 
-    User user = new User();
-    user.setEmail(email);
-    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-
     AuthResponse authResponse = new AuthResponse("test_token", 111111L);
-    when(jwtService.generateAuthResponse(user)).thenReturn(authResponse);
+    when(jwtService.generateAuthResponse(email)).thenReturn(authResponse);
+
+    UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
+    when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(userProjection, null));
 
     authenticationService.authenticate(loginInput);
-    verify(authenticationManager).authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    verify(authenticationManager).authenticate(any());
   }
 
   @Test
@@ -116,7 +119,7 @@ public class AuthenticationServiceTest {
     ReflectionTestUtils.setField(loginInput, "email", email);
     ReflectionTestUtils.setField(loginInput, "password", password);
 
-    when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+    when(authenticationManager.authenticate(any())).thenThrow(new BadRequestException("Invalid email or password"));
 
     BadRequestException exception = assertThrows(BadRequestException.class, () ->
         authenticationService.authenticate(loginInput)

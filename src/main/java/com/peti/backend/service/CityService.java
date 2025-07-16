@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.CityDto;
-import com.peti.backend.model.City;
+import com.peti.backend.model.domain.City;
 import com.peti.backend.repository.CityRepository;
 import java.util.List;
 import java.util.Optional;

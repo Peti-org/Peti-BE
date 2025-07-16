@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.BreedDto;
-import com.peti.backend.model.Breed;
+import com.peti.backend.model.domain.Breed;
 import com.peti.backend.repository.BreedRepository;
 import java.util.List;
 import java.util.Optional;

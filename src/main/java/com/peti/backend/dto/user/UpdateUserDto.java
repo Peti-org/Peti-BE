@@ -9,23 +9,14 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import java.sql.Date;
+import java.time.LocalDate;
 import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.sql.Date;
-import java.time.LocalDate;
-
 @Getter
-public class RegisterUserDto {
+public class UpdateUserDto {
 
-  @Email(message = "Invalid email format")
-  @NotBlank(message = "Email cannot be blank")
-  @Schema(description = "User's email", defaultValue = "johnDoe@gmail.com")
-  private String email;
-  @NotEmpty(message = "Password cannot be blank")
-  @Size(min = 8, message = "Password must be at least 8 characters long")
-  @Schema(description = "User's password (must be at least 8 characters long)", defaultValue = "StrongPassword123")
-  private String password;
   @NotEmpty(message = "First name cannot be blank")
   @Schema(description = "User's name", defaultValue = "John")
   private String firstName;
@@ -40,15 +31,4 @@ public class RegisterUserDto {
   @Schema(description = "ID of the city where the user lives", defaultValue = "1")
   private Long cityId;
 
-  public User toUser(PasswordEncoder passwordEncoder){
-    User user = new User();
-    user.setFirstName(firstName);
-    user.setLastName(lastName);
-    user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(password));
-    user.setBirthday(Date.valueOf(birthDate));
-    user.setUserDataFolder("default"); //TODO: mock folder as we don't have such a feature right now
-    user.setUserIsDeleted(false);
-    return user;
-  }
 }
