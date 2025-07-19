@@ -1,15 +1,8 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.PaymentSettingsDto;
-import com.peti.backend.model.PaymentSettings;
-import com.peti.backend.model.PaymentSettingsPK;
 import com.peti.backend.service.PaymentSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/payment-settings")

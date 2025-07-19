@@ -1,6 +1,6 @@
 package com.peti.backend.repository;
 
-import com.peti.backend.model.Pet;
+import com.peti.backend.model.domain.Pet;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

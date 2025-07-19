@@ -33,7 +33,7 @@ public class JwtServiceTest {
         .authorities(Collections.emptyList())
         .build();
 
-    var authResponse = jwtService.generateAuthResponse(user);
+    var authResponse = jwtService.generateAuthResponse("testuser");
     assertNotNull(authResponse);
     assertNotNull(authResponse.getToken());
 
@@ -43,12 +43,8 @@ public class JwtServiceTest {
 
   @Test
   void testInvalidTokenSignature() {
-    UserDetails user = User.withUsername("testuser")
-        .password("password")
-        .authorities(Collections.emptyList())
-        .build();
 
-    var authResponse = jwtService.generateAuthResponse(user);
+    var authResponse = jwtService.generateAuthResponse("testuser");
     String tamperedToken = authResponse.getToken() + "tampered";
 
     Exception exception = assertThrows(AccessDeniedException.class, () -> {
@@ -62,12 +58,7 @@ public class JwtServiceTest {
     // Set expiration to 10ms for testing expiration
     ReflectionTestUtils.setField(jwtService, "jwtExpiration", 10L);
 
-    UserDetails user = User.withUsername("expiringUser")
-        .password("password")
-        .authorities(Collections.emptyList())
-        .build();
-
-    var authResponse = jwtService.generateAuthResponse(user);
+    var authResponse = jwtService.generateAuthResponse("expiringUser");
     // Wait a bit for the token to expire
     Thread.sleep(20);
 

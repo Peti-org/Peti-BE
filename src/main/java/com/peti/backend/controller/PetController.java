@@ -2,7 +2,8 @@ package com.peti.backend.controller;
 
 import com.peti.backend.dto.pet.PetDto;
 import com.peti.backend.dto.pet.RequestPetDto;
-import com.peti.backend.model.User;
+import com.peti.backend.model.domain.User;
+import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.PetService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,21 +37,21 @@ public class PetController {
   @HasUserRole
   @PostMapping
   public ResponseEntity<PetDto> createPet(@Valid @RequestBody RequestPetDto requestPetDto,
-      @Parameter(hidden = true) User user) {
-    PetDto createdPet = petService.createPet(requestPetDto, user);
+      @Parameter(hidden = true) UserProjection userProjection) {
+    PetDto createdPet = petService.createPet(requestPetDto, userProjection);
     return ResponseEntity.ok(createdPet);
   }
 
   @HasUserRole
   @GetMapping
-  public ResponseEntity<List<PetDto>> getAllPets(@Parameter(hidden = true) User user) {
-    return ResponseEntity.ok(petService.getAllPets(user));
+  public ResponseEntity<List<PetDto>> getAllPets(@Parameter(hidden = true) UserProjection userProjection) {
+    return ResponseEntity.ok(petService.getAllPets(userProjection));
   }
 
   @HasUserRole
   @GetMapping("/{id}")
-  public ResponseEntity<PetDto> getPetById(@PathVariable UUID id, @Parameter(hidden = true) User user) {
-    return petService.getPetById(id, user)
+  public ResponseEntity<PetDto> getPetById(@PathVariable UUID id, @Parameter(hidden = true) UserProjection userProjection) {
+    return petService.getPetById(id, userProjection)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -58,24 +59,24 @@ public class PetController {
   @HasUserRole
   @PutMapping("/{id}")
   public ResponseEntity<PetDto> updatePet(@PathVariable UUID id, @Valid @RequestBody RequestPetDto petDto,
-      @Parameter(hidden = true) User user) {
-    return petService.updatePet(id, petDto, user)
+      @Parameter(hidden = true) UserProjection userProjection) {
+    return petService.updatePet(id, petDto, userProjection)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
 
   @HasUserRole
   @DeleteMapping("/{id}")
-  public ResponseEntity<PetDto> deletePet(@PathVariable UUID id, @Parameter(hidden = true) User user) {
-    return petService.deletePet(id, user)
+  public ResponseEntity<PetDto> deletePet(@PathVariable UUID id, @Parameter(hidden = true) UserProjection userProjection) {
+    return petService.deletePet(id, userProjection)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
 
-  @ModelAttribute("user")
-  public User getUser(Authentication authentication) {
+  @ModelAttribute("userProjection")
+  public UserProjection getUserProjection(Authentication authentication) {
     try {
-      return (User) authentication.getPrincipal();
+      return (UserProjection) authentication.getPrincipal();
     } catch (ClassCastException e) {
       throw new IllegalArgumentException("Authentication is wrong");
     }

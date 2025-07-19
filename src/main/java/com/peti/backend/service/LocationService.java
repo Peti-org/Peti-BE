@@ -1,7 +1,7 @@
 package com.peti.backend.service;
 
 import com.peti.backend.dto.LocationDto;
-import com.peti.backend.model.Location;
+import com.peti.backend.model.domain.Location;
 import com.peti.backend.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
