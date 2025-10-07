@@ -133,6 +133,11 @@ You can connect to the PostgreSQL database using any PostgreSQL client:
 
 - **Connection String:** `postgresql://petiuser:petipassword@localhost:5437/petidb`
 
+### Database Reset
+
+You need run ```create-scheme.sql``` script then run script from ```grant-permissions.sql``` without first row, and then
+start app, tables and mock data will be automatically added by Liquibase
+
 ### API Documentation
 
 Once the application is running, you can access:
@@ -148,7 +153,7 @@ Once the application is running, you can access:
 - Spring security configuration: https://medium.com/@minadev/authentication-and-authorization-with-spring-security-bf22e985f2cb
 - https://medium.com/@ihor.polataiko/spring-security-guide-part-1-introduction-c2709ff1bd98
 - https://www.baeldung.com/spring-deprecated-websecurityconfigureradapter
-- 
+-
 
 
 ### Service Specification

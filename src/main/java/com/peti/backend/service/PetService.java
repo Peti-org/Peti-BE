@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +36,13 @@ public class PetService {
         .map(PetDto::from);
   }
 
+  @Transactional
   public PetDto createPet(RequestPetDto requestPet, UserProjection user) {
     Pet savedPet = petRepository.save(toPet(requestPet, user.getUserId()));
     return PetDto.from(savedPet);
   }
 
+  @Transactional
   public Optional<PetDto> updatePet(UUID id, RequestPetDto requestPetDto, UserProjection user) {
     return petRepository.findById(id)
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
