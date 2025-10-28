@@ -1,9 +1,9 @@
 package com.peti.backend.controller;
 
 import com.peti.backend.dto.user.AuthResponse;
-import com.peti.backend.dto.user.LoginUserDto;
+import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
-import com.peti.backend.dto.user.RegisterUserDto;
+import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,15 +23,15 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/signup")
-  public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
+  public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RequestRegister registerUserDto) {
     RegisterResponse registeredUser = authenticationService.signup(registerUserDto);
 
     return ResponseEntity.ok(registeredUser);
   }
 
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-    AuthResponse authResponse = authenticationService.authenticate(loginUserDto);
+  public ResponseEntity<AuthResponse> authenticate(@Valid @RequestBody RequestLogin requestLogin) {
+    AuthResponse authResponse = authenticationService.authenticate(requestLogin);
     return ResponseEntity.ok(authResponse);
   }
 }

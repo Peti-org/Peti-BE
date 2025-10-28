@@ -164,20 +164,20 @@ VALUES
 -- Extended duration for third order
 
 -- 12. caretaker_slot
-INSERT INTO "caretaker_slot" (slot_id, caretaker_id, date, time_from, time_to, type, price, currency, additional_data)
+INSERT INTO "caretaker_slot" (slot_id, caretaker_id, date, time_from, time_to, type, price, currency, additional_data, creation_time)
 VALUES
   ('e1f2a3b4-c5d6-7890-1234-567340abcdef', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-10-26', '15:30:00',
    '16:30:00', 'вигул', 200.00, 'UAH', '{
     "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
     "notes": "Client will bring the pet"
-  }'),
+  }', '2025-07-27 10:34:00'),
   ('e1f2a3b4-c5d6-7890-1234-567890a56def', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-11-01', '11:00:00',
    '12:30:00', 'вигул', 350.00, 'UAH', '{
     "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
     "notes": "Client will bring the pet"
-  }'),
+  }', '2025-07-27 10:26:00'),
   ('a3b4c5d6-e7f8-9012-3456-7890abcdef03', 'c1d2e3f4-a5b6-7890-1234-567890abcdef', '2023-11-02', '18:00:00',
    '19:30:00', 'вигул', 1000.00, 'UAH', '{
     "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
     "notes": "Client will bring the pet"
-  }');
+  }', '2025-07-27 10:30:00');

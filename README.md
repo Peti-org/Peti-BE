@@ -138,7 +138,7 @@ You can connect to the PostgreSQL database using any PostgreSQL client:
 Once the application is running, you can access:
 - API endpoints at `http://localhost:8083`
 - Health check at `http://localhost:8083/api/ping`
-- Swagger `http://localhost:8082/swagger-ui/index.html`
+- Swagger `http://localhost:8083/swagger-ui/index.html`
 
 
 
@@ -148,7 +148,7 @@ Once the application is running, you can access:
 - Spring security configuration: https://medium.com/@minadev/authentication-and-authorization-with-spring-security-bf22e985f2cb
 - https://medium.com/@ihor.polataiko/spring-security-guide-part-1-introduction-c2709ff1bd98
 - https://www.baeldung.com/spring-deprecated-websecurityconfigureradapter
-- 
+-
 
 
 ### Service Specification

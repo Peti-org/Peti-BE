@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class UpdatePasswordDto {
+public class RequestUpdatePassword {
 
   @NotEmpty(message = "New password cannot be blank")
   @Size(min = 8, message = "New password must be at least 8 characters long")

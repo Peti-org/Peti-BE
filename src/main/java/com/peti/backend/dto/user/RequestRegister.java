@@ -16,7 +16,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 
 @Getter
-public class RegisterUserDto {
+public class RequestRegister {
 
   @Email(message = "Invalid email format")
   @NotBlank(message = "Email cannot be blank")

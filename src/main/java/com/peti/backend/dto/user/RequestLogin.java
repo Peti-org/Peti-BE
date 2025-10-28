@@ -6,10 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public class LoginUserDto {
+public class RequestLogin {
   @Email(message = "Invalid email format")
   @NotBlank(message = "Email cannot be blank")
   @Schema(description = "User's email", defaultValue = "johnDoe@gmail.com")

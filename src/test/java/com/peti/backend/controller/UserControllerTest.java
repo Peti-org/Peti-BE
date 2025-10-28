@@ -9,13 +9,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
-import com.peti.backend.dto.user.UpdatePasswordDto;
-import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.RequestUpdatePassword;
+import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.service.RoleService;
 import com.peti.backend.service.UserService;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -77,11 +76,11 @@ public class UserControllerTest {
   @Test
   public void testUpdateUser_Found() {
     UserDto userDto = ResourceLoader.loadResource("user-entity.json", UserDto.class);
-    UpdateUserDto updateUserDto = ResourceLoader.loadResource("update-user-request.json", UpdateUserDto.class);
-    when(userService.updateUser(userDto.getUserId(), updateUserDto)).thenReturn(userDto);
+    RequestUpdateUser requestUpdateUser = ResourceLoader.loadResource("update-user-request.json", RequestUpdateUser.class);
+    when(userService.updateUser(userDto.getUserId(), requestUpdateUser)).thenReturn(userDto);
     UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
 
-    ResponseEntity<UserDto> response = userController.updateUser(userProjection, updateUserDto);
+    ResponseEntity<UserDto> response = userController.updateUser(userProjection, requestUpdateUser);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(userDto.getUserId(), response.getBody().getUserId());
@@ -89,20 +88,20 @@ public class UserControllerTest {
 
   @Test
   public void testUpdateUser_NotFound() {
-    UpdateUserDto updateUserDto = ResourceLoader.loadResource("update-user-request.json", UpdateUserDto.class);
-    when(userService.updateUser(any(UUID.class), any(UpdateUserDto.class))).thenReturn(null);
+    RequestUpdateUser requestUpdateUser = ResourceLoader.loadResource("update-user-request.json", RequestUpdateUser.class);
+    when(userService.updateUser(any(UUID.class), any(RequestUpdateUser.class))).thenReturn(null);
     UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
 
-    ResponseEntity<UserDto> response = userController.updateUser(userProjection, updateUserDto);
+    ResponseEntity<UserDto> response = userController.updateUser(userProjection, requestUpdateUser);
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertNull(response.getBody());
   }
 
   @Test
   public void testUpdatePassword_Success() {
-    UpdatePasswordDto passwordDto = ResourceLoader.loadResource("update-password-request.json",
-        UpdatePasswordDto.class);
-    when(userService.updatePassword(any(UUID.class), any(UpdatePasswordDto.class))).thenReturn(true);
+    RequestUpdatePassword passwordDto = ResourceLoader.loadResource("update-password-request.json",
+        RequestUpdatePassword.class);
+    when(userService.updatePassword(any(UUID.class), any(RequestUpdatePassword.class))).thenReturn(true);
     UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
 
     ResponseEntity<Void> response = userController.updatePassword(userProjection, passwordDto);
@@ -111,9 +110,9 @@ public class UserControllerTest {
 
   @Test
   public void testUpdatePassword_Failure() {
-    UpdatePasswordDto passwordDto = ResourceLoader.loadResource("update-password-request.json",
-        UpdatePasswordDto.class);
-    when(userService.updatePassword(any(UUID.class), any(UpdatePasswordDto.class))).thenReturn(false);
+    RequestUpdatePassword passwordDto = ResourceLoader.loadResource("update-password-request.json",
+        RequestUpdatePassword.class);
+    when(userService.updatePassword(any(UUID.class), any(RequestUpdatePassword.class))).thenReturn(false);
     UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
 
     ResponseEntity<Void> response = userController.updatePassword(userProjection, passwordDto);

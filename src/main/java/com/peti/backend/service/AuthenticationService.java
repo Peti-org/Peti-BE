@@ -3,9 +3,9 @@ package com.peti.backend.service;
 import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.exception.BadRequestException;
 import com.peti.backend.dto.user.AuthResponse;
-import com.peti.backend.dto.user.LoginUserDto;
+import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
-import com.peti.backend.dto.user.RegisterUserDto;
+import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.security.JwtService;
@@ -29,7 +29,7 @@ public class AuthenticationService {
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
 
-  public RegisterResponse signup(RegisterUserDto registrationData) {
+  public RegisterResponse signup(RequestRegister registrationData) {
     // Validation for city existence
     CityDto cityDto = cityService.fetchById(registrationData.getCityId())
         .orElseThrow(() -> new BadRequestException(
@@ -48,7 +48,7 @@ public class AuthenticationService {
     return RegisterResponse.fromUser(registeredUser, authResponse);
   }
 
-  public AuthResponse authenticate(LoginUserDto input) {
+  public AuthResponse authenticate(RequestLogin input) {
     Authentication authentication = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
 

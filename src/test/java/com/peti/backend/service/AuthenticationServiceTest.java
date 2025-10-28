@@ -12,20 +12,17 @@ import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.exception.BadRequestException;
 import com.peti.backend.dto.user.AuthResponse;
-import com.peti.backend.dto.user.LoginUserDto;
+import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
-import com.peti.backend.dto.user.RegisterUserDto;
-import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.domain.Role;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.projection.UserProjection;
-import com.peti.backend.repository.UserRepository;
 import com.peti.backend.security.JwtService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.AdditionalAnswers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,7 +52,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void testSignup_Success() {
-    RegisterUserDto registerRequest = ResourceLoader.loadResource("registration-data.json", RegisterUserDto.class);
+    RequestRegister registerRequest = ResourceLoader.loadResource("registration-data.json", RequestRegister.class);
 
     CityDto cityDto = ResourceLoader.loadResource("city-response.json", CityDto.class);
     when(cityService.fetchById(anyLong())).thenReturn(Optional.of(cityDto));
@@ -81,7 +78,7 @@ public class AuthenticationServiceTest {
 
   @Test
   public void testSignup_CityNotFound_ThrowsBadRequestException() {
-    RegisterUserDto registerRequest = new RegisterUserDto();
+    RequestRegister registerRequest = new RequestRegister();
     // Set a cityId that does not exist
     ReflectionTestUtils.setField(registerRequest, "cityId", 999L);
 
@@ -97,7 +94,7 @@ public class AuthenticationServiceTest {
   public void testAuthenticate_Success() {
     String email = "user@example.com";
     String password = "password";
-    LoginUserDto loginInput = new LoginUserDto();
+    RequestLogin loginInput = new RequestLogin();
     ReflectionTestUtils.setField(loginInput, "email", email);
     ReflectionTestUtils.setField(loginInput, "password", password);
 
@@ -115,7 +112,7 @@ public class AuthenticationServiceTest {
   public void testAuthenticate_InvalidCredentials() {
     String email = "invalid@example.com";
     String password = "wrong";
-    LoginUserDto loginInput = new LoginUserDto();
+    RequestLogin loginInput = new RequestLogin();
     ReflectionTestUtils.setField(loginInput, "email", email);
     ReflectionTestUtils.setField(loginInput, "password", password);
 

@@ -1,6 +1,7 @@
 package com.peti.backend.model.domain;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -12,8 +13,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "caretaker", schema = "peti", catalog = "peti")
+@EqualsAndHashCode
 public class Caretaker {
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.UUID)
   @Id
   @Column(name = "caretaker_id", nullable = false)
   private UUID caretakerId;
@@ -24,7 +26,7 @@ public class Caretaker {
   private Object caretakerPreference;
 
   @Basic
-  @Column(name = "rating ", nullable = false)
+  @Column(name = "rating", nullable = false)
   private int rating;
 
   @Basic
@@ -32,34 +34,6 @@ public class Caretaker {
   private boolean caretakerIsDeleted;
   @ManyToOne
   @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
-  private User userByUserId;
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
-
-    Caretaker caretaker = (Caretaker) o;
-
-    if (caretakerIsDeleted != caretaker.caretakerIsDeleted)
-      return false;
-    if (caretakerId != null ? !caretakerId.equals(caretaker.caretakerId) : caretaker.caretakerId != null)
-      return false;
-    if (caretakerPreference != null ? !caretakerPreference.equals(caretaker.caretakerPreference) :
-            caretaker.caretakerPreference != null)
-      return false;
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = caretakerId != null ? caretakerId.hashCode() : 0;
-    result = 31 * result + (caretakerPreference != null ? caretakerPreference.hashCode() : 0);
-    result = 31 * result + (caretakerIsDeleted ? 1 : 0);
-    return result;
-  }
+  private User userReference;
 
 }

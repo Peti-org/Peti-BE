@@ -1,58 +1,87 @@
 package com.peti.backend.service;
 
-import com.peti.backend.dto.CaretakerDto;
+import com.peti.backend.dto.caretacker.CaretakerDto;
+import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
 import com.peti.backend.model.domain.Caretaker;
+import com.peti.backend.model.domain.User;
+import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.CaretakerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CaretakerService {
 
-    @Autowired
-    private CaretakerRepository caretakerRepository;
+  private final CaretakerRepository caretakerRepository;
 
-        private CaretakerDto mapToDto(Caretaker caretaker) {
-        CaretakerDto caretakerDto = new CaretakerDto();
+  public static SimpleCaretakerDto convertToSimpleDto(Caretaker caretaker) {
+    return new SimpleCaretakerDto(
+        caretaker.getCaretakerId(),
+        caretaker.getUserReference().getFirstName(),
+        caretaker.getUserReference().getLastName(),
+        caretaker.getRating()
+    );
+  }
+
+  private CaretakerDto mapToDto(Caretaker caretaker) {
+    CaretakerDto caretakerDto = new CaretakerDto();
+        caretakerDto.setId(caretaker.getCaretakerId());
+        caretakerDto.setName(caretaker.getUserReference().getFirstName());
+        caretakerDto.setEmail(caretaker.getUserReference().getEmail());
+        caretakerDto.setRating(caretaker.getRating());
+    return caretakerDto;
+  }
+
+  private Caretaker toCareTaker(UserProjection userProjection) {
+    Caretaker caretaker = new Caretaker();
+    caretaker.setUserReference(new User(userProjection.getUserId()));
+    caretaker.setCaretakerIsDeleted(false);
+    caretaker.setRating(0);
+    caretaker.setCaretakerPreference("{}"); // Assuming a default empty JSON object for preferences
+
 //        caretakerDto.setId(caretaker.getId());
 //        caretakerDto.setName(caretaker.getName());
 //        caretakerDto.setSurname(caretaker.getSurname());
 //        caretakerDto.setPhone(caretaker.getPhone());
 //        caretakerDto.setMail(caretaker.getMail());
 //        caretakerDto.setRating(caretaker.getRating());
-        return caretakerDto;
-    }
+    return caretaker;
+  }
 
-    public List<CaretakerDto> getAllCaretakers() {
-        List<Caretaker> caretakers = caretakerRepository.findAll();
-        return caretakers.stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-    }
+  public List<CaretakerDto> getAllCaretakers() {
+    List<Caretaker> caretakers = caretakerRepository.findAll();
+    return caretakers.stream()
+        .map(this::mapToDto)
+        .collect(Collectors.toList());
+  }
 
-    public Optional<CaretakerDto> getCaretakerById(Long id) {
-        Optional<Caretaker> caretakerOptional = caretakerRepository.findById(id);
-        return caretakerOptional.map(this::mapToDto);
-    }
+  public Optional<CaretakerDto> getCaretakerById(UUID id) {
+    return caretakerRepository.findById(id).map(this::mapToDto);
+  }
 
-    public CaretakerDto createCaretaker(Caretaker caretaker) {
-        Caretaker savedCaretaker = caretakerRepository.save(caretaker);
-        return mapToDto(savedCaretaker);
-    }
+  public Optional<UUID> getCaretakerIdByUserId(UUID userId) {
+    return caretakerRepository.findCaretakerIdBy(userId);
+  }
 
-    public CaretakerDto updateCaretaker(Long id, Caretaker caretaker) {
-        if (caretakerRepository.existsById(id)) {
-//            caretaker.setId(id);
-            return mapToDto(caretakerRepository.save(caretaker));
-        }
-        return null;
-    }
+  public CaretakerDto createCaretaker( UserProjection userProjection) {
+    Caretaker savedCaretaker = caretakerRepository.save(toCareTaker(userProjection));
+    return mapToDto(savedCaretaker);
+  }
 
-    public void deleteCaretaker(Long id) {
-        caretakerRepository.deleteById(id);
-    }
+//  public CaretakerDto updateCaretaker(Long id, Caretaker caretaker) {
+//    if (caretakerRepository.existsById(id)) {
+////            caretaker.setId(id);
+//      return mapToDto(caretakerRepository.save(caretaker));
+//    }
+//    return null;
+//  }
+
+//  public void deleteCaretaker(Long id) {
+//    caretakerRepository.deleteById(id);
+//  }
 }
