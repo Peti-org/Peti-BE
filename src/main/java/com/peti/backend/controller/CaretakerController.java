@@ -1,45 +1,65 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.CaretakerDto;
+import com.peti.backend.dto.caretacker.CaretakerDto;
+import com.peti.backend.model.projection.UserProjection;
+import com.peti.backend.security.annotation.HasAdminRole;
+import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.service.CaretakerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/caretakers")
+@RequiredArgsConstructor
+@Tag(name = "Caretaker", description = "Operation that is needed for managing caretaker")
+@SecurityRequirement(name = "bearerAuth")
 public class CaretakerController {
 
-    @Autowired
-    private CaretakerService caretakerService;
+  private final CaretakerService caretakerService;
 
-    @GetMapping
-    public ResponseEntity<List<CaretakerDto>> getAllCaretakers() {
-        return ResponseEntity.ok(caretakerService.getAllCaretakers());
+  @HasAdminRole
+  @GetMapping
+  public ResponseEntity<List<CaretakerDto>> getAllCaretakers() {
+    return ResponseEntity.ok(caretakerService.getAllCaretakers());
+  }
+
+  @HasCaretakerRole
+  @GetMapping("/me")
+  public ResponseEntity<CaretakerDto> getCaretakerById(@Parameter(hidden = true) UserProjection userProjection) {
+    try {
+      UUID caretakerId = caretakerService.getCaretakerIdByUserId(userProjection.getUserId())
+          .orElseThrow(
+              () -> new IllegalArgumentException("Caretaker not found for user: " + userProjection.getUserId()));
+      return caretakerService.getCaretakerById(caretakerId)
+          .map(ResponseEntity::ok)
+          .orElse(ResponseEntity.notFound().build());
+    } catch (ClassCastException e) {
+      throw new IllegalArgumentException("Authentication is wrong");
     }
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CaretakerDto> getCaretakerById(@PathVariable Long id) {
-        return caretakerService.getCaretakerById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+  @PostMapping
+  public ResponseEntity<CaretakerDto> createCaretaker(@Parameter(hidden = true) UserProjection userProjection) {
+    return ResponseEntity.ok(caretakerService.createCaretaker(userProjection));
+  }
+
+  @ModelAttribute("userProjection")
+  public UserProjection getUserProjection(Authentication authentication) {
+    try {
+      return (UserProjection) authentication.getPrincipal();
+    } catch (ClassCastException e) {
+      throw new IllegalArgumentException("Authentication is wrong");
     }
-
-//    @PostMapping
-//    public ResponseEntity<CaretakerDto> createCaretaker(@RequestBody CaretakerDto caretakerDto) {
-//        return ResponseEntity.status(HttpStatus.CREATED).body(caretakerService.createCaretaker(caretakerDto));
-//    }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<CaretakerDto> updateCaretaker(@PathVariable Long id, @RequestBody CaretakerDto caretakerDto) {
-//        return ResponseEntity.ok(caretakerService.updateCaretaker(id, caretakerDto));
-//    }
-
-    @DeleteMapping("/{caretakerId}")
-    public ResponseEntity<Void> deleteCaretaker(@PathVariable("caretakerId") Long caretakerId) {
-        caretakerService.deleteCaretaker(caretakerId);
-        return ResponseEntity.noContent().build();
-    }
+  }
 }

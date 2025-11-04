@@ -143,7 +143,7 @@ start app, tables and mock data will be automatically added by Liquibase
 Once the application is running, you can access:
 - API endpoints at `http://localhost:8083`
 - Health check at `http://localhost:8083/api/ping`
-- Swagger `http://localhost:8082/swagger-ui/index.html`
+- Swagger `http://localhost:8083/swagger-ui/index.html`
 
 
 

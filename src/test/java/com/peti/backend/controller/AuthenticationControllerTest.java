@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.user.AuthResponse;
-import com.peti.backend.dto.user.LoginUserDto;
+import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
-import com.peti.backend.dto.user.RegisterUserDto;
+import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.service.AuthenticationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,9 +30,9 @@ public class AuthenticationControllerTest {
 
   @Test
   public void testRegister_Success() {
-    RegisterUserDto registerUserDto = ResourceLoader.loadResource("registration-data.json", RegisterUserDto.class);
+    RequestRegister registerUserDto = ResourceLoader.loadResource("registration-data.json", RequestRegister.class);
     RegisterResponse registerResponse = ResourceLoader.loadResource("register-response.json", RegisterResponse.class);
-    when(authenticationService.signup(any(RegisterUserDto.class))).thenReturn(registerResponse);
+    when(authenticationService.signup(any(RequestRegister.class))).thenReturn(registerResponse);
 
     ResponseEntity<RegisterResponse> response = authenticationController.register(registerUserDto);
     assertNotNull(response);
@@ -44,11 +44,11 @@ public class AuthenticationControllerTest {
 
   @Test
   public void testAuthenticate_Success() {
-    LoginUserDto loginUserDto = ResourceLoader.loadResource("login-data.json", LoginUserDto.class);
+    RequestLogin requestLogin = ResourceLoader.loadResource("login-data.json", RequestLogin.class);
     AuthResponse authResponse = new AuthResponse("test_token", 111111L);
-    when(authenticationService.authenticate(any(LoginUserDto.class))).thenReturn(authResponse);
+    when(authenticationService.authenticate(any(RequestLogin.class))).thenReturn(authResponse);
 
-    ResponseEntity<AuthResponse> response = authenticationController.authenticate(loginUserDto);
+    ResponseEntity<AuthResponse> response = authenticationController.authenticate(requestLogin);
     assertNotNull(response);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());

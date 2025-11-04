@@ -31,10 +31,12 @@ public class SecurityConfiguration {
         // this disables session creation on Spring Security
         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll()
-            .requestMatchers("/api/cities/country/**").permitAll()
+            .requestMatchers("/auth/**").permitAll() // to allow authentication endpoints
+            .requestMatchers("/api/cities/country/**").permitAll() //to select country on register page
+            .requestMatchers("/api/slots/filter").permitAll() //to view all slots unauthenticated
             .requestMatchers("/api/ping").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
+            .requestMatchers("/").permitAll()
             .requestMatchers("/api-docs/**").permitAll()
             .anyRequest().authenticated())
 //                    .exceptionHandling(configurer ->  configurer.authenticationEntryPoint(new

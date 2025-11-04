@@ -1,21 +1,15 @@
 package com.peti.backend.dto.user;
 
-import com.peti.backend.model.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
-import java.sql.Date;
 import java.time.LocalDate;
 import lombok.Getter;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
-public class UpdateUserDto {
+public class RequestUpdateUser {
 
   @NotEmpty(message = "First name cannot be blank")
   @Schema(description = "User's name", defaultValue = "John")

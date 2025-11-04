@@ -11,8 +11,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
-import com.peti.backend.dto.user.UpdatePasswordDto;
-import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.RequestUpdatePassword;
+import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.domain.City;
 import com.peti.backend.model.domain.User;
@@ -74,32 +74,32 @@ public class UserServiceTest {
   @Test
   public void testUpdateUser_Found() {
     User user = ResourceLoader.loadResource("user-entity.json", User.class);
-    UpdateUserDto updateUserDto = ResourceLoader.loadResource("update-user-request.json", UpdateUserDto.class);
+    RequestUpdateUser requestUpdateUser = ResourceLoader.loadResource("update-user-request.json", RequestUpdateUser.class);
     City city = ResourceLoader.loadResource("city-entity.json", City.class);
 
     when(userRepository.findById(user.getUserId())).thenReturn(Optional.of(user));
-    when(entityManager.getReference(City.class, updateUserDto.getCityId())).thenReturn(city);
+    when(entityManager.getReference(City.class, requestUpdateUser.getCityId())).thenReturn(city);
     when(userRepository.save(any(User.class))).thenReturn(user);
 
-    UserDto result = userService.updateUser(user.getUserId(), updateUserDto);
+    UserDto result = userService.updateUser(user.getUserId(), requestUpdateUser);
     assertNotNull(result);
-    assertEquals(updateUserDto.getFirstName(), result.getFirstName());
+    assertEquals(requestUpdateUser.getFirstName(), result.getFirstName());
   }
 
   @Test
   public void testUpdateUser_NotFound() {
     UUID userId = UUID.randomUUID();
-    UpdateUserDto updateUserDto = ResourceLoader.loadResource("update-user-request.json", UpdateUserDto.class);
+    RequestUpdateUser requestUpdateUser = ResourceLoader.loadResource("update-user-request.json", RequestUpdateUser.class);
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-    UserDto result = userService.updateUser(userId, updateUserDto);
+    UserDto result = userService.updateUser(userId, requestUpdateUser);
     assertNull(result);
   }
 
   @Test
   public void testUpdatePassword_Success() {
     User user = ResourceLoader.loadResource("user-entity.json", User.class);
-    UpdatePasswordDto passwordDto = ResourceLoader.loadResource("update-password-request.json", UpdatePasswordDto.class);
+    RequestUpdatePassword passwordDto = ResourceLoader.loadResource("update-password-request.json", RequestUpdatePassword.class);
 
     when(userRepository.findById(user.getUserId())).thenReturn(Optional.of(user));
     when(passwordEncoder.matches(passwordDto.getOldPassword(), user.getPassword())).thenReturn(true);
@@ -111,7 +111,7 @@ public class UserServiceTest {
   @Test
   public void testUpdatePassword_Failure() {
     User user = ResourceLoader.loadResource("user-entity.json", User.class);
-    UpdatePasswordDto passwordDto = ResourceLoader.loadResource("update-password-request.json", UpdatePasswordDto.class);
+    RequestUpdatePassword passwordDto = ResourceLoader.loadResource("update-password-request.json", RequestUpdatePassword.class);
 
     when(userRepository.findById(user.getUserId())).thenReturn(Optional.of(user));
     when(passwordEncoder.matches(passwordDto.getOldPassword(), user.getPassword())).thenReturn(false);

@@ -1,7 +1,7 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.user.UpdatePasswordDto;
-import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.RequestUpdatePassword;
+import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasAdminRole;
@@ -60,8 +60,8 @@ public class UserController {
   @HasUserRole
   @PutMapping("/me")
   public ResponseEntity<UserDto> updateUser(@Parameter(hidden = true) UserProjection userProjection,
-      @Valid @RequestBody UpdateUserDto updateUserDto) {
-    UserDto updatedUser = userService.updateUser(userProjection.getUserId(), updateUserDto);
+      @Valid @RequestBody RequestUpdateUser requestUpdateUser) {
+    UserDto updatedUser = userService.updateUser(userProjection.getUserId(), requestUpdateUser);
     if (updatedUser != null) {
       return ResponseEntity.ok(updatedUser);
     } else {
@@ -72,8 +72,8 @@ public class UserController {
   @HasUserRole
   @PutMapping("/me/password")
   public ResponseEntity<Void> updatePassword(@Parameter(hidden = true) UserProjection userProjection,
-      @Valid @RequestBody UpdatePasswordDto updatePasswordDto) {
-    if (userService.updatePassword(userProjection.getUserId(), updatePasswordDto)) {
+      @Valid @RequestBody RequestUpdatePassword requestUpdatePassword) {
+    if (userService.updatePassword(userProjection.getUserId(), requestUpdatePassword)) {
       return ResponseEntity.ok().build();
     } else {
       return ResponseEntity.notFound().build();

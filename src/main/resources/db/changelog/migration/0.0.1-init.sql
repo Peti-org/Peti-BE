@@ -12,7 +12,7 @@ CREATE TABLE breed
   CONSTRAINT breed_pk PRIMARY KEY (breed_id)
 );
 
--- Table: caretacker_slots
+-- Table: caretaker_slots
 CREATE TABLE caretaker_slot
 (
   slot_id         uuid           NOT NULL,
@@ -23,8 +23,9 @@ CREATE TABLE caretaker_slot
   type            varchar(30)    NOT NULL,
   price           decimal(10, 2) NOT NULL,
   currency        varchar(5)     NOT NULL,
+  creation_time   timestamp      NOT NULL,
   additional_data jsonb          NOT NULL,
-  CONSTRAINT caretacker_slot_pk PRIMARY KEY (slot_id)
+  CONSTRAINT caretaker_slot_pk PRIMARY KEY (slot_id)
 );
 
 
@@ -149,7 +150,7 @@ CREATE TABLE "role"
 );
 
 -- foreign keys
--- Reference: caretacker_slots_caretaker (table: caretacker_slots)
+-- Reference: caretaker_slots_caretaker (table: caretaker_slots)
 ALTER TABLE caretaker_slot
   ADD CONSTRAINT caretaker_slot_caretaker
     FOREIGN KEY (caretaker_id)
@@ -157,6 +158,9 @@ ALTER TABLE caretaker_slot
       NOT DEFERRABLE
         INITIALLY IMMEDIATE
 ;
+
+CREATE INDEX index_slot_creation_time
+  ON caretaker_slot(creation_time DESC);
 
 -- Reference: caretaker_user (table: caretaker)
 ALTER TABLE caretaker

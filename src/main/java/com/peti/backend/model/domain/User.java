@@ -57,7 +57,7 @@ public class User implements UserDetails {
   @Basic
   @Column(name = "user_data_folder", nullable = false, length = 50)
   private String userDataFolder;
-  @OneToMany(mappedBy = "userByUserId")
+  @OneToMany(mappedBy = "userReference")
   private Collection<Caretaker> caretakersByUserId;
   //  @OneToMany(mappedBy = "userByUserId")
   //  private Collection<PaymentSettings> paymentSettingsByUserId;

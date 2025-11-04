@@ -3,8 +3,8 @@ package com.peti.backend.service;
 import static com.peti.backend.service.RoleService.convertToAuthority;
 
 import com.peti.backend.dto.CityDto;
-import com.peti.backend.dto.user.UpdatePasswordDto;
-import com.peti.backend.dto.user.UpdateUserDto;
+import com.peti.backend.dto.user.RequestUpdatePassword;
+import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.domain.City;
 import com.peti.backend.model.domain.Role;
@@ -87,7 +87,7 @@ public class UserService implements UserDetailsService {
     return convertToDto(savedUser, CityService.convertToDto(savedUser.getCityByCityId()));
   }
 
-  public UserDto updateUser(UUID userId, UpdateUserDto updatedUser) {
+  public UserDto updateUser(UUID userId, RequestUpdateUser updatedUser) {
     return userRepository.findById(userId)
         .map(existingUser -> {
           existingUser.setFirstName(updatedUser.getFirstName());
@@ -101,7 +101,7 @@ public class UserService implements UserDetailsService {
         .orElse(null);
   }
 
-  public boolean updatePassword(UUID userId, UpdatePasswordDto passwordDto) {
+  public boolean updatePassword(UUID userId, RequestUpdatePassword passwordDto) {
     return userRepository.findById(userId)
         .filter(user -> passwordEncoder.matches(passwordDto.getOldPassword(), user.getPassword()))
         .map(existingUser -> {
