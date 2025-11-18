@@ -112,35 +112,36 @@ VALUES
   ('c3d4e5f6-a7b8-9012-3456-7890abcdef01', 1, '4444********4444', '101', '4444');
 -- Serhiy's card
 
--- 9. event
-INSERT INTO event (event_id, event_time, user_id, event_name, caretaker_id, event_context, event_is_deleted)
+-- 11. caretaker_slot
+INSERT INTO "caretaker_slot" (slot_id, caretaker_id, date, time_from, time_to, type, price, currency, additional_data, creation_time, is_available)
 VALUES
-  ('e1f2a3b4-c5d6-7890-1234-567890abcdef', '2023-10-27 10:00:00', 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-   'Dog Walking for Buddy', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '{
-    "pet_id": "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-    "duration_hours": 1,
-    "location": "Client home pickup"
-  }', false),
-  ('f2a3b4c5-d6e7-8901-2345-67890abcdef0', '2023-11-05 14:00:00', 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-   'Dog training session for Max', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '{
-    "pet_id": "a7b8c9d0-e1f2-3456-7890-bcdef0123456",
-    "duration_hours": 1.5,
-    "focus": "Obedience"
-  }', false),
-  ('a3b4c5d6-e7f8-9012-3456-7890abcdef01', '2023-11-10 09:00:00', 'b2c3d4e5-f6a7-8901-2345-67890abcdef0',
-   'Cat Sitting for Luna', 'c1d2e3f4-a5b6-7890-1234-567890abcdef', '{
-    "pet_id": "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-    "duration_days": 3,
-    "location": "Caretaker home"
-  }', false),
-  ('b4c5d6e7-f8a9-0123-4567-890abcdef012', '2023-10-28 12:00:00', 'c3d4e5f6-a7b8-9012-3456-7890abcdef01',
-   'Parrot checkup for Kesha', 'c1d2e3f4-a5b6-7890-1234-567890abcdef', '{
+  ('e1f2a3b4-c5d6-7890-1234-567340abcdef', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-10-26', '15:30:00',
+   '16:30:00', 'вигул', 200.00, 'UAH', '{
     "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
     "notes": "Client will bring the pet"
-  }', false);
--- Event without caretaker initially
+  }', '2025-07-27 10:34:00', true),
+  ('e1f2a3b4-c5d6-7890-1234-567890a56def', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-11-01', '11:00:00',
+   '12:30:00', 'вигул', 350.00, 'UAH', '{
+    "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
+    "notes": "Client will bring the pet"
+  }', '2025-07-27 10:26:00', true),
+  ('a3b4c5d6-e7f8-9012-3456-7890abcdef03', 'c1d2e3f4-a5b6-7890-1234-567890abcdef', '2023-11-02', '18:00:00',
+   '19:30:00', 'вигул', 1000.00, 'UAH', '{
+    "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
+    "notes": "Client will bring the pet"
+  }', '2025-07-27 10:30:00', true);
 
--- 10. "order"
+-- 12. event
+INSERT INTO event (event_id, user_id, caretaker_id, slot_id, price, status, created_at, event_is_deleted)
+VALUES
+  ('e1f2a3b4-c5d6-7890-1234-567890abcdef', 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+   'd2e3f4a5-b6c7-8901-2345-67890abcdef0', 'e1f2a3b4-c5d6-7890-1234-567340abcdef', '{
+    "price": "22.44",
+    "currency": "UAH",
+    "priceBreakdown": [{"type":"discount", "price":"12.4"}]
+  }', 'created', '2023-11-05 14:00:00', false);
+
+-- 9. "order"
 -- Orders related to the events above
 INSERT INTO "order" (order_id, creation_time, price, currency, client_id, caretaker_id, event_id, order_is_deleted)
 VALUES
@@ -149,35 +150,16 @@ VALUES
    'e1f2a3b4-c5d6-7890-1234-567890abcdef', false),
   ('e1f2a3b4-c5d6-7890-1234-567890a56def', '2023-11-01 11:00:00', 350.00, 'UAH',
    'a1b2c3d4-e5f6-7890-1234-567890abcdef', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0',
-   'f2a3b4c5-d6e7-8901-2345-67890abcdef0', false),
+   'e1f2a3b4-c5d6-7890-1234-567890abcdef', false),
   ('a3b4c5d6-e7f8-9012-3456-7890abcdef03', '2023-11-02 18:00:00', 1000.00, 'UAH',
    'b2c3d4e5-f6a7-8901-2345-67890abcdef0', 'c1d2e3f4-a5b6-7890-1234-567890abcdef',
-   'a3b4c5d6-e7f8-9012-3456-7890abcdef01', false);
+   'e1f2a3b4-c5d6-7890-1234-567890abcdef', false);
 -- Note: Event 'b4c5d6e7-f8a9-0123-4567-890abcdef012' doesn't have a caretaker, so no order can be created for it based on the schema (caretaker_id NOT NULL in order).
 
--- 11. order_modification
+-- 10. order_modification
 INSERT INTO order_modification (order_id, modification_id, type, time)
 VALUES
   ('e1f2a3b4-c5d6-7890-1234-567340abcdef', 1, 'TIME_CHANGE', '2023-10-27 08:00:00'), -- Changed time for first order
   ('e1f2a3b4-c5d6-7890-1234-567890a56def', 1, 'NOTES_ADDED', '2023-11-03 10:00:00'), -- Added notes to third order
   ('a3b4c5d6-e7f8-9012-3456-7890abcdef03', 2, 'DURATION_EXTENDED', '2023-11-04 12:00:00');
 -- Extended duration for third order
-
--- 12. caretaker_slot
-INSERT INTO "caretaker_slot" (slot_id, caretaker_id, date, time_from, time_to, type, price, currency, additional_data, creation_time)
-VALUES
-  ('e1f2a3b4-c5d6-7890-1234-567340abcdef', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-10-26', '15:30:00',
-   '16:30:00', 'вигул', 200.00, 'UAH', '{
-    "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
-    "notes": "Client will bring the pet"
-  }', '2025-07-27 10:34:00'),
-  ('e1f2a3b4-c5d6-7890-1234-567890a56def', 'd2e3f4a5-b6c7-8901-2345-67890abcdef0', '2023-11-01', '11:00:00',
-   '12:30:00', 'вигул', 350.00, 'UAH', '{
-    "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
-    "notes": "Client will bring the pet"
-  }', '2025-07-27 10:26:00'),
-  ('a3b4c5d6-e7f8-9012-3456-7890abcdef03', 'c1d2e3f4-a5b6-7890-1234-567890abcdef', '2023-11-02', '18:00:00',
-   '19:30:00', 'вигул', 1000.00, 'UAH', '{
-    "pet_id": "b8c9d0e1-f2a3-4567-8901-cdef01234567",
-    "notes": "Client will bring the pet"
-  }', '2025-07-27 10:30:00');

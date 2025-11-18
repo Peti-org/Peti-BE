@@ -69,4 +69,7 @@ public class Slot {
   @JdbcTypeCode(SqlTypes.JSON)
   private Object additionalData;
 
+  @Basic
+  @Column(name = "is_available", nullable = false)
+  private boolean available;
 }

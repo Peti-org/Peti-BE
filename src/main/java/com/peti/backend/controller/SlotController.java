@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/slots")
 @Tag(name = "Catalog", description = "Operation that is needed for catalog page")
-//@SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "bearerAuth")
 public class SlotController {
 
   private final SlotService slotService;
