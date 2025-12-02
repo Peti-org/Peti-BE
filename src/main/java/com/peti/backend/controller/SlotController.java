@@ -1,7 +1,7 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.dto.slot.RequestSlotDto;
+import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.service.CaretakerService;
@@ -44,7 +44,7 @@ public class SlotController {
   @HasCaretakerRole
   @PostMapping
   public ResponseEntity<SlotDto> createSlot(@Valid @RequestBody RequestSlotDto requestSlotDto,
-      @Parameter(hidden = true) UUID caretakerId) {
+      @Parameter(hidden = true) @ModelAttribute("caretakerId") UUID caretakerId) {
     return ResponseEntity.ok(slotService.createSlot(requestSlotDto, caretakerId));
   }
 
@@ -52,7 +52,7 @@ public class SlotController {
   @PutMapping("/{slotId}")
   public ResponseEntity<SlotDto> updateSlot(@PathVariable UUID slotId,
       @Valid @RequestBody RequestSlotDto requestSlotDto,
-      @Parameter(hidden = true) UUID caretakerId) {
+      @Parameter(hidden = true) @ModelAttribute("caretakerId") UUID caretakerId) {
     return slotService.updateSlot(slotId, requestSlotDto, caretakerId)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -61,7 +61,7 @@ public class SlotController {
   @HasCaretakerRole
   @DeleteMapping("/{slotId}")
   public ResponseEntity<SlotDto> deleteSlot(@PathVariable UUID slotId,
-      @Parameter(hidden = true) UUID caretakerId) {
+      @Parameter(hidden = true) @ModelAttribute("caretakerId") UUID caretakerId) {
     return slotService.deleteSlot(slotId, caretakerId)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

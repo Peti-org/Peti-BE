@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * SlotService is responsible for managing slots and providing methods to retrieve and filter them.
@@ -74,6 +75,7 @@ public class SlotService {
         .collect(Collectors.toList());
   }
 
+  @Transactional
   public SlotDto createSlot(RequestSlotDto requestSlotDto, UUID caretakerId) {
     Slot slot = toSlot(requestSlotDto, caretakerId);
     Slot saved = slotRepository.save(slot);
