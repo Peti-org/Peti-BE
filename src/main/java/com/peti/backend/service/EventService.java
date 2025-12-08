@@ -42,7 +42,6 @@ public class EventService {
 
   @Transactional
   public EventDto createEvent(SlotDto slotDto, UUID userId) {
-    // create event
     Event event = toEvent(slotDto, userId);
     Event saved = eventRepository.save(event);
     return convertToDto(saved);

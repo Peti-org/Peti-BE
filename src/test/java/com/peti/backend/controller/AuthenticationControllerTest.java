@@ -9,6 +9,7 @@ import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.user.AuthResponse;
 import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
+import com.peti.backend.dto.user.RequestRefreshToken;
 import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.service.AuthenticationService;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ public class AuthenticationControllerTest {
   @Test
   public void testAuthenticate_Success() {
     RequestLogin requestLogin = ResourceLoader.loadResource("login-data.json", RequestLogin.class);
-    AuthResponse authResponse = new AuthResponse("test_token", 111111L);
+    AuthResponse authResponse = new AuthResponse("test_token", 111111L, "test_refresh_token", 222222L);
     when(authenticationService.authenticate(any(RequestLogin.class))).thenReturn(authResponse);
 
     ResponseEntity<AuthResponse> response = authenticationController.authenticate(requestLogin);
@@ -53,6 +54,23 @@ public class AuthenticationControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("test_token", response.getBody().getToken());
+    assertEquals("test_refresh_token", response.getBody().getRefreshToken());
+    assertEquals(222222L, response.getBody().getRefreshTokenExpiresIn());
+  }
+
+  @Test
+  public void testRefreshToken_Success() {
+    RequestRefreshToken requestRefreshToken = ResourceLoader.loadResource("refresh-token-data.json", RequestRefreshToken.class);
+    AuthResponse authResponse = new AuthResponse("new_token", 333333L, "new_refresh_token", 444444L);
+    when(authenticationService.authenticate(any(RequestRefreshToken.class))).thenReturn(authResponse);
+
+    ResponseEntity<AuthResponse> response = authenticationController.refreshToken(requestRefreshToken);
+    assertNotNull(response);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("new_token", response.getBody().getToken());
+    assertEquals("new_refresh_token", response.getBody().getRefreshToken());
+    assertEquals(444444L, response.getBody().getRefreshTokenExpiresIn());
   }
 }
 
