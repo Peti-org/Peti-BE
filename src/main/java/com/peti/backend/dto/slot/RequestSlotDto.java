@@ -11,8 +11,6 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record RequestSlotDto(
-    @NotNull(message = "Caretaker ID must not be null")
-    UUID caretakerId,
     @NotNull(message = "Date must not be null")
     @FutureOrPresent(message = "Date must be today or in the future")
     LocalDate date,
