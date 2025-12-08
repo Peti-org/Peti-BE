@@ -3,10 +3,11 @@ package com.peti.backend.service;
 import static com.peti.backend.service.CaretakerService.convertToSimpleDto;
 
 import com.peti.backend.dto.slot.PagedSlotsResponse;
-import com.peti.backend.dto.slot.SlotCursor;
-import com.peti.backend.dto.slot.SlotDto;
+import com.peti.backend.dto.slot.RequestCalendarSlots;
 import com.peti.backend.dto.slot.RequestSlotDto;
 import com.peti.backend.dto.slot.RequestSlotFilters;
+import com.peti.backend.dto.slot.SlotCursor;
+import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.Slot;
 import com.peti.backend.repository.SlotRepository;
@@ -61,6 +62,16 @@ public class SlotService {
     SlotCursor cursor = new SlotCursor(slotDtoList.getLast().caretaker().getRating(), slots.getLast().getCreationTime(),
         requestSlotFilters.slotCursor().limit());
     return new PagedSlotsResponse(slotDtoList, cursor);
+  }
+
+  public List<SlotDto> getCalendarSlots(RequestCalendarSlots requestCalendarSlots) {
+
+    List<Slot> slots = slotRepository.findAllByCaretaker_CaretakerIdAndDateBetween(requestCalendarSlots.caretakerId(),
+        Date.valueOf(requestCalendarSlots.fromDate()), Date.valueOf(requestCalendarSlots.toDate()));
+
+    return slots.stream()
+        .map(SlotService::convertToDto)
+        .collect(Collectors.toList());
   }
 
   public Optional<SlotDto> getSlotById(UUID id) {

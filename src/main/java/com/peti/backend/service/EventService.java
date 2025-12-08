@@ -39,6 +39,7 @@ public class EventService {
     );
   }
 
+
   @Transactional
   public EventDto createEvent(SlotDto slotDto, UUID userId) {
     // create event

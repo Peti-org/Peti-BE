@@ -25,6 +25,7 @@ CREATE TABLE caretaker_slot
   currency        varchar(5)     NOT NULL,
   creation_time   timestamp      NOT NULL,
   additional_data jsonb          NOT NULL,
+  is_available    boolean        NOT NULL,
   CONSTRAINT caretaker_slot_pk PRIMARY KEY (slot_id)
 );
 
@@ -43,13 +44,14 @@ CREATE TABLE caretaker
 -- Table: event
 CREATE TABLE event
 (
-  event_id         uuid         NOT NULL,
-  event_time       timestamp    NOT NULL,
-  user_id          uuid         NOT NULL,
-  event_name       varchar(100) NOT NULL,
-  caretaker_id     uuid         NOT NULL,
-  event_context    jsonb        NOT NULL,
-  event_is_deleted boolean      NOT NULL,
+  event_id         uuid        NOT NULL,
+  user_id          uuid        NOT NULL,
+  caretaker_id     uuid        NOT NULL,
+  slot_id          uuid        NOT NULL,
+  price            jsonb       NOT NULL,
+  status           varchar(20) NOT NULL,
+  created_at        timestamp   NOT NULL,
+  event_is_deleted boolean     NOT NULL,
   CONSTRAINT event_pk PRIMARY KEY (event_id)
 );
 
@@ -250,6 +252,15 @@ ALTER TABLE event
   ADD CONSTRAINT user_events_user
     FOREIGN KEY (user_id)
       REFERENCES "user" (user_id)
+      NOT DEFERRABLE
+        INITIALLY IMMEDIATE
+;
+
+-- Reference: event_slot (table: event)
+ALTER TABLE event
+  ADD CONSTRAINT event_slot
+    FOREIGN KEY (slot_id)
+      REFERENCES "caretaker_slot" (slot_id)
       NOT DEFERRABLE
         INITIALLY IMMEDIATE
 ;

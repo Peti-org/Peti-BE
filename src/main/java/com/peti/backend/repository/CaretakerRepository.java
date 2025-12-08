@@ -15,4 +15,6 @@ public interface CaretakerRepository extends JpaRepository<Caretaker, UUID> {
       FROM Caretaker caretacker WHERE caretacker.userReference.userId = :userId
       """)
   Optional<UUID> findCaretakerIdBy(UUID userId);
+
+  Boolean existsByUserReference_UserId(UUID userReferenceUserId);
 }
