@@ -8,7 +8,7 @@ COPY src /build/src
 
 RUN mvn clean package -DskipTests
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk
 
 #RUN --mount=type=cache,target=/var/cache/apt,id=slim-apt-cache-sv \
 #    --mount=type=cache,target=/var/lib/apt,id=slim-apt-lib-sv \

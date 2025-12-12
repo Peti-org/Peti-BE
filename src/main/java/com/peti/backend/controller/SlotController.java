@@ -43,7 +43,7 @@ public class SlotController {
 
   @HasCaretakerRole
   @PostMapping
-  public ResponseEntity<SlotDto> createSlot(@Valid @RequestBody RequestSlotDto requestSlotDto,
+  public ResponseEntity<List<SlotDto>> createSlot(@Valid @RequestBody RequestSlotDto requestSlotDto,
       @Parameter(hidden = true) @ModelAttribute("caretakerId") UUID caretakerId) {
     return ResponseEntity.ok(slotService.createSlot(requestSlotDto, caretakerId));
   }

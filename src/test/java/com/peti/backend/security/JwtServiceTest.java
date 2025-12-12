@@ -1,11 +1,13 @@
 package com.peti.backend.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
+import com.peti.backend.dto.user.AuthResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +26,7 @@ public class JwtServiceTest {
     jwtService = new JwtService();
     ReflectionTestUtils.setField(jwtService, "secretKey", testSecretKey);
     ReflectionTestUtils.setField(jwtService, "jwtExpiration", 3600000L); // 1 hour
+    ReflectionTestUtils.setField(jwtService, "jwtRefreshExpiration", 7200000L); // 2 hours
   }
 
   @Test
@@ -33,7 +36,7 @@ public class JwtServiceTest {
         .authorities(Collections.emptyList())
         .build();
 
-    var authResponse = jwtService.generateAuthResponse("testuser");
+    AuthResponse authResponse = jwtService.generateAuthResponse("testuser");
     assertNotNull(authResponse);
     assertNotNull(authResponse.getToken());
 
@@ -43,8 +46,7 @@ public class JwtServiceTest {
 
   @Test
   void testInvalidTokenSignature() {
-
-    var authResponse = jwtService.generateAuthResponse("testuser");
+    AuthResponse authResponse = jwtService.generateAuthResponse("testuser");
     String tamperedToken = authResponse.getToken() + "tampered";
 
     Exception exception = assertThrows(AccessDeniedException.class, () -> {
@@ -58,13 +60,30 @@ public class JwtServiceTest {
     // Set expiration to 10ms for testing expiration
     ReflectionTestUtils.setField(jwtService, "jwtExpiration", 10L);
 
-    var authResponse = jwtService.generateAuthResponse("expiringUser");
-    // Wait a bit for the token to expire
+    AuthResponse authResponse = jwtService.generateAuthResponse("expiringUser");
     Thread.sleep(20);
 
     Exception exception = assertThrows(AccessDeniedException.class, () -> {
       jwtService.extractUsername(authResponse.getToken());
     });
     assertTrue(exception.getMessage().contains("Access denied"));
+  }
+
+  @Test
+  void testGenerateAndValidateRefreshToken() {
+    AuthResponse authResponse = jwtService.generateAuthResponse("refreshUser");
+    String refreshToken = authResponse.getRefreshToken();
+
+    assertNotNull(refreshToken);
+    assertTrue(jwtService.isRefreshTokenValid(refreshToken));
+    assertEquals("refreshUser", jwtService.extractUsername(refreshToken));
+  }
+
+  @Test
+  void testInvalidRefreshTokenType() {
+    AuthResponse authResponse = jwtService.generateAuthResponse("wrongTypeUser");
+    String accessToken = authResponse.getToken();
+
+    assertThrows(AccessDeniedException.class, ()->jwtService.isRefreshTokenValid(accessToken+"wrong"));
   }
 }

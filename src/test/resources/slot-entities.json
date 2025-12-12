@@ -1,0 +1,40 @@
+[
+  {
+    "slotId" : "a1b2c3d4-5678-1234-5678-abcdefabcdef",
+    "caretaker" : {
+      "caretakerId" : "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+      "userReference" : {
+        "firstName" : "Olena",
+        "lastName" : "Shevchenko"
+      }
+    },
+    "date" : "2024-06-10",
+    "timeFrom" : "09:00:00",
+    "timeTo" : "09:30:00",
+    "type" : "walk",
+    "creationTime" : "2024-06-09T12:00:00",
+    "price" : 100.00,
+    "currency" : "UAH",
+    "additionalData" : "{\"test\": \"test\"}",
+    "available" : true
+  },
+  {
+    "slotId" : "a1b2c3d4-5678-1234-5678-abcdefabcdef",
+    "caretaker" : {
+      "caretakerId" : "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+      "userReference" : {
+        "firstName" : "Olena",
+        "lastName" : "Shevchenko"
+      }
+    },
+    "date" : "2024-06-10",
+    "timeFrom" : "09:30:00",
+    "timeTo" : "10:00:00",
+    "type" : "walk",
+    "creationTime" : "2024-06-09T12:00:00",
+    "price" : 100.00,
+    "currency" : "UAH",
+    "additionalData" : "{\"test\": \"test\"}",
+    "available" : true
+  }
+]

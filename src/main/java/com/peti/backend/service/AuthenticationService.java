@@ -3,8 +3,9 @@ package com.peti.backend.service;
 import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.exception.BadRequestException;
 import com.peti.backend.dto.user.AuthResponse;
-import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
+import com.peti.backend.dto.user.RequestLogin;
+import com.peti.backend.dto.user.RequestRefreshToken;
 import com.peti.backend.dto.user.RequestRegister;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.domain.User;
@@ -54,5 +55,12 @@ public class AuthenticationService {
 
     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
     return jwtService.generateAuthResponse(userDetails.getUsername());
+  }
+
+  public AuthResponse authenticate(RequestRefreshToken input) {
+    if (!jwtService.isRefreshTokenValid(input.getRefreshToken())) {
+      throw new BadRequestException("Invalid refresh token");
+    }
+    return jwtService.updateAuthResponse(input.getRefreshToken());
   }
 }
