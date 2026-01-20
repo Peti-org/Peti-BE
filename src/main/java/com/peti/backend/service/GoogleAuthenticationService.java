@@ -1,9 +1,11 @@
 package com.peti.backend.service;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.peti.backend.dto.CityDto;
 import com.peti.backend.dto.auth.GoogleTokenResponse;
 import com.peti.backend.dto.exception.BadRequestException;
@@ -12,14 +14,13 @@ import com.peti.backend.dto.user.RequestOAuthCode;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.UserRepository;
 import com.peti.backend.security.JwtService;
+import jakarta.annotation.PostConstruct;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,13 +30,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
-import jakarta.annotation.PostConstruct;
-
 @Service
 @RequiredArgsConstructor
 public class GoogleAuthenticationService {
-
-  private static final String GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 
   private final UserRepository userRepository;
   private final UserService userService;
@@ -44,19 +41,19 @@ public class GoogleAuthenticationService {
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
 
+  //todo change it to proper one in future
   private final RestClient restClient = RestClient.create();
 
   private GoogleIdTokenVerifier googleIdTokenVerifier;
 
+  @Value("${google.oauth.token-url}")
+  private String googleTokenUrl;
   @Value("${google.oauth.client-id}")
   private String googleClientId;
-
   @Value("${google.oauth.client-secret}")
   private String googleClientSecret;
-
   @Value("${google.oauth.default-city-id:1}")
   private Long defaultCityId;
-
   @Value("${google.oauth.default-birth-date:2000-01-01}")
   private String defaultBirthDate;
 
@@ -66,9 +63,10 @@ public class GoogleAuthenticationService {
       return;
     }
     googleIdTokenVerifier = new GoogleIdTokenVerifier.Builder(
-        new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+        new NetHttpTransport(),
+        GsonFactory.getDefaultInstance())
         .setAudience(Collections.singletonList(googleClientId))
-        .setIssuer(Arrays.asList("https://accounts.google.com", "accounts.google.com"))
+        .setIssuer("accounts.google.com")
         .build();
   }
 
@@ -77,7 +75,7 @@ public class GoogleAuthenticationService {
     GoogleIdToken.Payload payload = verifyIdToken(tokenResponse.getIdToken());
 
     String email = payload.getEmail();
-    if (email == null || email.isBlank()) {
+    if (isEmpty(email)) {
       throw new BadRequestException("Google account email is missing");
     }
 
@@ -94,7 +92,7 @@ public class GoogleAuthenticationService {
   }
 
   private GoogleTokenResponse exchangeCodeForToken(RequestOAuthCode request) {
-    if (googleClientId == null || googleClientId.isBlank() || googleClientSecret == null || googleClientSecret.isBlank()) {
+    if (isEmpty(googleClientId) || isEmpty(googleClientSecret)) {
       throw new BadRequestException("Google OAuth client is not configured");
     }
 
@@ -109,7 +107,7 @@ public class GoogleAuthenticationService {
     try {
       response = restClient
           .post()
-          .uri(GOOGLE_TOKEN_URL)
+          .uri(googleTokenUrl)
           .contentType(MediaType.APPLICATION_FORM_URLENCODED)
           .body(body)
           .retrieve()
@@ -138,7 +136,7 @@ public class GoogleAuthenticationService {
 
       GoogleIdToken.Payload payload = googleIdToken.getPayload();
       String authorizedParty = payload.getAuthorizedParty();
-      if (authorizedParty != null && !authorizedParty.isBlank() && !authorizedParty.equals(googleClientId)) {
+      if (isEmpty(authorizedParty) || !authorizedParty.equals(googleClientId)) {
         throw new BadRequestException("Invalid Google ID token audience");
       }
       Boolean emailVerified = payload.getEmailVerified();
@@ -171,7 +169,8 @@ public class GoogleAuthenticationService {
     userService.createUser(user);
   }
 
-  private String resolveString(GoogleIdToken.Payload payload, String primaryKey, String fallbackKey, String defaultValue) {
+  private String resolveString(GoogleIdToken.Payload payload, String primaryKey, String fallbackKey,
+      String defaultValue) {
     Object primary = primaryKey != null ? payload.get(primaryKey) : null;
     if (primary instanceof String primaryValue && !primaryValue.isBlank()) {
       return primaryValue;
