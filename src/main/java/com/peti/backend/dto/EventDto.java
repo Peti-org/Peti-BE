@@ -1,60 +1,16 @@
 package com.peti.backend.dto;
 
-import java.time.LocalDateTime;
+import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.dto.slot.SlotDto;
+import com.peti.backend.dto.user.UserDto;
+import java.math.BigDecimal;
+import java.util.UUID;
 
-public class EventDto {
-    private Long id;
-    private String name;
-    private String description;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private Long locationId;
+public record EventDto(UUID slotId,
+                       SimpleCaretakerDto caretaker,
+                       UserDto userDto,
+                       SlotDto slotDto,
+                       PriceDto price,
+                       String status) {
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Long getLocationId() {
-        return locationId;
-    }
-
-    public void setLocationId(Long locationId) {
-        this.locationId = locationId;
-    }
 }

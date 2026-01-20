@@ -26,7 +26,8 @@ public class SlotFilteringRepositoryImpl implements SlotFilteringRepository {
     // Cursor condition
     sb.append("( s.caretaker.rating < :cursorRating ")
         .append(" OR (s.caretaker.rating = :cursorRating AND s.creationTime < :cursorCreatedAt) ")
-        .append(")");
+        .append(")")
+        .append(" AND s.available IS TRUE");
 
     // Filters
     filter.onDate().ifPresent(t -> sb.append(" AND s.date = :onDate "));

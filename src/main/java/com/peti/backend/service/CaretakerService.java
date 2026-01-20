@@ -2,6 +2,7 @@ package com.peti.backend.service;
 
 import com.peti.backend.dto.caretacker.CaretakerDto;
 import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.dto.exception.BadRequestException;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.projection.UserProjection;
@@ -69,6 +70,9 @@ public class CaretakerService {
   }
 
   public CaretakerDto createCaretaker( UserProjection userProjection) {
+    if (caretakerRepository.existsByUserReference_UserId(userProjection.getUserId())){
+      throw new BadRequestException("Caretaker already exists");
+    }
     Caretaker savedCaretaker = caretakerRepository.save(toCareTaker(userProjection));
     return mapToDto(savedCaretaker);
   }

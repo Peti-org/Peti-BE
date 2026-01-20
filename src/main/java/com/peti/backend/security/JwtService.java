@@ -22,28 +22,43 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtService {
 
+  private static final String TYPE = "type";
+  private static final String ACCESS = "access";
+  private static final String REFRESH = "refresh";
+
   @Value("${security.jwt.secret-key}")
   private String secretKey;
 
   @Value("${security.jwt.expiration-time}")
   private long jwtExpiration;
 
+  @Value("${security.jwt.refresh.expiration-time}")
+  private long jwtRefreshExpiration;
+
   public String extractUsername(String token) {
     return extractClaim(token, Claims::getSubject);
   }
 
   public AuthResponse generateAuthResponse(String username) {
-    String token = generateToken(new HashMap<>(), username);
-    return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond());
+    String token = generateToken(new HashMap<>(Map.of(TYPE, ACCESS)), username, jwtExpiration);
+    String refreshToken = generateToken(new HashMap<>(Map.of(TYPE, REFRESH)), username, jwtRefreshExpiration);
+    return new AuthResponse(token, Instant.now().plusMillis(jwtExpiration).getEpochSecond(),
+        refreshToken, Instant.now().plusMillis(jwtRefreshExpiration).getEpochSecond());
   }
+
+  public AuthResponse updateAuthResponse(String oldRefreshToken) {
+    final String username = extractUsername(oldRefreshToken);
+    return generateAuthResponse(username);
+  }
+
 
   private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
-  private String generateToken(Map<String, Object> extraClaims, String username) {
-    return buildToken(extraClaims, username, jwtExpiration);
+  private String generateToken(Map<String, Object> extraClaims, String username, long expiration) {
+    return buildToken(extraClaims, username, expiration);
   }
 
   private String buildToken(Map<String, Object> extraClaims, String username, long expiration) {
@@ -58,9 +73,17 @@ public class JwtService {
   }
 
   public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    String username = extractUsername(token);
+    String type = extractClaim(token, claims -> (String) claims.get(TYPE));
+    return (username.equals(userDetails.getUsername())) && !isTokenExpired(token) && ACCESS.equals(type);
   }
+
+
+  public boolean isRefreshTokenValid(String token) {
+    String type = extractClaim(token, claims -> (String) claims.get(TYPE));
+    return !isTokenExpired(token) && REFRESH.equals(type);
+  }
+
 
   private boolean isTokenExpired(String token) {
     return extractExpiration(token).before(new Date());

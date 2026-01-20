@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,13 +48,6 @@ public class UserService implements UserDetailsService {
     userDto.setRoleName(user.getRole().getRoleName());
     userDto.setCity(city);
 
-    // If there's at least one caretaker, set the first one's ID
-//    if (user.getCaretakersByUserId() != null && !user.getCaretakersByUserId().isEmpty()) {
-//      user.getCaretakersByUserId().stream().findFirst().ifPresent(caretaker ->
-//              userDto.setCaretakersByUserId(caretaker.getCaretakerId())
-//      );
-//    }
-
     return userDto;
   }
 
@@ -77,9 +71,25 @@ public class UserService implements UserDetailsService {
   }
 
 
+  @Transactional
   public Optional<UserDto> getUserById(UUID userId) {
-    return userRepository.findById(userId)
-        .map(user -> convertToDto(user, CityService.convertToDto(user.getCityByCityId())));
+    Optional<User> optionalUser = userRepository.findById(userId);
+    if (optionalUser.isEmpty()) {
+      return Optional.empty();
+    }
+
+    User user = optionalUser.get();
+    UserDto userDto = convertToDto(user, CityService.convertToDto(user.getCityByCityId()));
+
+
+    // If there's at least one caretaker, set the first one's ID
+    if (user.getCaretakersByUserId() != null && !user.getCaretakersByUserId().isEmpty()) {
+      user.getCaretakersByUserId().stream().findFirst().ifPresent(caretaker ->
+          userDto.setCaretakersByUserId(caretaker.getCaretakerId())
+      );
+    }
+
+    return Optional.of(userDto);
   }
 
   public UserDto createUser(User user) {
