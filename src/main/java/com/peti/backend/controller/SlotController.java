@@ -37,7 +37,7 @@ public class SlotController {
 
   @HasCaretakerRole
   @GetMapping("/my")
-  public ResponseEntity<List<SlotDto>> getCaretakerSlots(@Parameter(hidden = true) UUID caretakerId) {
+  public ResponseEntity<List<SlotDto>> getCaretakerSlots(@Parameter(hidden = true) @ModelAttribute("caretakerId") UUID caretakerId) {
     return ResponseEntity.ok(slotService.getCaretakerSlots(caretakerId));
   }
 

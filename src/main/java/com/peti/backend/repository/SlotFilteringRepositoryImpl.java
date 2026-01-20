@@ -37,6 +37,9 @@ public class SlotFilteringRepositoryImpl implements SlotFilteringRepository {
     filter.timeFrom().ifPresent(t -> sb.append(" AND s.timeFrom >= :timeFrom "));
     filter.timeTo().ifPresent(t -> sb.append(" AND s.timeTo <= :timeTo "));
 
+//    // Group by caretaker id for uniqueness
+//    sb.append(" GROUP BY s.caretaker.caretakerId");
+
     sb.append(" ORDER BY s.caretaker.rating DESC, s.creationTime DESC");
 
     TypedQuery<Slot> query = entityManager.createQuery(sb.toString(), Slot.class);

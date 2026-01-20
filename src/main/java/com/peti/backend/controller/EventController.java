@@ -1,6 +1,7 @@
 package com.peti.backend.controller;
 
-import com.peti.backend.dto.EventDto;
+import com.peti.backend.dto.event.EventDto;
+import com.peti.backend.dto.event.RequestEventDto;
 import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasCaretakerRole;
@@ -28,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/events")
-@Tag(name = "Catalog", description = "Operation that is needed for managing events")
+@Tag(name = "Event", description = "Operation that is needed for managing events")
 @SecurityRequirement(name = "bearerAuth")
 public class EventController {
 
@@ -37,38 +38,38 @@ public class EventController {
 
   @HasCaretakerRole
   @GetMapping("/caretaker/my")
-  public ResponseEntity<List<EventDto>> getCaretakerEvents(@Parameter(hidden = true) UUID caretakerId) {
+  public ResponseEntity<List<EventDto>> getCaretakerEvents(
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+    UUID caretakerId = getCaretakerId(userProjection);
     return ResponseEntity.ok(eventService.getEventsByCaretakerId(caretakerId));
   }
 
   @HasUserRole
   @GetMapping("/user/my")
-  public ResponseEntity<List<EventDto>> getUserEvents(@Parameter(hidden = true) UserProjection userProjection) {
+  public ResponseEntity<List<EventDto>> getUserEvents(
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     return ResponseEntity.ok(eventService.getEventsByUserId(userProjection.getUserId()));
   }
 
   @HasUserRole
   @PostMapping
-  public ResponseEntity<EventDto> createEvent(@Valid @RequestBody SlotDto requestSlotDto,
-      @Parameter(hidden = true) UserProjection userProjection) {
-    return ResponseEntity.ok(eventService.createEvent(requestSlotDto, userProjection.getUserId()));
+  public ResponseEntity<EventDto> createEvent(@Valid @RequestBody RequestEventDto requestEventDto,
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+    return ResponseEntity.ok(eventService.createEvent(requestEventDto, userProjection.getUserId()));
   }
 
   @HasUserRole
   @DeleteMapping("/{eventId}")
   public ResponseEntity<SlotDto> deleteEvent(@PathVariable UUID eventId,
-      @Parameter(hidden = true) UserProjection userProjection) {
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     if (eventService.deleteEvent(eventId, userProjection.getUserId())) {
       return ResponseEntity.ok().build();
     }
     return ResponseEntity.notFound().build();
   }
 
-
-  @ModelAttribute("caretakerId")
-  public UUID getCaretakerId(Authentication authentication) {
+  private UUID getCaretakerId(UserProjection userProjection) {
     try {
-      UserProjection userProjection = (UserProjection) authentication.getPrincipal();
       return caretakerService.getCaretakerIdByUserId(userProjection.getUserId())
           .orElseThrow(
               () -> new IllegalArgumentException("Caretaker not found for user: " + userProjection.getUserId()));
