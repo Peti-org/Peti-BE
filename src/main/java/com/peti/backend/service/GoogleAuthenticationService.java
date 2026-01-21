@@ -66,7 +66,7 @@ public class GoogleAuthenticationService {
         new NetHttpTransport(),
         GsonFactory.getDefaultInstance())
         .setAudience(Collections.singletonList(googleClientId))
-        .setIssuer("accounts.google.com")
+        .setIssuer("https://accounts.google.com")
         .build();
   }
 
