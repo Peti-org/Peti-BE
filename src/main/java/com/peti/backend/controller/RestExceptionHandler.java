@@ -2,6 +2,7 @@ package com.peti.backend.controller;
 
 
 import com.peti.backend.dto.exception.BadRequestException;
+import com.peti.backend.dto.exception.NotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(BadRequestException.class)
   public ProblemDetail handleBadRequestException(BadRequestException exception) {
-    ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(400), exception.getMessage());
+    ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     errorDetail.setProperty("description", exception.getMessage());
     return errorDetail;
   }
@@ -57,6 +58,11 @@ public class RestExceptionHandler {
   @ExceptionHandler(UsernameNotFoundException.class)
   public ProblemDetail handleUerNotFoundException(UsernameNotFoundException exception) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
+  }
+
+  @ExceptionHandler(NotFoundException.class)
+  public ProblemDetail handleUerNotFoundException(NotFoundException exception) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
   }
 
   @ExceptionHandler(AccessDeniedException.class)

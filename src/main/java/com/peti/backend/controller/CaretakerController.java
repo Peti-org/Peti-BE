@@ -1,9 +1,10 @@
 package com.peti.backend.controller;
 
 import com.peti.backend.dto.caretacker.CaretakerDto;
+import com.peti.backend.dto.exception.NotFoundException;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasAdminRole;
-import com.peti.backend.security.annotation.HasCaretakerRole;
+import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.CaretakerService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -34,13 +35,14 @@ public class CaretakerController {
     return ResponseEntity.ok(caretakerService.getAllCaretakers());
   }
 
-  @HasCaretakerRole
+  @HasUserRole
   @GetMapping("/me")
-  public ResponseEntity<CaretakerDto> getCaretakerById(@Parameter(hidden = true) UserProjection userProjection) {
+  public ResponseEntity<CaretakerDto> getCaretakerById(
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     try {
       UUID caretakerId = caretakerService.getCaretakerIdByUserId(userProjection.getUserId())
           .orElseThrow(
-              () -> new IllegalArgumentException("Caretaker not found for user: " + userProjection.getUserId()));
+              () -> new NotFoundException("Caretaker not found for user: " + userProjection.getUserId()));
       return caretakerService.getCaretakerById(caretakerId)
           .map(ResponseEntity::ok)
           .orElse(ResponseEntity.notFound().build());
@@ -49,15 +51,18 @@ public class CaretakerController {
     }
   }
 
+  @HasUserRole
   @PostMapping
-  public ResponseEntity<CaretakerDto> createCaretaker(@Parameter(hidden = true) UserProjection userProjection) {
+  public ResponseEntity<CaretakerDto> createCaretaker(
+      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     return ResponseEntity.ok(caretakerService.createCaretaker(userProjection));
   }
 
   @ModelAttribute("userProjection")
   public UserProjection getUserProjection(Authentication authentication) {
     try {
-      return (UserProjection) authentication.getPrincipal();
+      UserProjection projection = (UserProjection) authentication.getPrincipal();
+      return projection;
     } catch (ClassCastException e) {
       throw new IllegalArgumentException("Authentication is wrong");
     }

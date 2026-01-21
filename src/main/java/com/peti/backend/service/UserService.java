@@ -70,26 +70,18 @@ public class UserService implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
-
   @Transactional
   public Optional<UserDto> getUserById(UUID userId) {
-    Optional<User> optionalUser = userRepository.findById(userId);
-    if (optionalUser.isEmpty()) {
-      return Optional.empty();
-    }
-
-    User user = optionalUser.get();
-    UserDto userDto = convertToDto(user, CityService.convertToDto(user.getCityByCityId()));
-
-
-    // If there's at least one caretaker, set the first one's ID
-    if (user.getCaretakersByUserId() != null && !user.getCaretakersByUserId().isEmpty()) {
-      user.getCaretakersByUserId().stream().findFirst().ifPresent(caretaker ->
-          userDto.setCaretakersByUserId(caretaker.getCaretakerId())
-      );
-    }
-
-    return Optional.of(userDto);
+    return userRepository.findById(userId)
+        .map(user -> {
+          UserDto userDto = convertToDto(user, CityService.convertToDto(user.getCityByCityId()));
+          userDto.setCaretaker(
+              Optional.ofNullable(user.getCaretakersByUserId())
+                  .map(caretakers -> !caretakers.isEmpty())
+                  .orElse(false)
+          );
+          return userDto;
+        });
   }
 
   public UserDto createUser(User user) {

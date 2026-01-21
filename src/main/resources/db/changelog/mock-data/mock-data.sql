@@ -1,5 +1,5 @@
 -- liquibase formatted sql
-
+SET search_path TO peti;
 -- changeset lyndexter:1701096714332-1
 
 -- 1. city
@@ -52,7 +52,15 @@ VALUES
   ('d4e5f6a7-b8c9-0123-4567-890abcdef012', 'Maria', 'Shevchenko', 'maria.s@example.com', '1992-09-01',
    'hashed_password_4', 3, 3, true, '/data/users/maria_s', 4), -- Deleted user
   ('7dc587a7-9ab7-472b-b3b6-6702c4f8a680', 'Tester', 'Testenov', 'tester@gmail.com', '2000-06-16',
-   '$2a$10$DxZ/I/5twj09Mte7Q/W.ceJnZF5o3eg0PRUTMlucttSHAWysuN0Rm', null, 1, false, 'default', 1);
+   '$2a$10$DxZ/I/5twj09Mte7Q/W.ceJnZF5o3eg0PRUTMlucttSHAWysuN0Rm', 1, 1, false, 'default', 1),
+  ('0a1b2c3d-4e5f-6789-0123-456789abcdef', 'Svitlana', 'Kozlova', 'svitlana.k@example.com', '1998-10-03',
+   'hashed_password_7', 2, 2, false, '/data/users/svitlana_k', 2),
+  ('1b2c3d4e-5f6a-7890-1234-56789abcdef0', 'Maksym', 'Hryhorov', 'maksym.h@example.com', '1991-01-25',
+   'hashed_password_8', 3, 3, false, '/data/users/maksym_h', 2),
+  ('2c3d4e5f-6a7b-8901-2345-67890abcdef0', 'Yana', 'Tkachenko', 'yana.t@example.com', '1996-04-12',
+   'hashed_password_9', 3, 3, false, '/data/users/yana_t', 2),
+  ('3d4e5f6a-7b8c-9012-3456-789abcdef012', 'Oleh', 'Kravchenko', 'oleh.k@example.com', '1987-12-05',
+   'hashed_password_10', 1, 1, false, '/data/users/oleh_k', 2);
 
 -- 5. breed
 INSERT INTO breed (pet_type, breed_name)
@@ -101,6 +109,34 @@ VALUES
     ],
     "availability": "Weekdays 9-18",
     "experience_years": 3
+  }', false, 50),
+  ('12345678-90ab-cdef-1234-567890abcdef', 'b2c3d4e5-f6a7-8901-2345-67890abcdef0', '{
+    "preferred_pets": [
+      "Dog"
+    ],
+    "availability": "Evenings",
+    "rate_per_hour": 200.00
+  }', false, 45),
+  ('abcdef01-2345-6789-abcd-ef0123456789', '0a1b2c3d-4e5f-6789-0123-456789abcdef', '{
+    "preferred_pets": [
+      "Reptile"
+    ],
+    "availability": "Flexible",
+    "specialty": "Exotic pets"
+  }', false, 48),
+  ('fedcba98-7654-3210-fedc-ba9876543210', '3d4e5f6a-7b8c-9012-3456-789abcdef012', '{
+    "preferred_pets": [
+      "Bird"
+    ],
+    "availability": "Mornings",
+    "rate_per_hour": 100.00
+  }', false, 42),
+  ('98765432-10fe-dcba-9876-543210abcdef', '2c3d4e5f-6a7b-8901-2345-67890abcdef0', '{
+    "preferred_pets": [
+      "Cat", "Dog"
+    ],
+    "availability": "Weekends and Holidays",
+    "experience_years": 5
   }', false, 50);
 
 -- 8. payment_settings

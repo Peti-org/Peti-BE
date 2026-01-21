@@ -26,12 +26,17 @@ services:
   app:
     image: peti/backend:v1.1
     container_name: peti-app
+    env_file:
+      - ./.env
     environment:
       # Database connection settings
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/peti
       SPRING_DATASOURCE_USERNAME: seller
       SPRING_DATASOURCE_PASSWORD: 1111
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      # Google OAuth
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
 
     ports:
       - "8083:8080"
