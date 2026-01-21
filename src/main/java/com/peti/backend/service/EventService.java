@@ -52,76 +52,14 @@ public class EventService {
 
   @Transactional
   public EventDto createEvent(RequestEventDto requestEventDto, UUID userId) {
-    // 1. Filter pets that belong to the user
-    List<UUID> petIds = requestEventDto.petsIds();
-    List<Pet> pets = entityManager.createQuery(
-            "SELECT p FROM Pet p WHERE p.petId IN :petIds AND p.petOwner.userId = :userId", Pet.class)
-        .setParameter("petIds", petIds)
-        .setParameter("userId", userId)
-        .getResultList();
-    if (pets.size() != petIds.size()) {
-      throw new IllegalArgumentException("Some pets do not belong to the user");
-    }
+    List<Pet> pets = getUserPets(requestEventDto.petsIds(), userId);
+    List<Slot> slots = getAndValidateSlots(requestEventDto.slotsIds());
+    UUID caretakerId = validateSlotsBelongToSameCaretaker(slots);
+    validateSlotsAreConsecutive(slots);
+    validateSlotsCapacity(slots, pets.size());
+    incrementSlotsOccupiedCapacity(slots, pets.size());
 
-    // 2. Filter slots that belong to the same caretaker
-    List<UUID> slotIds = requestEventDto.slotsIds();
-    List<Slot> slots = entityManager.createQuery(
-            "SELECT s FROM Slot s WHERE s.slotId IN :slotIds", Slot.class)
-        .setParameter("slotIds", slotIds)
-        .getResultList();
-    if (slots.size() != slotIds.size()) {
-      throw new IllegalArgumentException("Some slots do not exist");
-    }
-
-    UUID caretakerId = slots.getFirst().getCaretaker().getCaretakerId();
-    boolean allSameCaretaker = slots.stream()
-        .allMatch(s -> s.getCaretaker().getCaretakerId().equals(caretakerId));
-    if (!allSameCaretaker) {
-      throw new IllegalArgumentException("Slots must belong to the same caretaker");
-    }
-
-    // 3. Validate slots are consecutive (end time of one == start time of next)
-    slots.sort(Comparator.comparing(Slot::getDate).thenComparing(Slot::getTimeFrom));
-    for (int i = 1; i < slots.size(); i++) {
-      Slot prev = slots.get(i - 1);
-      Slot curr = slots.get(i);
-      if (!prev.getDate().equals(curr.getDate()) ||
-          !prev.getTimeTo().equals(curr.getTimeFrom())) {
-        throw new IllegalArgumentException("Slots are not consecutive");
-      }
-    }
-
-    // 4. Validate slots have enough capacity for pets
-    int petsCount = pets.size();
-    for (Slot slot : slots) {
-      if (slot.getCapacity() - slot.getOccupiedCapacity() < petsCount) {
-        throw new IllegalArgumentException("Slot " + slot.getSlotId() + " does not have enough capacity");
-      }
-    }
-
-    // Increment occupiedCapacity for each slot
-    for (Slot slot : slots) {
-      slot.setOccupiedCapacity(slot.getOccupiedCapacity() + petsCount);
-      entityManager.persist(slot); // or slotRepository.save(slot) if using repository
-    }
-
-    // 5. Create event
-    Event event = new Event();
-    event.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
-    event.setUser(entityManager.getReference(User.class, userId));
-    event.setPrice(new PriceDto(BigDecimal.ONE, "UAH", new ArrayList<>())); // Mock price as zero
-    event.setStatus("created");
-    event.setCreatedAt(LocalDateTime.now());
-    event.setEventIsDeleted(false);
-    event.setType("вигул");
-    event.setDatetimeFrom(slots.get(0).getDate().toLocalDate()
-        .atTime(slots.get(0).getTimeFrom().toLocalTime()));
-    Slot lastSlot = slots.get(slots.size() - 1);
-    event.setDatetimeTo(lastSlot.getDate().toLocalDate()
-        .atTime(lastSlot.getTimeTo().toLocalTime()));
-    event.getSlots().addAll(slots);
-    event.getPets().addAll(pets);
-
+    Event event = buildEvent(slots, pets, caretakerId, userId);
     Event saved = eventRepository.save(event);
 
     return convertToDto(saved, caretakerId, userId);
@@ -149,6 +87,85 @@ public class EventService {
       return true;
     }
     return false;
+  }
+
+  private List<Pet> getUserPets(List<UUID> petIds, UUID userId) {
+    List<Pet> pets = entityManager.createQuery(
+            "SELECT p FROM Pet p WHERE p.petId IN :petIds AND p.petOwner.userId = :userId", Pet.class)
+        .setParameter("petIds", petIds)
+        .setParameter("userId", userId)
+        .getResultList();
+    if (pets.size() != petIds.size()) {
+      throw new IllegalArgumentException("Some pets do not belong to the user");
+    }
+    return pets;
+  }
+
+  private List<Slot> getAndValidateSlots(List<UUID> slotIds) {
+    List<Slot> slots = entityManager.createQuery(
+            "SELECT s FROM Slot s WHERE s.slotId IN :slotIds", Slot.class)
+        .setParameter("slotIds", slotIds)
+        .getResultList();
+    if (slots.size() != slotIds.size()) {
+      throw new IllegalArgumentException("Some slots do not exist");
+    }
+    return slots;
+  }
+
+  private UUID validateSlotsBelongToSameCaretaker(List<Slot> slots) {
+    UUID caretakerId = slots.getFirst().getCaretaker().getCaretakerId();
+    boolean allSameCaretaker = slots.stream()
+        .allMatch(s -> s.getCaretaker().getCaretakerId().equals(caretakerId));
+    if (!allSameCaretaker) {
+      throw new IllegalArgumentException("Slots must belong to the same caretaker");
+    }
+    return caretakerId;
+  }
+
+  private void validateSlotsAreConsecutive(List<Slot> slots) {
+    slots.sort(Comparator.comparing(Slot::getDate).thenComparing(Slot::getTimeFrom));
+    for (int i = 1; i < slots.size(); i++) {
+      Slot prev = slots.get(i - 1);
+      Slot curr = slots.get(i);
+      if (!prev.getDate().equals(curr.getDate()) ||
+          !prev.getTimeTo().equals(curr.getTimeFrom())) {
+        throw new IllegalArgumentException("Slots are not consecutive");
+      }
+    }
+  }
+
+  private void validateSlotsCapacity(List<Slot> slots, int petsCount) {
+    for (Slot slot : slots) {
+      if (slot.getCapacity() - slot.getOccupiedCapacity() < petsCount) {
+        throw new IllegalArgumentException("Slot " + slot.getSlotId() + " does not have enough capacity");
+      }
+    }
+  }
+
+  private void incrementSlotsOccupiedCapacity(List<Slot> slots, int petsCount) {
+    for (Slot slot : slots) {
+      slot.setOccupiedCapacity(slot.getOccupiedCapacity() + petsCount);
+      entityManager.persist(slot);
+    }
+  }
+
+  private Event buildEvent(List<Slot> slots, List<Pet> pets, UUID caretakerId, UUID userId) {
+    Event event = new Event();
+    event.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
+    event.setUser(entityManager.getReference(User.class, userId));
+    event.setPrice(new PriceDto(BigDecimal.ONE, "UAH", new ArrayList<>()));
+    event.setStatus("created");
+    event.setCreatedAt(LocalDateTime.now());
+    event.setEventIsDeleted(false);
+    event.setType("walk");
+    event.setDatetimeFrom(slots.getFirst().getDate().toLocalDate()
+        .atTime(slots.getFirst().getTimeFrom().toLocalTime()));
+    Slot lastSlot = slots.getLast();
+    event.setDatetimeTo(lastSlot.getDate().toLocalDate()
+        .atTime(lastSlot.getTimeTo().toLocalTime()));
+    event.getSlots().addAll(slots);
+    event.getPets().addAll(pets);
+    return event;
   }
 
   private Event toEvent(SlotDto slotDto, UUID userId) {
