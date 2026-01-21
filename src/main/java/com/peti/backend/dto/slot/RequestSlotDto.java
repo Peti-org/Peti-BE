@@ -22,6 +22,8 @@ public record RequestSlotDto(
     String type,
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     @Digits(integer = 10, fraction = 2, message = "Price must have max 10 digits before decimal and 2 after")
-    BigDecimal price) {
+    BigDecimal price,
+    @NotNull(message = "Type must not be null")
+    Integer capacity) {
 
 }

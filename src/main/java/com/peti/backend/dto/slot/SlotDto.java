@@ -13,6 +13,7 @@ public record SlotDto(UUID slotId,
                       LocalTime timeTo,
                       String type,
                       BigDecimal price,
-                      String currency) {
+                      String currency,
+                      Integer capacity) {
 
 }

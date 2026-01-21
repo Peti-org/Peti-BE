@@ -48,7 +48,8 @@ public class SlotService {
         slot.getTimeTo().toLocalTime(),
         slot.getType(),
         slot.getPrice(),
-        slot.getCurrency()
+        slot.getCurrency(),
+        slot.getCapacity() - slot.getOccupiedCapacity()
     );
   }
 
@@ -129,8 +130,8 @@ public class SlotService {
   /**
    * Divides a RequestSlotDto into multiple slots with custom interval
    *
-   * @param request The slot request DTO
-   * @param caretakerId The caretaker UUID
+   * @param request         The slot request DTO
+   * @param caretakerId     The caretaker UUID
    * @param intervalMinutes Custom interval in minutes
    * @return List of Slot entities ready to be persisted
    */
@@ -156,7 +157,7 @@ public class SlotService {
   /**
    * Maps RequestSlotDto and time range to a Slot entity
    */
-  private Slot toSlot(RequestSlotDto request, UUID caretakerId,  LocalTime startTime, LocalTime endTime) {
+  private Slot toSlot(RequestSlotDto request, UUID caretakerId, LocalTime startTime, LocalTime endTime) {
     Slot slot = new Slot();
 
     slot.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
@@ -168,6 +169,9 @@ public class SlotService {
     slot.setCurrency("UAH");//todo Hardcoded for now, consider making it dynamic
     slot.setCreationTime(LocalDateTime.now());
     slot.setAdditionalData("{\"test\": \"test\"}");
+    slot.setAvailable(true);
+    slot.setCapacity(request.capacity());
+    slot.setOccupiedCapacity(0);
 
     return slot;
   }
