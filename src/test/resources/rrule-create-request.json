@@ -1,0 +1,8 @@
+{
+  "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR",
+  "dtstart": "2026-02-01T09:00:00",
+  "dtend": "2026-12-31T17:00:00",
+  "description": "Weekdays 9am-5pm",
+  "slotType": "STANDARD"
+}
+

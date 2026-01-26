@@ -1,0 +1,8 @@
+{
+  "rrule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+  "dtstart": "2026-02-01T10:00:00",
+  "dtend": "2026-12-31T18:00:00",
+  "description": "Updated: Mon/Wed/Fri 10am-6pm",
+  "slotType": "PREMIUM"
+}
+
