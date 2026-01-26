@@ -1,0 +1,39 @@
+[
+  {
+    "rruleId": "11111111-1111-1111-1111-111111111111",
+    "caretaker": {
+      "caretakerId": "c1d2e3f4-a5b6-7890-1234-567890abcdef",
+      "userReference": {
+        "userId": "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+        "firstName": "Olena",
+        "lastName": "Kovalenko"
+      },
+      "rating": 50
+    },
+    "rrule": "FREQ=WEEKLY;BYDAY=SA,SU",
+    "dtstart": "2026-01-01T09:00:00",
+    "dtend": "2026-12-31T18:00:00",
+    "description": "Available on weekends 9am-6pm",
+    "slotType": "STANDARD",
+    "createdAt": "2026-01-01T08:00:00"
+  },
+  {
+    "rruleId": "22222222-2222-2222-2222-222222222222",
+    "caretaker": {
+      "caretakerId": "c1d2e3f4-a5b6-7890-1234-567890abcdef",
+      "userReference": {
+        "userId": "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+        "firstName": "Olena",
+        "lastName": "Kovalenko"
+      },
+      "rating": 50
+    },
+    "rrule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
+    "dtstart": "2026-01-01T18:00:00",
+    "dtend": "2026-12-31T21:00:00",
+    "description": "Evening availability Mon/Wed/Fri 6pm-9pm",
+    "slotType": "PREMIUM",
+    "createdAt": "2026-01-01T08:00:00"
+  }
+]
+

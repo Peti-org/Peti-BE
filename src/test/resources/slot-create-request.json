@@ -3,5 +3,6 @@
   "timeFrom": "09:00",
   "timeTo": "10:00",
   "type": "walk",
-  "price": 100.00
+  "price": 100.00,
+  "capacity": 2
 }
