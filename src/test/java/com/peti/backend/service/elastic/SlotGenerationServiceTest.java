@@ -59,7 +59,7 @@ class SlotGenerationServiceTest {
     List<BookingInput> bookings = List.of();
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Then: only 1 slot with max capacity (not 3 slots for each level)
     assertThat(slots).hasSize(1);
@@ -85,7 +85,7 @@ class SlotGenerationServiceTest {
     );
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Then:
     // Timeline: 8-10 cap=3, 10-12 cap=2, 12-20 cap=3
@@ -130,7 +130,7 @@ class SlotGenerationServiceTest {
     );
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Timeline:
     // 8-10: cap=3 (no bookings)
@@ -183,7 +183,7 @@ class SlotGenerationServiceTest {
     );
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Timeline: 8-10 cap=2, 10-12 cap=0, 12-20 cap=2
     // Cap 2: 8-10, 12-20 (2 ranges, no continuous 8-20 because of gap)
@@ -214,7 +214,7 @@ class SlotGenerationServiceTest {
     );
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Timeline: 8-10 cap=2, 10-20 cap=3
     // Cap 3: 10-20 (one range)
@@ -248,7 +248,7 @@ class SlotGenerationServiceTest {
     );
 
     // When
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, bookings, caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), bookings, caretaker);
 
     // Timeline: 8-18 cap=3, 18-20 cap=2
     // Cap 3: 8-18 (one range)
@@ -284,7 +284,7 @@ class SlotGenerationServiceTest {
         defaultPricingConfig
     );
     
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, List.of(), caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), List.of(), caretaker);
     assertThat(slots).isEmpty();
   }
 
@@ -306,7 +306,7 @@ class SlotGenerationServiceTest {
         pricingConfig
     );
 
-    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, rrule, List.of(), caretaker);
+    List<ElasticSlotDocument> slots = service.generateSlotsForDay(testDate, List.of(rrule), List.of(), caretaker);
 
     assertThat(slots).hasSize(1);
     ElasticSlotDocument slot = slots.get(0);
