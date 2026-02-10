@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
@@ -50,6 +51,18 @@ public class CaretakerRRule {
   @Basic
   @Column(name = "slot_type", nullable = false, length = 50)
   private String slotType;
+
+  @Basic
+  @Column(name = "capacity", nullable = false)
+  private Integer capacity;
+
+  @Basic
+  @Column(name = "interval_minutes", nullable = false)
+  private Integer intervalMinutes;
+
+  @Basic
+  @Column(name = "generated_to")
+  private LocalDate generatedTo;
 
   @Basic
   @Column(name = "created_at", nullable = false)

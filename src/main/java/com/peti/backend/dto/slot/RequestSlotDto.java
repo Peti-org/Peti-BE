@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -23,7 +24,8 @@ public record RequestSlotDto(
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     @Digits(integer = 10, fraction = 2, message = "Price must have max 10 digits before decimal and 2 after")
     BigDecimal price,
-    @NotNull(message = "Type must not be null")
+    @NotNull(message = "Capacity must not be null")
+    @Positive(message = "Capacity must be positive")
     Integer capacity) {
 
 }

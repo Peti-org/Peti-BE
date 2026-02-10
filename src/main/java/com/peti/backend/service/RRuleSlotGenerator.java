@@ -2,6 +2,7 @@ package com.peti.backend.service;
 
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.Slot;
+import com.peti.backend.model.internal.TimeSlotPair;
 import com.peti.backend.repository.SlotRepository;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
@@ -33,11 +34,11 @@ public class RRuleSlotGenerator {
 
   private final SlotRepository slotRepository;
   private final EntityManager entityManager;
+  private final SlotDivider slotDivider;
 
-  // Mock values for now as per plan
+  // Default values for fields not yet in RRule
   private static final BigDecimal DEFAULT_PRICE = new BigDecimal("100.00");
   private static final String DEFAULT_CURRENCY = "UAH";
-  private static final int DEFAULT_CAPACITY = 5;
 
   /**
    * Generates slots for a single RRule within the specified date range.
@@ -55,9 +56,16 @@ public class RRuleSlotGenerator {
       // Parse the RRule string
       RecurrenceRule recurrenceRule = new RecurrenceRule(rrule.getRrule());
 
-      // Get start and end times from dtstart
+      // Get start and end times from dtstart/dtend
       LocalTime dailyStartTime = rrule.getDtstart().toLocalTime();
       LocalTime dailyEndTime = rrule.getDtend() != null ? rrule.getDtend().toLocalTime() : dailyStartTime.plusHours(8);
+
+      // Divide time range into slots using SlotDivider
+      List<TimeSlotPair> timeSlots = slotDivider.divideTimeRange(
+          dailyStartTime,
+          dailyEndTime,
+          rrule.getIntervalMinutes()
+      );
 
       // Convert LocalDate to DateTime for the iterator
       DateTime start = new DateTime(
@@ -74,6 +82,7 @@ public class RRuleSlotGenerator {
 
       List<Slot> slotsToCreate = new ArrayList<>();
       int slotsCreated = 0;
+      LocalDate lastGeneratedDate = startDate.minusDays(1);
 
       // Iterate through recurrence occurrences
       while (iterator.hasNext()) {
@@ -96,17 +105,24 @@ public class RRuleSlotGenerator {
           break;
         }
 
-        // Create slot for this occurrence
-        Slot slot = createSlot(rrule, occurrenceDate, dailyStartTime, dailyEndTime);
+        // Update last generated date
+        if (occurrenceDate.isAfter(lastGeneratedDate)) {
+          lastGeneratedDate = occurrenceDate;
+        }
 
-        // Check if slot already exists
-        if (!slotRepository.existsByCaretakerIdAndDateAndTime(
-            rrule.getCaretaker().getCaretakerId(),
-            Date.valueOf(occurrenceDate),
-            Time.valueOf(dailyStartTime),
-            Time.valueOf(dailyEndTime))) {
-          slotsToCreate.add(slot);
-          slotsCreated++;
+        // Create slots for each time slot on this occurrence date
+        for (TimeSlotPair timeSlot : timeSlots) {
+          // Check if slot already exists
+          if (!slotRepository.existsByCaretakerIdAndDateAndTime(
+              rrule.getCaretaker().getCaretakerId(),
+              Date.valueOf(occurrenceDate),
+              Time.valueOf(timeSlot.startTime()),
+              Time.valueOf(timeSlot.endTime()))) {
+
+            Slot slot = createSlot(rrule, occurrenceDate, timeSlot.startTime(), timeSlot.endTime());
+            slotsToCreate.add(slot);
+            slotsCreated++;
+          }
         }
 
         // Batch save every 100 slots to avoid memory issues
@@ -121,6 +137,13 @@ public class RRuleSlotGenerator {
       if (!slotsToCreate.isEmpty()) {
         slotRepository.saveAll(slotsToCreate);
         log.debug("Saved final batch of {} slots for RRule {}", slotsToCreate.size(), rrule.getRruleId());
+      }
+
+      // Update generatedTo field
+      if (lastGeneratedDate.isAfter(startDate.minusDays(1))) {
+        rrule.setGeneratedTo(lastGeneratedDate);
+        entityManager.merge(rrule);
+        log.debug("Updated RRule {} generatedTo: {}", rrule.getRruleId(), lastGeneratedDate);
       }
 
       log.info("Generated {} slots for RRule {}", slotsCreated, rrule.getRruleId());
@@ -141,6 +164,7 @@ public class RRuleSlotGenerator {
   private Slot createSlot(CaretakerRRule rrule, LocalDate date, LocalTime timeFrom, LocalTime timeTo) {
     Slot slot = new Slot();
     slot.setCaretaker(rrule.getCaretaker());
+    slot.setRrule(rrule);
     slot.setDate(Date.valueOf(date));
     slot.setTimeFrom(Time.valueOf(timeFrom));
     slot.setTimeTo(Time.valueOf(timeTo));
@@ -150,8 +174,9 @@ public class RRuleSlotGenerator {
     slot.setCreationTime(LocalDateTime.now());
     slot.setAdditionalData("{}");
     slot.setAvailable(true);
-    slot.setCapacity(DEFAULT_CAPACITY);
+    slot.setCapacity(rrule.getCapacity());
     slot.setOccupiedCapacity(0);
+    slot.setIsRepeated(true); // Mark as generated from RRule
     return slot;
   }
 }

@@ -2,6 +2,7 @@ package com.peti.backend.repository;
 
 import com.peti.backend.model.domain.Slot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,5 +26,13 @@ public interface SlotRepository extends JpaRepository<Slot, UUID>, SlotFiltering
       @Param("date") Date date,
       @Param("timeFrom") Time timeFrom,
       @Param("timeTo") Time timeTo);
+
+  @Modifying
+  @Query("DELETE FROM Slot s WHERE s.rrule.rruleId = :rruleId " +
+      "AND s.date >= :fromDate " +
+      "AND s.occupiedCapacity = 0")
+  int deleteByRRuleIdAndDateAfterAndUnoccupied(
+      @Param("rruleId") UUID rruleId,
+      @Param("fromDate") Date fromDate);
 }
 

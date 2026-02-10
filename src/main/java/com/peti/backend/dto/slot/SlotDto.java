@@ -14,6 +14,7 @@ public record SlotDto(UUID slotId,
                       String type,
                       BigDecimal price,
                       String currency,
-                      Integer capacity) {
+                      Integer capacity,
+                      Boolean isRepeated) {
 
 }

@@ -1,21 +1,23 @@
 {
-  "slotId": "a1b2c3d4-5678-1234-5678-abcdefabcdef",
+  "slotId": "323e4567-e89b-12d3-a456-426614174003",
   "caretaker": {
-    "caretakerId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+    "caretakerId": "223e4567-e89b-12d3-a456-426614174002",
     "userReference": {
-      "firstName": "Olena",
-      "lastName": "Shevchenko"
-    }
+      "userId": "523e4567-e89b-12d3-a456-426614174005"
+    },
+    "rating": 4
   },
-  "date": "2024-06-10",
+  "date": "2026-02-10",
   "timeFrom": "09:00:00",
   "timeTo": "09:30:00",
   "type": "walk",
-  "creationTime": "2024-06-09T12:00:00",
-  "price": 100.00,
+  "price": 150.00,
   "currency": "UAH",
-  "capacity" : 2,
-  "occupiedCapacity" : 0,
-  "additionalData": "{\"test\": \"test\"}",
-  "available": true
+  "capacity": 3,
+  "occupiedCapacity": 0,
+  "isRepeated": false,
+  "available": true,
+  "creationTime": "2026-02-03T10:00:00",
+  "additionalData": "{}"
 }
+

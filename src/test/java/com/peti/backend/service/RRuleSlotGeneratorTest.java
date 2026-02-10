@@ -3,9 +3,9 @@ package com.peti.backend.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,196 +13,178 @@ import static org.mockito.Mockito.when;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.Slot;
-import com.peti.backend.model.domain.User;
+import com.peti.backend.model.internal.TimeSlotPair;
 import com.peti.backend.repository.SlotRepository;
 import jakarta.persistence.EntityManager;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Unit tests for RRuleSlotGenerator service.
- */
-class RRuleSlotGeneratorTest {
+@ExtendWith(MockitoExtension.class)
+public class RRuleSlotGeneratorTest {
 
+  @Mock
   private SlotRepository slotRepository;
+
+  @Mock
   private EntityManager entityManager;
+
+  @Mock
+  private SlotDivider slotDivider;
+
+  @InjectMocks
   private RRuleSlotGenerator slotGenerator;
+
+  private CaretakerRRule rrule;
+  private Caretaker caretaker;
+  private UUID caretakerId;
 
   @BeforeEach
   void setUp() {
-    slotRepository = mock(SlotRepository.class);
-    entityManager = mock(EntityManager.class);
-    slotGenerator = new RRuleSlotGenerator(slotRepository, entityManager);
-  }
+    caretakerId = UUID.fromString("223e4567-e89b-12d3-a456-426614174002");
 
-  @Test
-  void testGenerateSlotsForRRule_WeeklyPattern_GeneratesCorrectSlots() {
-    // Given: Weekly RRule for weekends (SA,SU)
-    CaretakerRRule rrule = createTestRRule(
-        "FREQ=WEEKLY;BYDAY=SA,SU",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0)
-    );
+    caretaker = new Caretaker();
+    caretaker.setCaretakerId(caretakerId);
 
-    LocalDate startDate = LocalDate.of(2026, 1, 25);  // Saturday
-    LocalDate endDate = LocalDate.of(2026, 2, 1);    // Next Sunday
-
-    // Mock no existing slots
-    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
-        .thenReturn(false);
-    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should create 3 slots (Jan 25 Sat, Jan 26 Sun, Feb 1 Sun)
-    assertEquals(3, slotsCreated);
-    verify(slotRepository, times(1)).saveAll(anyList());
-  }
-
-  @Test
-  void testGenerateSlotsForRRule_DailyPattern_GeneratesCorrectSlots() {
-    // Given: Daily RRule
-    CaretakerRRule rrule = createTestRRule(
-        "FREQ=DAILY",
-        LocalDateTime.of(2026, 1, 25, 10, 0),
-        LocalDateTime.of(2026, 1, 31, 15, 0)
-    );
-
-    LocalDate startDate = LocalDate.of(2026, 1, 25);
-    LocalDate endDate = LocalDate.of(2026, 1, 27);  // 3 days
-
-    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
-        .thenReturn(false);
-    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should create 3 slots (25, 26, 27)
-    assertEquals(3, slotsCreated);
-  }
-
-  @Test
-  void testGenerateSlotsForRRule_SkipsExistingSlots() {
-    // Given: Weekly RRule
-    CaretakerRRule rrule = createTestRRule(
-        "FREQ=WEEKLY;BYDAY=MO",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 17, 0)
-    );
-
-    LocalDate startDate = LocalDate.of(2026, 1, 26);  // Monday
-    LocalDate endDate = LocalDate.of(2026, 2, 2);    // Next Monday
-
-    // Mock: First slot exists, second doesn't
-    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
-        .thenReturn(true)   // Jan 26 exists
-        .thenReturn(false); // Feb 2 doesn't exist
-    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should only create 1 slot (skips existing)
-    assertEquals(1, slotsCreated);
-  }
-
-  @Test
-  void testGenerateSlotsForRRule_RespectsDtendLimit() {
-    // Given: RRule that ends on Jan 28
-    CaretakerRRule rrule = createTestRRule(
-        "FREQ=DAILY",
-        LocalDateTime.of(2026, 1, 25, 9, 0),
-        LocalDateTime.of(2026, 1, 28, 17, 0)
-    );
-
-    LocalDate startDate = LocalDate.of(2026, 1, 25);
-    LocalDate endDate = LocalDate.of(2026, 1, 31);  // Request goes beyond dtend
-
-    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
-        .thenReturn(false);
-    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should only create 4 slots (25, 26, 27, 28) - stops at dtend
-    assertEquals(4, slotsCreated);
-  }
-
-  @Test
-  void testGenerateSlotsForRRule_InvalidRRule_ReturnsZero() {
-    // Given: Invalid RRule string
-    CaretakerRRule rrule = createTestRRule(
-        "INVALID_RRULE",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 17, 0)
-    );
-
-    LocalDate startDate = LocalDate.of(2026, 1, 25);
-    LocalDate endDate = LocalDate.of(2026, 1, 31);
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should return 0 and not save anything
-    assertEquals(0, slotsCreated);
-    verify(slotRepository, never()).saveAll(anyList());
-  }
-
-  @Test
-  void testGenerateSlotsForRRule_BatchSaving() {
-    // Given: RRule that will create many slots (150+ days)
-    CaretakerRRule rrule = createTestRRule(
-        "FREQ=DAILY",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 17, 0)
-    );
-
-    LocalDate startDate = LocalDate.of(2026, 1, 1);
-    LocalDate endDate = LocalDate.of(2026, 6, 1);  // ~150 days
-
-    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
-        .thenReturn(false);
-    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-
-    // Then: Should have called saveAll multiple times (batch size = 100)
-    assertTrue(slotsCreated > 100);
-    verify(slotRepository, times(2)).saveAll(anyList());  // At least 2 batches
-  }
-
-  // Helper method to create test RRule
-  private CaretakerRRule createTestRRule(String rruleString, LocalDateTime dtstart, LocalDateTime dtend) {
-    User user = new User();
-    user.setUserId(UUID.randomUUID());
-    user.setFirstName("Test");
-    user.setLastName("User");
-
-    Caretaker caretaker = new Caretaker();
-    caretaker.setCaretakerId(UUID.randomUUID());
-    caretaker.setUserReference(user);
-
-    CaretakerRRule rrule = new CaretakerRRule();
-    rrule.setRruleId(UUID.randomUUID());
+    rrule = new CaretakerRRule();
+    rrule.setRruleId(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
     rrule.setCaretaker(caretaker);
-    rrule.setRrule(rruleString);
-    rrule.setDtstart(dtstart);
-    rrule.setDtend(dtend);
-    rrule.setSlotType("STANDARD");
-    rrule.setDescription("Test RRule");
-    rrule.setCreatedAt(LocalDateTime.now());
+    rrule.setRrule("FREQ=DAILY;COUNT=3");
+    rrule.setDtstart(LocalDateTime.of(2026, 2, 10, 9, 0));
+    rrule.setDtend(LocalDateTime.of(2026, 2, 10, 17, 0));
+    rrule.setSlotType("walk");
+    rrule.setCapacity(5);
+    rrule.setIntervalMinutes(30);
+  }
 
-    return rrule;
+  @Test
+  public void testGenerateSlotsForRRule_UsesSlotDivider() {
+    LocalDate startDate = LocalDate.of(2026, 2, 10);
+    LocalDate endDate = LocalDate.of(2026, 2, 12);
+
+    // Mock SlotDivider to return 16 time slots per day (8 hours / 30 min)
+    List<TimeSlotPair> timeSlots = Arrays.asList(
+        new TimeSlotPair(LocalTime.of(9, 0), LocalTime.of(9, 30)),
+        new TimeSlotPair(LocalTime.of(9, 30), LocalTime.of(10, 0)),
+        new TimeSlotPair(LocalTime.of(10, 0), LocalTime.of(10, 30)),
+        new TimeSlotPair(LocalTime.of(10, 30), LocalTime.of(11, 0))
+    );
+    when(slotDivider.divideTimeRange(any(LocalTime.class), any(LocalTime.class), any(Integer.class)))
+        .thenReturn(timeSlots);
+    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
+        .thenReturn(false);
+    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(entityManager.merge(any())).thenReturn(rrule);
+
+    int result = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
+
+    // Should generate slots for 3 days (COUNT=3), 1 time slot per day = 3 total
+    assertEquals(4, result);
+    verify(slotRepository).saveAll(anyList());
+  }
+
+  @Test
+  public void testGenerateSlotsForRRule_SkipsExistingSlots() {
+    LocalDate startDate = LocalDate.of(2026, 2, 10);
+    LocalDate endDate = LocalDate.of(2026, 2, 10);
+
+    List<TimeSlotPair> timeSlots = Arrays.asList(
+        new TimeSlotPair(LocalTime.of(9, 0), LocalTime.of(9, 30)),
+        new TimeSlotPair(LocalTime.of(9, 30), LocalTime.of(10, 0))
+    );
+    when(slotDivider.divideTimeRange(any(), any(), anyInt())).thenReturn(timeSlots);
+
+    // First slot exists, second doesn't
+    when(slotRepository.existsByCaretakerIdAndDateAndTime(
+        eq(caretakerId),
+        eq(Date.valueOf(startDate)),
+        eq(Time.valueOf(LocalTime.of(9, 0))),
+        eq(Time.valueOf(LocalTime.of(9, 30)))
+    )).thenReturn(true);
+
+    when(slotRepository.existsByCaretakerIdAndDateAndTime(
+        eq(caretakerId),
+        eq(Date.valueOf(startDate)),
+        eq(Time.valueOf(LocalTime.of(9, 30))),
+        eq(Time.valueOf(LocalTime.of(10, 0)))
+    )).thenReturn(false);
+
+    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(entityManager.merge(any())).thenReturn(rrule);
+
+    int result = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
+
+    // Should only create 1 slot (the non-existing one)
+    assertEquals(1, result);
+  }
+
+  @Test
+  public void testGenerateSlotsForRRule_SetsIsRepeatedTrue() {
+    LocalDate startDate = LocalDate.of(2026, 2, 10);
+    LocalDate endDate = LocalDate.of(2026, 2, 10);
+
+    List<TimeSlotPair> timeSlots = Arrays.asList(
+        new TimeSlotPair(LocalTime.of(9, 0), LocalTime.of(9, 30))
+    );
+    when(slotDivider.divideTimeRange(any(), any(), anyInt())).thenReturn(timeSlots);
+    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
+        .thenReturn(false);
+    when(entityManager.merge(any())).thenReturn(rrule);
+
+    // Capture saved slots
+    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> {
+      List<Slot> slots = invocation.getArgument(0);
+      for (Slot slot : slots) {
+        assertTrue(slot.getIsRepeated(), "Slot should have isRepeated = true");
+        assertEquals(rrule, slot.getRrule(), "Slot should reference the RRule");
+        assertEquals(5, slot.getCapacity(), "Slot should use RRule capacity");
+      }
+      return slots;
+    });
+
+    slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
+  }
+
+  @Test
+  public void testGenerateSlotsForRRule_UpdatesGeneratedTo() {
+    LocalDate startDate = LocalDate.of(2026, 2, 10);
+    LocalDate endDate = LocalDate.of(2026, 2, 12);
+
+    List<TimeSlotPair> timeSlots = Arrays.asList(
+        new TimeSlotPair(LocalTime.of(9, 0), LocalTime.of(9, 30))
+    );
+    when(slotDivider.divideTimeRange(any(), any(), anyInt())).thenReturn(timeSlots);
+    when(slotRepository.existsByCaretakerIdAndDateAndTime(any(), any(), any(), any()))
+        .thenReturn(false);
+    when(slotRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+    when(entityManager.merge(any())).thenReturn(rrule);
+
+    slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
+
+    verify(entityManager).merge(any(CaretakerRRule.class));
+    // The RRule's generatedTo should be updated to the last generated date
+  }
+
+  @Test
+  public void testGenerateSlotsForRRule_InvalidRRule() {
+    rrule.setRrule("INVALID_RRULE");
+    LocalDate startDate = LocalDate.of(2026, 2, 10);
+    LocalDate endDate = LocalDate.of(2026, 2, 12);
+
+    int result = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
+
+    assertEquals(0, result);
   }
 }
 

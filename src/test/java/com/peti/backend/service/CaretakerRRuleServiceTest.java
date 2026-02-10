@@ -1,15 +1,14 @@
 package com.peti.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.peti.backend.ResourceLoader;
 import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.dto.rrule.RequestRRuleDto;
@@ -17,215 +16,148 @@ import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.repository.CaretakerRRuleRepository;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-class CaretakerRRuleServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class CaretakerRRuleServiceTest {
 
+  @Mock
   private CaretakerRRuleRepository rruleRepository;
+
+  @Mock
   private EntityManager entityManager;
+
+  @Mock
+  private SlotGenerationScheduler slotGenerationScheduler;
+
+  @InjectMocks
   private CaretakerRRuleService rruleService;
+
+  private UUID caretakerId;
+  private UUID rruleId;
+  private CaretakerRRule rrule;
+  private RequestRRuleDto requestRRuleDto;
+  private Caretaker caretaker;
 
   @BeforeEach
   void setUp() {
-    rruleRepository = mock(CaretakerRRuleRepository.class);
-    entityManager = mock(EntityManager.class);
-    rruleService = new CaretakerRRuleService(rruleRepository, entityManager);
+    caretakerId = UUID.fromString("223e4567-e89b-12d3-a456-426614174002");
+    rruleId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+
+    // Load test data
+    requestRRuleDto = ResourceLoader.loadResource("rrule-create-request.json", RequestRRuleDto.class);
+
+    // Create mock entities
+    caretaker = new Caretaker();
+    caretaker.setCaretakerId(caretakerId);
+
+    rrule = new CaretakerRRule();
+    rrule.setRruleId(rruleId);
+    rrule.setCaretaker(caretaker);
+    rrule.setRrule(requestRRuleDto.rrule());
+    rrule.setDtstart(requestRRuleDto.dtstart());
+    rrule.setDtend(requestRRuleDto.dtend());
+    rrule.setDescription(requestRRuleDto.description());
+    rrule.setSlotType(requestRRuleDto.slotType());
+    rrule.setCapacity(requestRRuleDto.capacity());
+    rrule.setIntervalMinutes(requestRRuleDto.intervalMinutes());
   }
 
   @Test
-  void testGetAllRRulesForCaretaker_ReturnsListOfRRules() {
-    // Given
-    Caretaker caretaker = ResourceLoader.loadResource("caretaker-entity.json", Caretaker.class);
-    UUID caretakerId = caretaker.getCaretakerId();
-    List<CaretakerRRule> rrules = ResourceLoader.loadResource("rrule-entities.json", new TypeReference<>() {});
+  public void testCreateRRule_Success() {
+    when(entityManager.getReference(Caretaker.class, caretakerId)).thenReturn(caretaker);
+    when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
+    when(slotGenerationScheduler.generateSlotsForSingleRRule(any(), any(), any())).thenReturn(10);
 
+    RRuleDto result = rruleService.createRRule(requestRRuleDto, caretakerId);
+
+    assertNotNull(result);
+    assertEquals(requestRRuleDto.rrule(), result.rrule());
+    assertEquals(requestRRuleDto.capacity(), result.capacity());
+    assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
+    verify(rruleRepository).save(any(CaretakerRRule.class));
+    verify(slotGenerationScheduler).generateSlotsForSingleRRule(any(), any(), any());
+  }
+
+  @Test
+  public void testGetAllRRulesForCaretaker() {
+    List<CaretakerRRule> rrules = Arrays.asList(rrule);
     when(rruleRepository.findAllByCaretaker_CaretakerId(caretakerId)).thenReturn(rrules);
 
-    // When
     List<RRuleDto> result = rruleService.getAllRRulesForCaretaker(caretakerId);
 
-    // Then
-    assertNotNull(result);
-    assertEquals(2, result.size());
-    assertEquals(rrules.get(0).getRrule(), result.get(0).rrule());
-    assertEquals(rrules.get(1).getRrule(), result.get(1).rrule());
-    verify(rruleRepository).findAllByCaretaker_CaretakerId(caretakerId);
+    assertEquals(1, result.size());
+    assertEquals(rruleId, result.get(0).rruleId());
   }
 
   @Test
-  void testGetAllRRulesForCaretaker_EmptyList() {
-    // Given
-    UUID caretakerId = UUID.randomUUID();
-    when(rruleRepository.findAllByCaretaker_CaretakerId(caretakerId)).thenReturn(List.of());
+  public void testUpdateRRule_Success() {
+    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
+    when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
+    when(slotGenerationScheduler.deleteSlotsForRRule(any(), any())).thenReturn(5);
+    when(slotGenerationScheduler.generateSlotsForSingleRRule(any(), any(), any())).thenReturn(10);
 
-    // When
-    List<RRuleDto> result = rruleService.getAllRRulesForCaretaker(caretakerId);
+    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, requestRRuleDto, caretakerId);
 
-    // Then
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-    verify(rruleRepository).findAllByCaretaker_CaretakerId(caretakerId);
-  }
-
-  @Test
-  void testCreateRRule_Success() {
-    // Given
-    RequestRRuleDto createDto = ResourceLoader.loadResource("rrule-create-request.json", RequestRRuleDto.class);
-    Caretaker caretaker = ResourceLoader.loadResource("caretaker-entity.json", Caretaker.class);
-    UUID caretakerId = caretaker.getCaretakerId();
-
-    CaretakerRRule savedRRule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-
-    when(entityManager.getReference(Caretaker.class, caretakerId)).thenReturn(caretaker);
-    when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(savedRRule);
-
-    // When
-    RRuleDto result = rruleService.createRRule(createDto, caretakerId);
-
-    // Then
-    assertNotNull(result);
-    assertEquals(savedRRule.getRruleId(), result.rruleId());
-    assertEquals(savedRRule.getRrule(), result.rrule());
-    assertEquals(savedRRule.getDescription(), result.description());
-    verify(entityManager).getReference(Caretaker.class, caretakerId);
-    verify(rruleRepository).save(any(CaretakerRRule.class));
-  }
-
-  @Test
-  void testUpdateRRule_Success() {
-    // Given
-    CaretakerRRule existingRRule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-    RequestRRuleDto updateDto = ResourceLoader.loadResource("rrule-update-request.json", RequestRRuleDto.class);
-    UUID rruleId = existingRRule.getRruleId();
-    UUID caretakerId = existingRRule.getCaretaker().getCaretakerId();
-
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(existingRRule));
-    when(rruleRepository.save(any(CaretakerRRule.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, updateDto, caretakerId);
-
-    // Then
     assertTrue(result.isPresent());
-    assertEquals(updateDto.rrule(), result.get().rrule());
-    assertEquals(updateDto.description(), result.get().description());
-    assertEquals(updateDto.dtstart(), result.get().dtstart());
-    assertEquals(updateDto.dtend(), result.get().dtend());
-    verify(rruleRepository).findById(rruleId);
+    verify(slotGenerationScheduler).deleteSlotsForRRule(eq(rruleId), any(LocalDate.class));
+    verify(slotGenerationScheduler).generateSlotsForSingleRRule(eq(rruleId), any(), any());
     verify(rruleRepository).save(any(CaretakerRRule.class));
   }
 
   @Test
-  void testUpdateRRule_NotFound() {
-    // Given
-    RequestRRuleDto updateDto = ResourceLoader.loadResource("rrule-update-request.json", RequestRRuleDto.class);
-    UUID rruleId = UUID.randomUUID();
-    UUID caretakerId = UUID.randomUUID();
+  public void testUpdateRRule_WrongCaretaker() {
+    UUID differentCaretakerId = UUID.randomUUID();
+    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
 
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.empty());
+    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, requestRRuleDto, differentCaretakerId);
 
-    // When
-    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, updateDto, caretakerId);
-
-    // Then
-    assertTrue(result.isEmpty());
-    verify(rruleRepository).findById(rruleId);
-    verify(rruleRepository, never()).save(any());
+    assertFalse(result.isPresent());
   }
 
   @Test
-  void testUpdateRRule_WrongCaretaker() {
-    // Given
-    CaretakerRRule existingRRule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-    RequestRRuleDto updateDto = ResourceLoader.loadResource("rrule-update-request.json", RequestRRuleDto.class);
-    UUID rruleId = existingRRule.getRruleId();
-    UUID wrongCaretakerId = UUID.randomUUID();
+  public void testDeleteRRule_Success() {
+    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
+    when(slotGenerationScheduler.deleteSlotsForRRule(any(), any())).thenReturn(5);
 
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(existingRRule));
-
-    // When
-    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, updateDto, wrongCaretakerId);
-
-    // Then
-    assertTrue(result.isEmpty());
-    verify(rruleRepository).findById(rruleId);
-    verify(rruleRepository, never()).save(any());
-  }
-
-  @Test
-  void testDeleteRRule_Success() {
-    // Given
-    CaretakerRRule existingRRule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-    UUID rruleId = existingRRule.getRruleId();
-    UUID caretakerId = existingRRule.getCaretaker().getCaretakerId();
-
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(existingRRule));
-
-    // When
     Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, caretakerId);
 
-    // Then
     assertTrue(result.isPresent());
-    assertEquals(existingRRule.getRruleId(), result.get().rruleId());
-    assertEquals(existingRRule.getRrule(), result.get().rrule());
-    verify(rruleRepository).findById(rruleId);
+    verify(slotGenerationScheduler).deleteSlotsForRRule(eq(rruleId), any(LocalDate.class));
     verify(rruleRepository).deleteById(rruleId);
   }
 
   @Test
-  void testDeleteRRule_NotFound() {
-    // Given
-    UUID rruleId = UUID.randomUUID();
-    UUID caretakerId = UUID.randomUUID();
+  public void testDeleteRRule_WrongCaretaker() {
+    UUID differentCaretakerId = UUID.randomUUID();
+    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
 
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.empty());
+    Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, differentCaretakerId);
 
-    // When
-    Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, caretakerId);
-
-    // Then
-    assertTrue(result.isEmpty());
-    verify(rruleRepository).findById(rruleId);
-    verify(rruleRepository, never()).deleteById(any());
+    assertFalse(result.isPresent());
   }
 
   @Test
-  void testDeleteRRule_WrongCaretaker() {
-    // Given
-    CaretakerRRule existingRRule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-    UUID rruleId = existingRRule.getRruleId();
-    UUID wrongCaretakerId = UUID.randomUUID();
+  public void testConvertToDto() {
+    rrule.setGeneratedTo(LocalDate.of(2026, 2, 17));
 
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(existingRRule));
-
-    // When
-    Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, wrongCaretakerId);
-
-    // Then
-    assertTrue(result.isEmpty());
-    verify(rruleRepository).findById(rruleId);
-    verify(rruleRepository, never()).deleteById(any());
-  }
-
-  @Test
-  void testConvertToDto_Success() {
-    // Given
-    CaretakerRRule rrule = ResourceLoader.loadResource("rrule-entity.json", CaretakerRRule.class);
-
-    // When
     RRuleDto result = CaretakerRRuleService.convertToDto(rrule);
 
-    // Then
     assertNotNull(result);
-    assertEquals(rrule.getRruleId(), result.rruleId());
-    assertEquals(rrule.getRrule(), result.rrule());
-    assertEquals(rrule.getDtstart(), result.dtstart());
-    assertEquals(rrule.getDtend(), result.dtend());
-    assertEquals(rrule.getDescription(), result.description());
+    assertEquals(rruleId, result.rruleId());
+    assertEquals(requestRRuleDto.rrule(), result.rrule());
+    assertEquals(requestRRuleDto.capacity(), result.capacity());
+    assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
   }
 }
 

@@ -1,19 +1,16 @@
 {
-  "rruleId" : "11111111-1111-1111-1111-111111111111",
-  "caretaker" : {
-    "caretakerId" : "c1d2e3f4-a5b6-7890-1234-567890abcdef",
-    "rating" : 50,
-    "userReference" : {
-      "lastName" : "Kovalenko",
-      "firstName" : "Olena",
-      "userId" : "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
-    }
+  "rruleId": "123e4567-e89b-12d3-a456-426614174001",
+  "caretaker": {
+    "caretakerId": "223e4567-e89b-12d3-a456-426614174002"
   },
-  "rrule" : "FREQ=WEEKLY;BYDAY=SA,SU",
-  "dtend" : "2026-12-31T18:00:00",
-  "dtstart" : "2026-01-01T09:00:00",
-  "description" : "Available on weekends 9am-6pm",
-  "slotType" : "STANDARD",
-  "createdAt" : "2026-01-01T08:00:00"
+  "rrule": "FREQ=DAILY",
+  "dtstart": "2026-02-03T09:00:00",
+  "dtend": "2026-12-31T18:00:00",
+  "description": "Daily morning slots",
+  "slotType": "walk",
+  "capacity": 5,
+  "intervalMinutes": 30,
+  "generatedTo": "2026-02-17",
+  "createdAt": "2026-02-03T08:00:00"
 }
 
