@@ -76,7 +76,7 @@ public class CaretakerService {
       throw new BadRequestException("Caretaker already exists");
     }
     Caretaker savedCaretaker = caretakerRepository.save(toCareTaker(userProjection));
-    if (userProjection.getRoleId() < roleService.getCareTakerRole().getRoleId()) {
+    if (userProjection.getRoleId() > roleService.getCareTakerRole().getRoleId()) {
       // Change role to caretaker if the user has lower role than caretaker, otherwise keep the same role (e.g. admin)
       userService.changeRole(userProjection.getUserId(), roleService.getCareTakerRole());
     }
