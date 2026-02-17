@@ -71,6 +71,10 @@ public class CaretakerRRuleServiceTest {
     rrule.setSlotType(requestRRuleDto.slotType());
     rrule.setCapacity(requestRRuleDto.capacity());
     rrule.setIntervalMinutes(requestRRuleDto.intervalMinutes());
+    rrule.setIsEnabled(requestRRuleDto.isEnabled());
+    rrule.setIsSchedule(requestRRuleDto.isSchedule());
+    rrule.setIsBusy(requestRRuleDto.isBusy());
+    rrule.setPriority(requestRRuleDto.priority());
   }
 
   @Test
@@ -85,6 +89,10 @@ public class CaretakerRRuleServiceTest {
     assertEquals(requestRRuleDto.rrule(), result.rrule());
     assertEquals(requestRRuleDto.capacity(), result.capacity());
     assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
+    assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
+    assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
+    assertEquals(requestRRuleDto.isBusy(), result.isBusy());
+    assertEquals(requestRRuleDto.priority(), result.priority());
     verify(rruleRepository).save(any(CaretakerRRule.class));
     verify(slotGenerationScheduler).generateSlotsForSingleRRule(any(), any(), any());
   }
@@ -158,6 +166,10 @@ public class CaretakerRRuleServiceTest {
     assertEquals(requestRRuleDto.rrule(), result.rrule());
     assertEquals(requestRRuleDto.capacity(), result.capacity());
     assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
+    assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
+    assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
+    assertEquals(requestRRuleDto.isBusy(), result.isBusy());
+    assertEquals(requestRRuleDto.priority(), result.priority());
   }
 }
 

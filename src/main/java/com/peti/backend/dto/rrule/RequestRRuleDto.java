@@ -26,7 +26,20 @@ public record RequestRRuleDto(
 
     @NotNull(message = "Interval minutes is required")
     @Min(value = 1, message = "Interval must be at least 1 minute")
-    Integer intervalMinutes
+    Integer intervalMinutes,
+
+    @NotNull(message = "IsEnabled is required")
+    Boolean isEnabled,
+
+    @NotNull(message = "IsSchedule is required")
+    Boolean isSchedule,
+
+    @NotNull(message = "IsBusy is required")
+    Boolean isBusy,
+
+    @NotNull(message = "Priority is required")
+    @Min(value = 0, message = "Priority must be at least 0")
+    Integer priority
 ) {
 }
 

@@ -35,7 +35,11 @@ public class CaretakerRRuleService {
         rrule.getDescription(),
         rrule.getSlotType(),
         rrule.getCapacity(),
-        rrule.getIntervalMinutes());
+        rrule.getIntervalMinutes(),
+        rrule.getIsEnabled(),
+        rrule.getIsSchedule(),
+        rrule.getIsBusy(),
+        rrule.getPriority());
   }
 
   public List<RRuleDto> getAllRRulesForCaretaker(UUID caretakerId) {
@@ -58,6 +62,10 @@ public class CaretakerRRuleService {
     rrule.setIntervalMinutes(createDto.intervalMinutes());
     rrule.setGeneratedTo(null); // Initially not generated
     rrule.setCreatedAt(LocalDateTime.now());
+    rrule.setIsEnabled(createDto.isEnabled());
+    rrule.setIsSchedule(createDto.isSchedule());
+    rrule.setIsBusy(createDto.isBusy());
+    rrule.setPriority(createDto.priority());
 
     CaretakerRRule saved = rruleRepository.save(rrule);
 
@@ -95,6 +103,10 @@ public class CaretakerRRuleService {
           existing.setCapacity(updateDto.capacity());
           existing.setIntervalMinutes(updateDto.intervalMinutes());
           existing.setGeneratedTo(null); // Reset generation tracking
+          existing.setIsEnabled(updateDto.isEnabled());
+          existing.setIsSchedule(updateDto.isSchedule());
+          existing.setIsBusy(updateDto.isBusy());
+          existing.setPriority(updateDto.priority());
 
           CaretakerRRule saved = rruleRepository.save(existing);
 

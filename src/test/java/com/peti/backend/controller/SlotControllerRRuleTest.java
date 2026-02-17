@@ -53,7 +53,11 @@ class SlotControllerRRuleTest {
         "Evening availability",
         "walk",
         3,
-        30
+        30,
+        true,
+        false,
+        false,
+        0
     );
 
     when(rruleService.getAllRRulesForCaretaker(caretakerId)).thenReturn(List.of(rruleDto1, rruleDto2));
@@ -121,7 +125,11 @@ class SlotControllerRRuleTest {
         updateDto.description(),
         updateDto.slotType(),
         updateDto.capacity(),
-        updateDto.intervalMinutes());
+        updateDto.intervalMinutes(),
+        true,
+        false,
+        false,
+        0);
 
     when(rruleService.updateRRule(eq(rruleId), any(RequestRRuleDto.class), eq(caretakerId)))
         .thenReturn(Optional.of(updatedDto));

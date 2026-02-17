@@ -5,6 +5,10 @@
   "description": "Daily morning slots",
   "slotType": "walk",
   "capacity": 5,
-  "intervalMinutes": 30
+  "intervalMinutes": 30,
+  "isEnabled": true,
+  "isSchedule": false,
+  "isBusy": false,
+  "priority": 10
 }
 
