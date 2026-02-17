@@ -85,6 +85,14 @@ public class Slot {
   @Column(name = "occupied_capacity", nullable = false)
   private Integer occupiedCapacity;
 
+  @Basic
+  @Column(name = "is_repeated", nullable = false)
+  private Boolean isRepeated;
+
+  @ManyToOne
+  @JoinColumn(name = "rrule_id", referencedColumnName = "rrule_id")
+  private CaretakerRRule rrule;
+
   @ManyToMany(mappedBy = "slots", fetch = FetchType.LAZY)
   private Set<Event> events = new HashSet<>();
 }

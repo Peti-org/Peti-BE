@@ -49,7 +49,8 @@ public class SlotService {
         slot.getType(),
         slot.getPrice(),
         slot.getCurrency(),
-        slot.getCapacity() - slot.getOccupiedCapacity()
+        slot.getCapacity() - slot.getOccupiedCapacity(),
+        slot.getIsRepeated()
     );
   }
 
@@ -66,7 +67,9 @@ public class SlotService {
       return new PagedSlotsResponse(List.of(), requestSlotFilters.slotCursor());
     }
 
-    SlotCursor cursor = new SlotCursor(slotDtoList.getLast().caretaker().getRating(), slots.getLast().getCreationTime(),
+    SlotCursor cursor = new SlotCursor(
+        slotDtoList.getLast().caretaker().getRating(),
+        slots.getLast().getCreationTime(),
         requestSlotFilters.slotCursor().limit());
     return new PagedSlotsResponse(slotDtoList, cursor);
   }
@@ -172,6 +175,8 @@ public class SlotService {
     slot.setAvailable(true);
     slot.setCapacity(request.capacity());
     slot.setOccupiedCapacity(0);
+    slot.setIsRepeated(false); // Manual slots are not repeated
+    slot.setRrule(null); // No RRule association for manual slots
 
     return slot;
   }
@@ -182,6 +187,7 @@ public class SlotService {
     slot.setTimeTo(Time.valueOf(request.timeTo()));
     slot.setType(request.type());
     slot.setPrice(request.price());
+    slot.setCapacity(request.capacity());
     //todo think about updating time and what user will see if slot was updated
   }
 }

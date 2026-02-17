@@ -1,7 +1,9 @@
 {
-  "date": "2024-06-10",
-  "timeFrom": "09:00",
-  "timeTo": "10:00",
+  "date": "2026-02-10",
+  "timeFrom": "09:00:00",
+  "timeTo": "11:00:00",
   "type": "walk",
-  "price": 100.00
+  "price": 150.00,
+  "capacity": 3
 }
+
