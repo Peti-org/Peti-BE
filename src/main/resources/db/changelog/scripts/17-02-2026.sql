@@ -8,9 +8,3 @@ ALTER TABLE peti.caretaker_rrule
   ADD COLUMN is_busy     BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN priority    INTEGER NOT NULL DEFAULT 0;
 
--- Create index for efficient filtering by enabled status
-CREATE INDEX idx_rrule_is_enabled ON peti.caretaker_rrule(caretaker_id, is_enabled);
-
--- Create index for priority-based queries
-CREATE INDEX idx_rrule_priority ON peti.caretaker_rrule(caretaker_id, priority DESC);
-
