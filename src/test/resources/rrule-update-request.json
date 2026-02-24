@@ -3,6 +3,12 @@
   "dtstart": "2026-02-01T10:00:00",
   "dtend": "2026-12-31T18:00:00",
   "description": "Updated: Mon/Wed/Fri 10am-6pm",
-  "slotType": "PREMIUM"
+  "slotType": "PREMIUM",
+  "capacity": 3,
+  "intervalMinutes": 60,
+  "isEnabled": true,
+  "isSchedule": true,
+  "isBusy": false,
+  "priority": 20
 }
 

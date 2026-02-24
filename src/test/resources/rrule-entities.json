@@ -15,7 +15,11 @@
     "dtend": "2026-12-31T18:00:00",
     "description": "Available on weekends 9am-6pm",
     "slotType": "STANDARD",
-    "createdAt": "2026-01-01T08:00:00"
+    "createdAt": "2026-01-01T08:00:00",
+    "isEnabled": true,
+    "isSchedule": false,
+    "isBusy": false,
+    "priority": 5
   },
   {
     "rruleId": "22222222-2222-2222-2222-222222222222",
@@ -33,7 +37,11 @@
     "dtend": "2026-12-31T21:00:00",
     "description": "Evening availability Mon/Wed/Fri 6pm-9pm",
     "slotType": "PREMIUM",
-    "createdAt": "2026-01-01T08:00:00"
+    "createdAt": "2026-01-01T08:00:00",
+    "isEnabled": true,
+    "isSchedule": true,
+    "isBusy": false,
+    "priority": 10
   }
 ]
 

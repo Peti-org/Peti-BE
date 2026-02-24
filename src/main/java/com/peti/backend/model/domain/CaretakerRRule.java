@@ -67,5 +67,21 @@ public class CaretakerRRule {
   @Basic
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
+
+  @Basic
+  @Column(name = "is_enabled", nullable = false)
+  private Boolean isEnabled;
+
+  @Basic
+  @Column(name = "is_schedule", nullable = false)
+  private Boolean isSchedule;
+
+  @Basic
+  @Column(name = "is_busy", nullable = false)
+  private Boolean isBusy;
+
+  @Basic
+  @Column(name = "priority", nullable = false)
+  private Integer priority;
 }
 

@@ -31,7 +31,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Mon/Wed/Fri availability",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -49,7 +49,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -69,7 +69,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -89,7 +89,7 @@ class RRuleDtoValidationTest {
         null,
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -109,7 +109,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         null,
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -127,7 +127,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         null,
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -145,7 +145,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 2, 1, 10, 0),
         LocalDateTime.of(2026, 11, 30, 17, 0),
         "Updated availability",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -163,7 +163,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -182,7 +182,7 @@ class RRuleDtoValidationTest {
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -201,7 +201,7 @@ class RRuleDtoValidationTest {
         null,
         LocalDateTime.of(2026, 12, 31, 18, 0),
         "Description",
-        "walk", 3, 30
+        "walk", 3, 30, true, false, false, 0
     );
 
     // When
@@ -220,7 +220,7 @@ class RRuleDtoValidationTest {
         "FREQ=DAILY",
         LocalDateTime.of(2026, 1, 1, 9, 0),
         LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Test", "walk", 3, 30);
+        "Test", "walk", 3, 30, true, false, false, 0);
 
     // Then - Records are immutable, no setters available
     assertFalse(dto.rrule().isEmpty());

@@ -117,4 +117,14 @@ public class UserService implements UserDetailsService {
   public void deleteUser(UUID userId) {
     userRepository.deleteById(userId);
   }
+
+  public void changeRole(UUID userId, Role role) {
+    userRepository.findById(userId)
+        .map(existingUser -> {
+          existingUser.setRole(role);
+
+          User savedUser = userRepository.save(existingUser);
+          return convertToDto(savedUser, CityService.convertToDto(savedUser.getCityByCityId()));
+        });
+  }
 }

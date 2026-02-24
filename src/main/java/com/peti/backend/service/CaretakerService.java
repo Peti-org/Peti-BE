@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class CaretakerService {
 
   private final CaretakerRepository caretakerRepository;
+  private final UserService userService;
+  private final RoleService roleService;
 
   public static SimpleCaretakerDto convertToSimpleDto(Caretaker caretaker) {
     return new SimpleCaretakerDto(
@@ -31,10 +33,10 @@ public class CaretakerService {
 
   private CaretakerDto mapToDto(Caretaker caretaker) {
     CaretakerDto caretakerDto = new CaretakerDto();
-        caretakerDto.setId(caretaker.getCaretakerId());
-        caretakerDto.setName(caretaker.getUserReference().getFirstName());
-        caretakerDto.setEmail(caretaker.getUserReference().getEmail());
-        caretakerDto.setRating(caretaker.getRating());
+    caretakerDto.setId(caretaker.getCaretakerId());
+    caretakerDto.setName(caretaker.getUserReference().getFirstName());
+    caretakerDto.setEmail(caretaker.getUserReference().getEmail());
+    caretakerDto.setRating(caretaker.getRating());
     return caretakerDto;
   }
 
@@ -69,11 +71,15 @@ public class CaretakerService {
     return caretakerRepository.findCaretakerIdBy(userId);
   }
 
-  public CaretakerDto createCaretaker( UserProjection userProjection) {
-    if (caretakerRepository.existsByUserReference_UserId(userProjection.getUserId())){
+  public CaretakerDto createCaretaker(UserProjection userProjection) {
+    if (caretakerRepository.existsByUserReference_UserId(userProjection.getUserId())) {
       throw new BadRequestException("Caretaker already exists");
     }
     Caretaker savedCaretaker = caretakerRepository.save(toCareTaker(userProjection));
+    if (userProjection.getRoleId() > roleService.getCareTakerRole().getRoleId()) {
+      // Change role to caretaker if the user has lower role than caretaker, otherwise keep the same role (e.g. admin)
+      userService.changeRole(userProjection.getUserId(), roleService.getCareTakerRole());
+    }
     return mapToDto(savedCaretaker);
   }
 

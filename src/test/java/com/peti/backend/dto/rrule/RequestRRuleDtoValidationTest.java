@@ -1,7 +1,6 @@
 package com.peti.backend.dto.rrule;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +32,7 @@ public class RequestRRuleDtoValidationTest {
         "Test description",
         "walk",
         5,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -49,7 +48,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         5,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -67,7 +66,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         5,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -85,7 +84,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "",
         5,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -103,7 +102,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         null,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -121,7 +120,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         0,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -139,7 +138,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         -1,
-        30
+        30, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -155,7 +154,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         5,
-        null
+        null, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -173,7 +172,7 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "walk",
         5,
-        0
+        0, true, false, false, 0
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
@@ -191,11 +190,11 @@ public class RequestRRuleDtoValidationTest {
         "Test",
         "",
         -1,
-        0
+        0, null, null, null, -1
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-    assertThat(violations).hasSize(5);
+    assertThat(violations).hasSize(9);
   }
 }
 
