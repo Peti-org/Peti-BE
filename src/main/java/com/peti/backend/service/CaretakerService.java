@@ -1,6 +1,9 @@
 package com.peti.backend.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peti.backend.dto.caretacker.CaretakerDto;
+import com.peti.backend.dto.caretacker.CaretakerPreferences;
 import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
 import com.peti.backend.dto.exception.BadRequestException;
 import com.peti.backend.model.domain.Caretaker;
@@ -21,6 +24,7 @@ public class CaretakerService {
   private final CaretakerRepository caretakerRepository;
   private final UserService userService;
   private final RoleService roleService;
+  private final ObjectMapper objectMapper;
 
   public static SimpleCaretakerDto convertToSimpleDto(Caretaker caretaker) {
     return new SimpleCaretakerDto(
@@ -37,6 +41,7 @@ public class CaretakerService {
     caretakerDto.setName(caretaker.getUserReference().getFirstName());
     caretakerDto.setEmail(caretaker.getUserReference().getEmail());
     caretakerDto.setRating(caretaker.getRating());
+    caretakerDto.setCaretakerPreference(deepCopyPreference(caretaker.getCaretakerPreference()));
     return caretakerDto;
   }
 
@@ -45,7 +50,8 @@ public class CaretakerService {
     caretaker.setUserReference(new User(userProjection.getUserId()));
     caretaker.setCaretakerIsDeleted(false);
     caretaker.setRating(0);
-    caretaker.setCaretakerPreference("{}"); // Assuming a default empty JSON object for preferences
+    caretaker.setCaretakerPreference(
+        new CaretakerPreferences(null, null)); // Assuming a default empty JSON object for preferences
 
 //        caretakerDto.setId(caretaker.getId());
 //        caretakerDto.setName(caretaker.getName());
@@ -83,13 +89,25 @@ public class CaretakerService {
     return mapToDto(savedCaretaker);
   }
 
-//  public CaretakerDto updateCaretaker(Long id, Caretaker caretaker) {
-//    if (caretakerRepository.existsById(id)) {
-////            caretaker.setId(id);
-//      return mapToDto(caretakerRepository.save(caretaker));
-//    }
-//    return null;
-//  }
+  public CaretakerPreferences deepCopyPreference(CaretakerPreferences preferences) {
+    try {
+      byte[] bytes = objectMapper.writeValueAsBytes(preferences);
+      return objectMapper.readValue(bytes, new TypeReference<>() {
+      });
+    } catch (Exception e) {
+      throw new RuntimeException("Deep copy failed", e);
+    }
+  }
+
+  public CaretakerDto updateCaretaker(UserProjection userProjection, CaretakerPreferences caretakerPreferences) {
+    Caretaker exsistingCaretaker = caretakerRepository.findByUserReference_UserId(userProjection.getUserId())
+        .orElseThrow(() -> new BadRequestException("Caretaker not exists"));
+    //add validation....
+    //rating can't be updated here
+    exsistingCaretaker.setCaretakerPreference(deepCopyPreference(caretakerPreferences));
+    Caretaker savedCaretaker = caretakerRepository.save(exsistingCaretaker);
+    return mapToDto(savedCaretaker);
+  }
 
 //  public void deleteCaretaker(Long id) {
 //    caretakerRepository.deleteById(id);

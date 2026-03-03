@@ -1,5 +1,6 @@
 package com.peti.backend.model.domain;
 
+import com.peti.backend.dto.caretacker.CaretakerPreferences;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class Caretaker {
   @Basic
   @Column(name = "caretaker_preference", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  private Object caretakerPreference;
+  private CaretakerPreferences caretakerPreference;
 
   @Basic
   @Column(name = "rating", nullable = false)

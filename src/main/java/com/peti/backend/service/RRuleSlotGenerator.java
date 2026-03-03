@@ -2,6 +2,7 @@ package com.peti.backend.service;
 
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.Slot;
+import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.model.internal.TimeSlotPair;
 import com.peti.backend.repository.SlotRepository;
 import jakarta.persistence.EntityManager;
@@ -168,7 +169,7 @@ public class RRuleSlotGenerator {
     slot.setDate(Date.valueOf(date));
     slot.setTimeFrom(Time.valueOf(timeFrom));
     slot.setTimeTo(Time.valueOf(timeTo));
-    slot.setType(rrule.getSlotType());
+    slot.setType(ServiceType.fromName(rrule.getSlotType()).name());
     slot.setPrice(DEFAULT_PRICE);
     slot.setCurrency(DEFAULT_CURRENCY);
     slot.setCreationTime(LocalDateTime.now());

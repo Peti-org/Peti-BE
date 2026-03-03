@@ -1,5 +1,6 @@
 package com.peti.backend.dto.rrule;
 
+import com.peti.backend.model.internal.ServiceType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,8 +18,8 @@ public record RequestRRuleDto(
 
     String description,
 
-    @NotBlank(message = "Slot type is required")
-    String slotType,
+    @NotNull(message = "Slot type is required")
+    ServiceType slotType,
 
     @NotNull(message = "Capacity is required")
     @Positive(message = "Capacity must be positive")
