@@ -23,13 +23,6 @@ import javax.annotation.Nullable;
     {
       "services": [
         {
-          "basePrice": {
-            "priceForService": 50.00,
-            "pricePerExtendingStep": 10.00,
-            "vipPrice": 80.00,
-            "currency": "UAH",
-            "pickupPrice": 15.00
-          },
           "type": "WALKING",
           "frozen": false,
           "priceNegotiable": true,
@@ -139,10 +132,6 @@ public record CaretakerPreferences(
   ) {}
 
   public record ServiceConfig(
-      @Schema(description = "Base pricing information for this service")
-      @NotNull(message = "Base price must not be null")
-      @Valid
-      PriceInfo basePrice,
 
       @Schema(description = "Type of the service", defaultValue = "WALKING", example = "WALKING", allowableValues = {"WALKING", "SITTING", "TRAINING", "GROOMING", "VET", "UNDEFINED"})
       @NotNull(message = "Service type must not be null")

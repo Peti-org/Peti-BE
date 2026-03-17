@@ -51,7 +51,7 @@ class SlotControllerRRuleTest {
         rruleDto1.dtstart(),
         rruleDto1.dtend(),
         "Evening availability",
-        "walk",
+        rruleDto1.slotType(),
         3,
         30,
         true,

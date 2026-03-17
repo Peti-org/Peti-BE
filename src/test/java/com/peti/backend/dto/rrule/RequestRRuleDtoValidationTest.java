@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.peti.backend.model.internal.ServiceType;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -30,7 +31,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now().plusDays(1),
         LocalDateTime.now().plusDays(30),
         "Test description",
-        "walk",
+        ServiceType.WALKING,
         5,
         30, true, false, false, 0
     );
@@ -46,7 +47,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         5,
         30, true, false, false, 0
     );
@@ -64,7 +65,7 @@ public class RequestRRuleDtoValidationTest {
         null,
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         5,
         30, true, false, false, 0
     );
@@ -82,7 +83,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "",
+        null,
         5,
         30, true, false, false, 0
     );
@@ -100,7 +101,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         null,
         30, true, false, false, 0
     );
@@ -118,7 +119,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         0,
         30, true, false, false, 0
     );
@@ -136,7 +137,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         -1,
         30, true, false, false, 0
     );
@@ -152,7 +153,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         5,
         null, true, false, false, 0
     );
@@ -170,7 +171,7 @@ public class RequestRRuleDtoValidationTest {
         LocalDateTime.now(),
         null,
         "Test",
-        "walk",
+        ServiceType.WALKING,
         5,
         0, true, false, false, 0
     );
@@ -188,13 +189,13 @@ public class RequestRRuleDtoValidationTest {
         null,
         null,
         "Test",
-        "",
+        ServiceType.WALKING,
         -1,
         0, null, null, null, -1
     );
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-    assertThat(violations).hasSize(9);
+    assertThat(violations).hasSize(8);
   }
 }
 

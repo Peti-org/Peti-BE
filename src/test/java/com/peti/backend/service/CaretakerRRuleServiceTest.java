@@ -68,7 +68,7 @@ public class CaretakerRRuleServiceTest {
     rrule.setDtstart(requestRRuleDto.dtstart());
     rrule.setDtend(requestRRuleDto.dtend());
     rrule.setDescription(requestRRuleDto.description());
-    rrule.setSlotType(requestRRuleDto.slotType());
+    rrule.setSlotType(requestRRuleDto.slotType().name());
     rrule.setCapacity(requestRRuleDto.capacity());
     rrule.setIntervalMinutes(requestRRuleDto.intervalMinutes());
     rrule.setIsEnabled(requestRRuleDto.isEnabled());
