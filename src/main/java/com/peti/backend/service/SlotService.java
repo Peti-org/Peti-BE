@@ -10,6 +10,7 @@ import com.peti.backend.dto.slot.SlotCursor;
 import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.Slot;
+import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.model.internal.TimeSlotPair;
 import com.peti.backend.repository.SlotRepository;
 import jakarta.persistence.EntityManager;
@@ -46,7 +47,7 @@ public class SlotService {
         slot.getDate().toLocalDate(),
         slot.getTimeFrom().toLocalTime(),
         slot.getTimeTo().toLocalTime(),
-        slot.getType(),
+        ServiceType.fromName(slot.getType()),
         slot.getPrice(),
         slot.getCurrency(),
         slot.getCapacity() - slot.getOccupiedCapacity(),
@@ -185,7 +186,7 @@ public class SlotService {
     slot.setDate(Date.valueOf(request.date()));
     slot.setTimeFrom(Time.valueOf(request.timeFrom()));
     slot.setTimeTo(Time.valueOf(request.timeTo()));
-    slot.setType(request.type());
+    slot.setType(ServiceType.fromName(request.type()).name());
     slot.setPrice(request.price());
     slot.setCapacity(request.capacity());
     //todo think about updating time and what user will see if slot was updated

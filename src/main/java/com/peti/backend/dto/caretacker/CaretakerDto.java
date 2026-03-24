@@ -1,6 +1,7 @@
 package com.peti.backend.dto.caretacker;
 
 import java.util.UUID;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,5 +16,6 @@ public class CaretakerDto {
   private String email;
   private String address;
   private Integer rating;
+  @Valid private CaretakerPreferences caretakerPreference;
 
 }

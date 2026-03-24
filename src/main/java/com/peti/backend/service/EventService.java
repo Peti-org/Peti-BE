@@ -9,6 +9,7 @@ import com.peti.backend.model.domain.Event;
 import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.domain.Slot;
 import com.peti.backend.model.domain.User;
+import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.repository.EventRepository;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
@@ -157,7 +158,7 @@ public class EventService {
     event.setStatus("created");
     event.setCreatedAt(LocalDateTime.now());
     event.setEventIsDeleted(false);
-    event.setType("walk");
+    event.setType(ServiceType.WALKING.name());
     event.setDatetimeFrom(slots.getFirst().getDate().toLocalDate()
         .atTime(slots.getFirst().getTimeFrom().toLocalTime()));
     Slot lastSlot = slots.getLast();

@@ -1,6 +1,7 @@
 package com.peti.backend.dto.slot;
 
 import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.model.internal.ServiceType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,7 +12,7 @@ public record SlotDto(UUID slotId,
                       LocalDate date,
                       LocalTime timeFrom,
                       LocalTime timeTo,
-                      String type,
+                      ServiceType type,
                       BigDecimal price,
                       String currency,
                       Integer capacity,

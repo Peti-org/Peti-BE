@@ -1,5 +1,6 @@
 package com.peti.backend.dto.rrule;
 
+import com.peti.backend.model.internal.ServiceType;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ public record RRuleDto(
     LocalDateTime dtstart,
     LocalDateTime dtend,
     String description,
-    String slotType,
+    ServiceType slotType,
     Integer capacity,
     Integer intervalMinutes,
     Boolean isEnabled,

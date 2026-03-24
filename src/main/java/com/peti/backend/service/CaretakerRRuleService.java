@@ -4,6 +4,7 @@ import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.dto.rrule.RequestRRuleDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
+import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.repository.CaretakerRRuleRepository;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class CaretakerRRuleService {
         rrule.getDtstart(),
         rrule.getDtend(),
         rrule.getDescription(),
-        rrule.getSlotType(),
+        ServiceType.fromName(rrule.getSlotType()),
         rrule.getCapacity(),
         rrule.getIntervalMinutes(),
         rrule.getIsEnabled(),
@@ -57,7 +58,7 @@ public class CaretakerRRuleService {
     rrule.setDtstart(createDto.dtstart());
     rrule.setDtend(createDto.dtend());
     rrule.setDescription(createDto.description());
-    rrule.setSlotType(createDto.slotType());
+    rrule.setSlotType(createDto.slotType().name());
     rrule.setCapacity(createDto.capacity());
     rrule.setIntervalMinutes(createDto.intervalMinutes());
     rrule.setGeneratedTo(null); // Initially not generated
@@ -99,7 +100,7 @@ public class CaretakerRRuleService {
           existing.setDtstart(updateDto.dtstart());
           existing.setDtend(updateDto.dtend());
           existing.setDescription(updateDto.description());
-          existing.setSlotType(updateDto.slotType());
+          existing.setSlotType(updateDto.slotType().name());
           existing.setCapacity(updateDto.capacity());
           existing.setIntervalMinutes(updateDto.intervalMinutes());
           existing.setGeneratedTo(null); // Reset generation tracking
