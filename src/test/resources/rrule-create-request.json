@@ -1,0 +1,14 @@
+{
+  "rrule": "FREQ=DAILY",
+  "dtstart": "2026-02-03T09:00:00",
+  "dtend": "2026-12-31T18:00:00",
+  "description": "Daily morning slots",
+  "slotType": "WALKING",
+  "capacity": 5,
+  "intervalMinutes": 30,
+  "isEnabled": true,
+  "isSchedule": false,
+  "isBusy": false,
+  "priority": 10
+}
+

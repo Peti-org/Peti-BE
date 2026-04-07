@@ -3,5 +3,6 @@
   "timeFrom": "10:00",
   "timeTo": "11:00",
   "type": "play",
-  "price": 120.00
+  "price": 120.00,
+  "capacity": 3
 }

@@ -17,4 +17,6 @@ public interface CaretakerRepository extends JpaRepository<Caretaker, UUID> {
   Optional<UUID> findCaretakerIdBy(UUID userId);
 
   Boolean existsByUserReference_UserId(UUID userReferenceUserId);
+
+  Optional<Caretaker> findByUserReference_UserId(UUID userReferenceUserId);
 }
