@@ -34,7 +34,7 @@ public class SecurityConfiguration {
             .requestMatchers("/auth/**").permitAll() // to allow authentication endpoints
             .requestMatchers("/api/cities/country/**").permitAll() //to select country on register page
             .requestMatchers("/api/slots/filter").permitAll() //to view all slots unauthenticated
-            .requestMatchers("/api/v2/catalog/**").permitAll() //to test Elasticsearch catalog endpoints
+            .requestMatchers("/api/v2/catalog/**").permitAll() // to view all slots catalog endpoints unauthenticated
             .requestMatchers("/api/ping").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/").permitAll()

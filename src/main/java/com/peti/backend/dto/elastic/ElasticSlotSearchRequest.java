@@ -15,11 +15,11 @@ import java.util.List;
  * Supports filtering by various criteria and pet matching.
  */
 public record ElasticSlotSearchRequest(
-    // Date range - required
     @NotNull(message = "Start date is required")
     @FutureOrPresent(message = "Start date must be today or in the future")
     LocalDate dateFrom,
 
+    @FutureOrPresent(message = "End date must be today or in the future")
     @NotNull(message = "End date is required")
     LocalDate dateTo,
 
@@ -27,19 +27,18 @@ public record ElasticSlotSearchRequest(
     LocalTime timeFrom,
     LocalTime timeTo,
 
-    // Minimum duration in minutes user needs
-    @Min(value = 30, message = "Minimum duration is 30 minutes")
-    Integer minDurationMinutes,
-
-    // City filter
+    @NotNull(message = "City ID is required")
     String cityId,
 
     // Price range - ше питання, як ми будемо рахувати ціну, бо вона залежить від тварин і їх кількості і бла-бла-бла, що еластік не може сам порахувати, а видавати юзеру якусь фігню не прикольно
     @Positive(message = "Min price must be positive")
-    BigDecimal minPricePerHour,
+    BigDecimal minPricePerHour,//todo add calculation service on top of standart price
 
     @Positive(message = "Max price must be positive")
     BigDecimal maxPricePerHour,
+
+    @NotNull(message = "Price currency is required")
+    String currency,
 
     // Minimum caretaker rating
     @Min(value = 1, message = "Min rating must be at least 1")
@@ -54,13 +53,12 @@ public record ElasticSlotSearchRequest(
 
     // Pagination
     @Min(value = 0, message = "Page must be non-negative")
-    Integer page,
+    Integer page,//todo rewrite pagination
 
     @Min(value = 1, message = "Page size must be at least 1")
     @Max(value = 100, message = "Page size cannot exceed 100")
     Integer pageSize,
 
-    // Sort options
     SortField sortBy,
     SortDirection sortDirection
 ) {
@@ -73,15 +71,16 @@ public record ElasticSlotSearchRequest(
       String size,          // small, medium, large, extra_large
       Double weightKg, // треба буде подумати щодо кілограмів і розмірів. Різні тварини, вочевидь, мають різні вагові категорії, коти легші за собак в середньому
       Boolean hasSpecialNeeds,
-      List<String> specialRequirements  // medication, special_diet, etc. НЗ??
+      List<String> specialRequirements  // medication, special_diet, etc.
   ) {}
 
-  public enum PetMatchMode { // Найс штука. Може бути, що нема людей для обох твоїх тварин, то доведеться кому віддати одного, а комусь іншого
+  //for now only all any for future
+  public enum PetMatchMode {// Найс штука. Може бути, що нема людей для обох твоїх тварин, то доведеться кому віддати одного, а комусь іншого
     ALL,      // Caretaker must accept ALL pets
     ANY       // Caretaker must accept at least ONE pet
-  }
+  }//todo check, seems not usefull at all?? is real case when customer wnat to do that
 
-  public enum SortField { // Напевно не треба???
+  public enum SortField {
     RATING,
     PRICE,
     AVAILABILITY,
@@ -102,10 +101,10 @@ public record ElasticSlotSearchRequest(
         dateTo != null ? dateTo : dateFrom.plusDays(7),
         timeFrom != null ? timeFrom : LocalTime.of(8, 0),
         timeTo != null ? timeTo : LocalTime.of(20, 0),
-        minDurationMinutes != null ? minDurationMinutes : 60,
         cityId,
         minPricePerHour,
         maxPricePerHour,
+        currency,
         minRating,
         pets,
         petMatchMode != null ? petMatchMode : PetMatchMode.ALL,

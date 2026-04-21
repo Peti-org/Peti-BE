@@ -4,7 +4,7 @@ import java.util.List;
 
 
 public record ElasticSlotSearchResponse(
-    List<SlotSearchResult> slots,
+    List<SlotSearchResult> slots,//todo refactor
     int page,
     int pageSize,
     long totalElements,

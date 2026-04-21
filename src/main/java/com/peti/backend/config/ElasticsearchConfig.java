@@ -8,11 +8,9 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@EnableScheduling
-@EnableElasticsearchRepositories(basePackages = "com.peti.backend.repository.elastic")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-  @Value("${spring.elasticsearch.uris:http://localhost:9200}")
+  @Value("${spring.elasticsearch.uri:localhost:9200}")
   private String elasticsearchUri;
 
   @Value("${spring.elasticsearch.connection-timeout:5000}")
@@ -24,7 +22,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
   @Override
   public ClientConfiguration clientConfiguration() {
     return ClientConfiguration.builder()
-        .connectedTo(elasticsearchUri.replace("http://", "").replace("https://", ""))
+        .connectedTo(elasticsearchUri)
         .withConnectTimeout(connectionTimeout)
         .withSocketTimeout(socketTimeout)
         .build();
