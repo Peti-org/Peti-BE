@@ -5,7 +5,7 @@ import com.peti.backend.dto.elastic.ElasticSlotSearchRequest;
 import com.peti.backend.dto.elastic.ElasticSlotSearchResponse;
 import com.peti.backend.dto.elastic.SlotSearchResult;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
-import com.peti.backend.service.elastic.model.PetInfo;
+import com.peti.backend.model.elastic.model.PetInfo;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

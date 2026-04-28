@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import com.peti.backend.dto.content.ArticleDto;
 import com.peti.backend.dto.content.CursorPageResponse;
 import com.peti.backend.dto.content.RequestArticleDto;
-import com.peti.backend.dto.exception.NotFoundException;
+import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.domain.Article;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.ArticleRepository;

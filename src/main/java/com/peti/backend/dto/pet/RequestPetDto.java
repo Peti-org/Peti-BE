@@ -1,6 +1,7 @@
 package com.peti.backend.dto.pet;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,4 +24,8 @@ public class RequestPetDto {
   @Min(value = 1, message = "Breed ID must be a positive number")
   @Schema(description = "Pet breed id", defaultValue = "1")
   private Integer breedId;
+  @NotNull(message = "Pet profile cannot be null")
+  @Valid
+  @Schema(description = "Pet profile with health and behavior details")
+  private PetProfile profile;
 }

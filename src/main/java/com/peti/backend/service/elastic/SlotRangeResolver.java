@@ -1,8 +1,8 @@
 package com.peti.backend.service.elastic;
 
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.service.elastic.model.TimeRange;
-import com.peti.backend.service.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeRange;
+import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;

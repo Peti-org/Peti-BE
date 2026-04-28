@@ -10,8 +10,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.user.CityController;
 import com.peti.backend.dto.CityDto;
-import com.peti.backend.service.CityService;
+import com.peti.backend.service.user.CityService;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

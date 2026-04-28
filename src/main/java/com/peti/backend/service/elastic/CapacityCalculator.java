@@ -3,8 +3,8 @@ package com.peti.backend.service.elastic;
 import com.peti.backend.dto.caretacker.CaretakerPreferences;
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.domain.CaretakerRRule;
-import com.peti.backend.service.elastic.model.BookingInput;
-import com.peti.backend.service.elastic.model.CapacityWithPricing;
+import com.peti.backend.model.elastic.model.BookingInput;
+import com.peti.backend.model.elastic.model.CapacityWithPricing;
 import java.time.LocalTime;
 import java.util.List;
 

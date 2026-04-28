@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.internal.ServiceType;
-import com.peti.backend.service.elastic.model.TimeRange;
-import com.peti.backend.service.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeRange;
+import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;

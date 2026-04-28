@@ -3,7 +3,7 @@ package com.peti.backend.service.content;
 import com.peti.backend.dto.content.ArticleDto;
 import com.peti.backend.dto.content.CursorPageResponse;
 import com.peti.backend.dto.content.RequestArticleDto;
-import com.peti.backend.dto.exception.NotFoundException;
+import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.domain.Article;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.ArticleRepository;
@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
+
+  private final static int SPEED_OF_READING = 200; // words per minute
 
   private final ArticleRepository articleRepository;
   private final ReactionRepository reactionRepository;
@@ -104,7 +106,7 @@ public class ArticleService {
       return 1;
     }
     int words = content.split("\\s+").length;
-    return Math.max(1, words / 200);
+    return Math.max(1, words / SPEED_OF_READING);
   }
 }
 

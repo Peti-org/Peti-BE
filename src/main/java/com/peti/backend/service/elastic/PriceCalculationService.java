@@ -2,9 +2,9 @@ package com.peti.backend.service.elastic;
 
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
-import com.peti.backend.service.elastic.model.PetInfo;
-import com.peti.backend.service.elastic.model.PriceBreakdown;
-import com.peti.backend.service.elastic.model.PriceCalculationResult;
+import com.peti.backend.model.elastic.model.PetInfo;
+import com.peti.backend.model.elastic.model.PriceBreakdown;
+import com.peti.backend.model.elastic.model.PriceCalculationResult;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;

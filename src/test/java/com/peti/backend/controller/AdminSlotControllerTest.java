@@ -7,8 +7,9 @@ import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.peti.backend.service.SlotGenerationScheduler;
-import com.peti.backend.service.SlotGenerationScheduler.SlotGenerationResult;
+import com.peti.backend.controller.maintenance.AdminSlotController;
+import com.peti.backend.service.slot.SlotGenerationScheduler;
+import com.peti.backend.service.slot.SlotGenerationScheduler.SlotGenerationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

@@ -8,11 +8,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.user.PetController;
 import com.peti.backend.dto.pet.PetDto;
 import com.peti.backend.dto.pet.RequestPetDto;
-import com.peti.backend.model.domain.User;
 import com.peti.backend.model.projection.UserProjection;
-import com.peti.backend.service.PetService;
+import com.peti.backend.service.user.PetService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

@@ -9,12 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.user.UserController;
 import com.peti.backend.dto.user.RequestUpdatePassword;
 import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.projection.UserProjection;
-import com.peti.backend.service.RoleService;
-import com.peti.backend.service.UserService;
+import com.peti.backend.service.user.RoleService;
+import com.peti.backend.service.user.UserService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

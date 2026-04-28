@@ -6,7 +6,7 @@ import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.security.annotation.HasUserRole;
-import com.peti.backend.service.CaretakerService;
+import com.peti.backend.service.user.CaretakerService;
 import com.peti.backend.service.EventService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

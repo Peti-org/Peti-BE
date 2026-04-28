@@ -17,8 +17,9 @@ public class PetDto {
   private String name;
   private LocalDate dateOfBirth;
   private BreedDto breed;
+  private PetProfile profile;
 
   public static PetDto from(Pet pet) {
-    return new PetDto(pet.getPetId(), pet.getName(), pet.getBirthday().toLocalDate(), BreedDto.from(pet.getBreed()));
+    return new PetDto(pet.getPetId(), pet.getName(), pet.getBirthday().toLocalDate(), BreedDto.from(pet.getBreed()), pet.getContext());
   }
 }
