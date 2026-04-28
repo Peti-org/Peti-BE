@@ -240,10 +240,25 @@ public record CaretakerPreferences(
 
       @Schema(description = "Start time of availability for this day (HH:mm)", defaultValue = "08:00", example = "08:00")
       @NotNull(message = "Schedule start time must not be null")
-      LocalTime from,
+      String from,
 
       @Schema(description = "End time of availability for this day (HH:mm)", defaultValue = "18:00", example = "18:00")
       @NotNull(message = "Schedule end time must not be null")
-      LocalTime to
-  ) {}
+      String to
+  ) {
+    private static final java.time.format.DateTimeFormatter TIME_FORMAT =
+        java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+
+    public DaySchedule(boolean enabled, LocalTime from, LocalTime to) {
+      this(enabled, from.format(TIME_FORMAT), to.format(TIME_FORMAT));
+    }
+
+    public LocalTime fromTime() {
+      return LocalTime.parse(from, TIME_FORMAT);
+    }
+
+    public LocalTime toTime() {
+      return LocalTime.parse(to, TIME_FORMAT);
+    }
+  }
 }
