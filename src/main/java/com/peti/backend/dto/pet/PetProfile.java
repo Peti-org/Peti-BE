@@ -2,6 +2,7 @@ package com.peti.backend.dto.pet;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -12,6 +13,7 @@ public record PetProfile(
 
     @Schema(description = "Pet weight in kg, null if unknown", example = "12.5")
     @DecimalMin(value = "0.01", message = "Weight must be positive")
+    @DecimalMax(value = "999", message = "Weight must be less than 1000 kg")
     BigDecimal weightKg,
 
     @Schema(description = "Pet sex", example = "MALE", allowableValues = {"MALE", "FEMALE", "UNKNOWN"})
