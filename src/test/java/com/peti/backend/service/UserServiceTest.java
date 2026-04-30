@@ -19,6 +19,8 @@ import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.UserRepository;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.peti.backend.service.user.UserService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

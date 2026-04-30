@@ -1,0 +1,194 @@
+package com.peti.backend.service.slot;
+
+import static com.peti.backend.service.user.CaretakerService.convertToSimpleDto;
+
+import com.peti.backend.dto.slot.PagedSlotsResponse;
+import com.peti.backend.dto.slot.RequestCalendarSlots;
+import com.peti.backend.dto.slot.RequestSlotDto;
+import com.peti.backend.dto.slot.RequestSlotFilters;
+import com.peti.backend.dto.slot.SlotCursor;
+import com.peti.backend.dto.slot.SlotDto;
+import com.peti.backend.model.domain.Caretaker;
+import com.peti.backend.model.domain.Slot;
+import com.peti.backend.model.internal.ServiceType;
+import com.peti.backend.model.internal.TimeSlotPair;
+import com.peti.backend.repository.SlotRepository;
+import jakarta.persistence.EntityManager;
+import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * SlotService is responsible for managing slots and providing methods to retrieve and filter them.
+ */
+@Service
+@RequiredArgsConstructor
+public class SlotService {
+
+  private static final int SLOT_INTERVAL_MINUTES = 30;
+
+  private final SlotRepository slotRepository;
+  private final EntityManager entityManager;
+  private final SlotDivider slotDivider;
+
+  public static SlotDto convertToDto(Slot slot) {
+    return new SlotDto(
+        slot.getSlotId(),
+        convertToSimpleDto(slot.getCaretaker()),
+        slot.getDate().toLocalDate(),
+        slot.getTimeFrom().toLocalTime(),
+        slot.getTimeTo().toLocalTime(),
+        ServiceType.fromName(slot.getType()),
+        slot.getPrice(),
+        slot.getCurrency(),
+        slot.getCapacity() - slot.getOccupiedCapacity(),
+        slot.getIsRepeated()
+    );
+  }
+
+  public PagedSlotsResponse getFilteredSlots(RequestSlotFilters requestSlotFilters) {
+
+    List<Slot> slots = slotRepository.findSlotsWithCursor(requestSlotFilters.slotFilters(),
+        requestSlotFilters.slotCursor());
+
+    List<SlotDto> slotDtoList = slots.stream()
+        .map(SlotService::convertToDto)
+        .collect(Collectors.toList());
+
+    if (slotDtoList.isEmpty()) {
+      return new PagedSlotsResponse(List.of(), requestSlotFilters.slotCursor());
+    }
+
+    SlotCursor cursor = new SlotCursor(
+        slotDtoList.getLast().caretaker().getRating(),
+        slots.getLast().getCreationTime(),
+        requestSlotFilters.slotCursor().limit());
+    return new PagedSlotsResponse(slotDtoList, cursor);
+  }
+
+  public List<SlotDto> getCalendarSlots(RequestCalendarSlots requestCalendarSlots) {
+
+    List<Slot> slots = slotRepository.findAllByCaretaker_CaretakerIdAndDateBetween(requestCalendarSlots.caretakerId(),
+        Date.valueOf(requestCalendarSlots.fromDate()), Date.valueOf(requestCalendarSlots.toDate()));
+
+    return slots.stream()
+        .map(SlotService::convertToDto)
+        .collect(Collectors.toList());
+  }
+
+  public Optional<SlotDto> getSlotById(UUID id) {
+    return slotRepository.findById(id).map(SlotService::convertToDto);
+  }
+
+  public List<SlotDto> getCaretakerSlots(UUID caretakerId) {
+    List<Slot> slots = slotRepository.findAllByCaretaker_CaretakerId(caretakerId);
+
+    return slots.stream()
+        .map(SlotService::convertToDto)
+        .collect(Collectors.toList());
+  }
+
+  @Transactional
+  public List<SlotDto> createSlot(RequestSlotDto requestSlotDto, UUID caretakerId) {
+
+    List<Slot> slots = divideAndCreateSlots(requestSlotDto, caretakerId);
+    List<Slot> saved = slotRepository.saveAll(slots);
+
+    return saved.stream()
+        .map(SlotService::convertToDto)
+        .collect(Collectors.toList());
+  }
+
+  public Optional<SlotDto> updateSlot(UUID slotId, RequestSlotDto requestSlotDto, UUID caretakerId) {
+    return slotRepository.findById(slotId)
+        .filter(slot -> slot.getCaretaker().getCaretakerId().equals(caretakerId))
+        .map(existing -> {
+          updateSlotEntity(existing, requestSlotDto);
+          Slot saved = slotRepository.save(existing);
+          return convertToDto(saved);
+        });
+  }
+
+  public Optional<SlotDto> deleteSlot(UUID slotId, UUID caretakerId) {
+    return slotRepository.findById(slotId)
+        .filter(slot -> slot.getCaretaker().getCaretakerId().equals(caretakerId))
+        .map(slot -> {
+          slotRepository.deleteById(slotId);
+          return convertToDto(slot);
+        });
+  }
+
+  public List<Slot> divideAndCreateSlots(RequestSlotDto request, UUID caretakerId) {
+    return divideAndCreateSlots(request, caretakerId, SLOT_INTERVAL_MINUTES);
+  }
+
+  /**
+   * Divides a RequestSlotDto into multiple slots with custom interval
+   *
+   * @param request         The slot request DTO
+   * @param caretakerId     The caretaker UUID
+   * @param intervalMinutes Custom interval in minutes
+   * @return List of Slot entities ready to be persisted
+   */
+  public List<Slot> divideAndCreateSlots(RequestSlotDto request, UUID caretakerId, int intervalMinutes) {
+    List<Slot> slots = new ArrayList<>();
+
+    // Divide time range into slots
+    List<TimeSlotPair> timeSlots = slotDivider.divideTimeRange(
+        request.timeFrom(),
+        request.timeTo(),
+        intervalMinutes
+    );
+
+    // Map each time slot to a Slot entity
+    for (TimeSlotPair timeSlot : timeSlots) {
+      Slot slot = toSlot(request, caretakerId, timeSlot.startTime(), timeSlot.endTime());
+      slots.add(slot);
+    }
+
+    return slots;
+  }
+
+  /**
+   * Maps RequestSlotDto and time range to a Slot entity
+   */
+  private Slot toSlot(RequestSlotDto request, UUID caretakerId, LocalTime startTime, LocalTime endTime) {
+    Slot slot = new Slot();
+
+    slot.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
+    slot.setDate(Date.valueOf(request.date()));
+    slot.setTimeFrom(Time.valueOf(startTime));
+    slot.setTimeTo(Time.valueOf(endTime));
+    slot.setType(request.type());
+    slot.setPrice(request.price());
+    slot.setCurrency("UAH");//todo Hardcoded for now, consider making it dynamic
+    slot.setCreationTime(LocalDateTime.now());
+    slot.setAdditionalData("{\"test\": \"test\"}");
+    slot.setAvailable(true);
+    slot.setCapacity(request.capacity());
+    slot.setOccupiedCapacity(0);
+    slot.setIsRepeated(false); // Manual slots are not repeated
+    slot.setRrule(null); // No RRule association for manual slots
+
+    return slot;
+  }
+
+  private void updateSlotEntity(Slot slot, RequestSlotDto request) {
+    slot.setDate(Date.valueOf(request.date()));
+    slot.setTimeFrom(Time.valueOf(request.timeFrom()));
+    slot.setTimeTo(Time.valueOf(request.timeTo()));
+    slot.setType(ServiceType.fromName(request.type()).name());
+    slot.setPrice(request.price());
+    slot.setCapacity(request.capacity());
+    //todo think about updating time and what user will see if slot was updated
+  }
+}

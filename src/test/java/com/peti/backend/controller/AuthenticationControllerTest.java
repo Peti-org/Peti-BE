@@ -6,12 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.auth.AuthenticationController;
 import com.peti.backend.dto.user.AuthResponse;
 import com.peti.backend.dto.user.RequestLogin;
 import com.peti.backend.dto.user.RegisterResponse;
 import com.peti.backend.dto.user.RequestRefreshToken;
 import com.peti.backend.dto.user.RequestRegister;
-import com.peti.backend.service.AuthenticationService;
+import com.peti.backend.service.auth.AuthenticationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

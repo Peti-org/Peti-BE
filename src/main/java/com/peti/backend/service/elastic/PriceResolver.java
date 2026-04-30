@@ -4,7 +4,7 @@ import com.peti.backend.dto.caretacker.CaretakerPreferences.PetConfig;
 import com.peti.backend.dto.caretacker.CaretakerPreferences.PriceInfo;
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.dto.caretacker.CaretakerPreferences.WeightTier;
-import com.peti.backend.service.elastic.model.PetInfo;
+import com.peti.backend.model.elastic.model.PetInfo;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;

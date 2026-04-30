@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +14,8 @@ import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.Slot;
 import com.peti.backend.model.internal.TimeSlotPair;
 import com.peti.backend.repository.SlotRepository;
+import com.peti.backend.service.slot.RRuleSlotGenerator;
+import com.peti.backend.service.slot.SlotDivider;
 import jakarta.persistence.EntityManager;
 import java.sql.Date;
 import java.sql.Time;

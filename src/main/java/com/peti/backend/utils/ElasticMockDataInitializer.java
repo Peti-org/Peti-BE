@@ -16,7 +16,7 @@ import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.repository.elastic.ElasticSlotRepository;
 import com.peti.backend.service.elastic.SlotGenerationService;
-import com.peti.backend.service.elastic.model.BookingInput;
+import com.peti.backend.model.elastic.model.BookingInput;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.Duration;

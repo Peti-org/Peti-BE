@@ -1,6 +1,6 @@
 package com.peti.backend.model.domain;
 
-import static com.peti.backend.service.RoleService.convertToAuthority;
+import static com.peti.backend.service.user.RoleService.convertToAuthority;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -63,6 +63,7 @@ public class User implements UserDetails {
   //  private Collection<PaymentSettings> paymentSettingsByUserId;
   @OneToMany(mappedBy = "petOwner")
   private Collection<Pet> petsByUserId;
+  @Deprecated(since = "delete it, not used anymore")
   @ManyToOne
   @JoinColumn(name = "location_id", referencedColumnName = "location_id", nullable = true)
   private Location locationByLocationId;

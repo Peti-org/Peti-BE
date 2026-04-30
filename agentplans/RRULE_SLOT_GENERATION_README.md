@@ -19,7 +19,7 @@ This feature automatically generates caretaker availability slots based on RFC 5
 ### 2. Services
 
 #### RRuleSlotGenerator
-**Location:** `com.peti.backend.service.RRuleSlotGenerator`
+**Location:** `com.peti.backend.service.slot.RRuleSlotGenerator`
 
 Core service responsible for:
 - Parsing RRule strings using `lib-recur` library
@@ -34,7 +34,7 @@ public int generateSlotsForRRule(CaretakerRRule rrule, LocalDate startDate, Loca
 ```
 
 #### SlotGenerationScheduler
-**Location:** `com.peti.backend.service.SlotGenerationScheduler`
+**Location:** `com.peti.backend.service.slot.SlotGenerationScheduler`
 
 Scheduled component that:
 - Runs daily at 2 AM (configurable via cron expression)
@@ -50,7 +50,7 @@ public void generateDailySlots()
 ```
 
 ### 3. Admin Controller
-**Location:** `com.peti.backend.controller.AdminSlotController`
+**Location:** `com.peti.backend.controller.maintenance.AdminSlotController`
 
 **Endpoint:** `POST /api/admin/slots/generate`
 - **Security:** Requires ADMIN role

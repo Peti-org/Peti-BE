@@ -13,8 +13,9 @@ import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.City;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
+import com.peti.backend.model.elastic.model.TimeRange;
 import com.peti.backend.model.internal.ServiceType;
-import com.peti.backend.service.elastic.model.BookingInput;
+import com.peti.backend.model.elastic.model.BookingInput;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,7 +85,7 @@ class SlotGenerationServiceTest {
     when(assembler.assemble(eq(testDate), any(), anyList(), eq(caretaker)))
         .thenAnswer(inv -> {
           @SuppressWarnings("unchecked")
-          var ranges = (Map<Integer, List<com.peti.backend.service.elastic.model.TimeRange>>) inv.getArgument(1);
+          var ranges = (Map<Integer, List<TimeRange>>) inv.getArgument(1);
           return ranges.entrySet().stream()
               .flatMap(e -> e.getValue().stream().map(r ->
                   ElasticSlotDocument.builder()

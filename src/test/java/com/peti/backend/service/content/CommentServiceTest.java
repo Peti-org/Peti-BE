@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.peti.backend.dto.content.CommentDto;
 import com.peti.backend.dto.content.RequestCommentDto;
-import com.peti.backend.dto.exception.NotFoundException;
+import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.domain.Comment;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.CommentRepository;

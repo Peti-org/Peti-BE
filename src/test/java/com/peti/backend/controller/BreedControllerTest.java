@@ -8,8 +8,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.user.BreedController;
 import com.peti.backend.dto.BreedDto;
-import com.peti.backend.service.BreedService;
+import com.peti.backend.service.user.BreedService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

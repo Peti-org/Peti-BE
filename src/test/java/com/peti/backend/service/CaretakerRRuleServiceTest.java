@@ -15,6 +15,8 @@ import com.peti.backend.dto.rrule.RequestRRuleDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.repository.CaretakerRRuleRepository;
+import com.peti.backend.service.slot.CaretakerRRuleService;
+import com.peti.backend.service.slot.SlotGenerationScheduler;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Arrays;

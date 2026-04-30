@@ -1,8 +1,8 @@
 package com.peti.backend.controller;
 
 
-import com.peti.backend.dto.exception.BadRequestException;
-import com.peti.backend.dto.exception.NotFoundException;
+import com.peti.backend.model.exception.BadRequestException;
+import com.peti.backend.model.exception.NotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Map;

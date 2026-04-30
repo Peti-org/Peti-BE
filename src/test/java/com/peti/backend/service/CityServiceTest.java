@@ -16,6 +16,8 @@ import com.peti.backend.repository.CityRepository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import com.peti.backend.service.user.CityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

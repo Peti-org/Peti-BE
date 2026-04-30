@@ -9,11 +9,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.controller.slot.SlotController;
 import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.dto.rrule.RequestRRuleDto;
-import com.peti.backend.service.CaretakerRRuleService;
-import com.peti.backend.service.CaretakerService;
-import com.peti.backend.service.SlotService;
+import com.peti.backend.service.slot.CaretakerRRuleService;
+import com.peti.backend.service.user.CaretakerService;
+import com.peti.backend.service.slot.SlotService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

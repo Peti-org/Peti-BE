@@ -1,5 +1,6 @@
 package com.peti.backend.model.domain;
 
+import com.peti.backend.dto.pet.PetProfile;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class Pet {
   @Basic
   @Column(name = "context", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  private Object context;
+  private PetProfile context;
   @Basic
   @Column(name = "pet_data_folder", nullable = false, length = 50)
   private String petDataFolder;
