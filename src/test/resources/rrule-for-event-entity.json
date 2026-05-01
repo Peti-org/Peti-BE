@@ -1,0 +1,55 @@
+{
+  // CaretakerRRule fixture used by EventService tests.
+  "rruleId": "11111111-aaaa-1111-aaaa-111111111111",
+  "caretaker": {
+    "caretakerId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+    "caretakerIsDeleted": false,
+    "rating": 50,
+    "caretakerPreference": {
+      "services": [
+        {
+          "type": "WALKING",
+          "frozen": false,
+          "priceNegotiable": true,
+          "isVip": false,
+          "maxSimultaneousPets": 3,
+          "baseDuration": "PT1H",
+          "stepDuration": "PT30M",
+          "minAdvanceMinutesBeforeSalesClose": "PT2H",
+          "configs": {
+            "Dog": {
+              "enabled": true,
+              "breeds": { "isIncluded": true, "include": [], "exclude": [] },
+              "sameForAllWeights": true,
+              "petPrice": {
+                "priceForService": 100.00,
+                "pricePerExtendingStep": 20.00,
+                "vipPrice": null,
+                "currency": "UAH",
+                "pickupPrice": null
+              },
+              "pickupDelivery": { "pickup": true, "bring": false },
+              "weightTiers": null
+            }
+          },
+          "tasksIncluded": ["Feeding"]
+        }
+      ],
+      "weeklySchedule": {
+        "MONDAY": { "enabled": true, "from": "08:00", "to": "20:00" }
+      }
+    }
+  },
+  "rrule": "FREQ=DAILY",
+  "dtstart": "2026-05-01T08:00:00",
+  "dtend": "2026-05-31T20:00:00",
+  "description": "Daily walks",
+  "slotType": "WALKING",
+  "capacity": 3,
+  "intervalMinutes": 30,
+  "createdAt": "2026-04-01T08:00:00",
+  "isEnabled": true,
+  "isSchedule": false,
+  "isBusy": false,
+  "priority": 1
+}

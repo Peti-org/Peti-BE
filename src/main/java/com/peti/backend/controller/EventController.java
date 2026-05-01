@@ -2,13 +2,13 @@ package com.peti.backend.controller;
 
 import com.peti.backend.dto.event.EventDto;
 import com.peti.backend.dto.event.RequestEventDto;
-import com.peti.backend.dto.slot.SlotDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.security.annotation.HasUserRole;
-import com.peti.backend.service.user.CaretakerService;
-import com.peti.backend.service.EventService;
+import com.peti.backend.service.event.EventService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,23 +29,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/events")
-@Tag(name = "Event", description = "Operation that is needed for managing events")
+@Tag(name = "Event", description = "Operations for managing events booked from a CaretakerRRule")
 @SecurityRequirement(name = "bearerAuth")
 public class EventController {
 
   private final EventService eventService;
-  private final CaretakerService caretakerService;
+  private final InputParamsResolver inputParamsResolver;
 
   @HasCaretakerRole
   @GetMapping("/caretaker/my")
+  @Operation(summary = "List events for the current caretaker (excludes deleted)")
   public ResponseEntity<List<EventDto>> getCaretakerEvents(
       @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    UUID caretakerId = getCaretakerId(userProjection);
+    UUID caretakerId = inputParamsResolver.resolveCaretakerIdBy(userProjection.getUserId());
     return ResponseEntity.ok(eventService.getEventsByCaretakerId(caretakerId));
   }
 
   @HasUserRole
   @GetMapping("/user/my")
+  @Operation(summary = "List events for the current user (excludes deleted)")
   public ResponseEntity<List<EventDto>> getUserEvents(
       @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     return ResponseEntity.ok(eventService.getEventsByUserId(userProjection.getUserId()));
@@ -53,14 +55,21 @@ public class EventController {
 
   @HasUserRole
   @PostMapping
-  public ResponseEntity<EventDto> createEvent(@Valid @RequestBody RequestEventDto requestEventDto,
+  @Operation(summary = "Create event from a CaretakerRRule",
+      description = "Creates an event in CREATED status. Triggers an Elastic slot rebuild for the caretaker.")
+  @ApiResponse(responseCode = "200", description = "Event created")
+  @ApiResponse(responseCode = "400", description = "Invalid time window or pets")
+  @ApiResponse(responseCode = "404", description = "RRule not found")
+  public ResponseEntity<EventDto> createEvent(
+      @Valid @RequestBody RequestEventDto requestEventDto,
       @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     return ResponseEntity.ok(eventService.createEvent(requestEventDto, userProjection.getUserId()));
   }
 
   @HasUserRole
   @DeleteMapping("/{eventId}")
-  public ResponseEntity<SlotDto> deleteEvent(@PathVariable UUID eventId,
+  @Operation(summary = "Soft-delete an event", description = "Triggers an Elastic slot rebuild.")
+  public ResponseEntity<Void> deleteEvent(@PathVariable UUID eventId,
       @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
     if (eventService.deleteEvent(eventId, userProjection.getUserId())) {
       return ResponseEntity.ok().build();
@@ -68,22 +77,9 @@ public class EventController {
     return ResponseEntity.notFound().build();
   }
 
-  private UUID getCaretakerId(UserProjection userProjection) {
-    try {
-      return caretakerService.getCaretakerIdByUserId(userProjection.getUserId())
-          .orElseThrow(
-              () -> new IllegalArgumentException("Caretaker not found for user: " + userProjection.getUserId()));
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
-  }
-
   @ModelAttribute("userProjection")
   public UserProjection getUserProjection(Authentication authentication) {
-    try {
-      return (UserProjection) authentication.getPrincipal();
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
+    return (UserProjection) authentication.getPrincipal();
   }
 }
+

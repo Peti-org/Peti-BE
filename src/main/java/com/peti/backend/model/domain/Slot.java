@@ -3,20 +3,16 @@ package com.peti.backend.model.domain;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -28,12 +24,13 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @Table(name = "caretaker_slot", schema = "peti", catalog = "peti")
-@EqualsAndHashCode(exclude = "events")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Slot {
 
   @GeneratedValue(strategy = GenerationType.UUID)
   @Id
   @Column(name = "slot_id ", nullable = false)
+  @EqualsAndHashCode.Include
   private UUID slotId;
 
   @ManyToOne
@@ -92,7 +89,4 @@ public class Slot {
   @ManyToOne
   @JoinColumn(name = "rrule_id", referencedColumnName = "rrule_id")
   private CaretakerRRule rrule;
-
-  @ManyToMany(mappedBy = "slots", fetch = FetchType.LAZY)
-  private Set<Event> events = new HashSet<>();
 }

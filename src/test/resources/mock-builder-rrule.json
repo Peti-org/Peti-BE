@@ -1,0 +1,14 @@
+{
+  // Expected output of MockDataBuilder.buildRRule(caretaker, 2026-05-05, 0)
+  "rrule": "FREQ=DAILY",
+  "dtstart": "2026-05-05T08:00:00",
+  "dtend": "2026-05-05T18:00:00",
+  "slotType": "WALKING",
+  "capacity": 1,
+  "intervalMinutes": 30,
+  "isEnabled": true,
+  "isSchedule": true,
+  "isBusy": false,
+  "priority": 0
+}
+

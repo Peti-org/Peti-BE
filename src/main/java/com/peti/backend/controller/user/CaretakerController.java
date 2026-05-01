@@ -2,10 +2,12 @@ package com.peti.backend.controller.user;
 
 import com.peti.backend.dto.caretacker.CaretakerDto;
 import com.peti.backend.dto.caretacker.CaretakerPreferences;
+import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
+import com.peti.backend.service.slot.CaretakerRRuleService;
 import com.peti.backend.service.user.CaretakerService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CaretakerController {
 
   private final CaretakerService caretakerService;
+  private final CaretakerRRuleService rruleService;
 
   @HasAdminRole
   @GetMapping
@@ -79,6 +83,11 @@ public class CaretakerController {
       @org.springframework.web.bind.annotation.RequestBody @Valid CaretakerPreferences caretakerPreferences
   ) {
     return ResponseEntity.ok(caretakerService.updateCaretaker(userProjection, caretakerPreferences));
+  }
+
+  @GetMapping("/{caretakerId}/rrules")
+  public ResponseEntity<List<RRuleDto>> getCaretakerRRules(@PathVariable UUID caretakerId ) {
+    return ResponseEntity.ok(rruleService.getAllRRulesForCaretaker(caretakerId));
   }
 
   @ModelAttribute("userProjection")
