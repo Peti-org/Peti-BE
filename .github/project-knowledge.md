@@ -1,6 +1,6 @@
 # Peti-BE Project Knowledge Cache
 
-> **Last analyzed**: 2026-05-01
+> **Last analyzed**: 2026-05-02
 > This file is the local knowledge store so agents don't re-analyze the project structure each time.
 
 ---
@@ -70,7 +70,7 @@ Controller  →  Service  →  Repository  →  Database / Elasticsearch
 | **DTO** | `dto/{domain}/` | Request/response DTOs, separate from entities |
 | **Security** | `security/` | JWT filter, security config, role annotations |
 | **Config** | `config/` | `AppConfig` (ObjectMapper), `ElasticsearchConfig`, `HibernateConfig` |
-| **Utils** | `utils/` | `MockDataBuilder`, `ElasticMockDataInitializer` |
+| **Utils** | `utils/` | `MockDataBuilder`, `ElasticMockDataInitializer`, `DeepCloner` |
 
 ### Package Structure
 ```
@@ -396,9 +396,45 @@ Allowed origins: `localhost:8080`, `localhost:8082`, `localhost:8083`
 | Pattern | Implementation |
 |---------|---------------|
 | DI | Constructor injection via `@RequiredArgsConstructor` |
-| DTO mapping | Static `from(Entity)` on DTO + private `toEntity(Dto)` in service |
+| DTO mapping | Static `convert(Entity)` / `convert(Entity, ...)` on DTO + private `toEntity(Dto)` in service |
 | Validation | Jakarta `@NotEmpty`, `@NotNull` on DTOs, `@Valid` on controller params |
 | Error handling | Global `RestExceptionHandler`, custom `BadRequestException`/`NotFoundException` |
+| Deep cloning | `DeepCloner` component — serializes/deserializes JSONB records (`CaretakerPreferences`, `PetProfile`) via `ObjectMapper` to produce independent copies |
+| Async | `@EnableAsync` on `AppConfig`; `@Async` on `CaretakerSlotsRebuildTrigger.rebuild()` methods |
+| Arg resolvers | `CurrentCaretakerIdArgumentResolver` resolves `@CurrentCaretakerId UUID` from security context → `CaretakerService.getCaretakerIdByUserId()` |
+| Annotations | `@CurrentUser` — injects `UserProjection` into controller methods; `@CurrentCaretakerId` — injects caretaker UUID |
+
+### New/Refactored Classes (2026-05-02)
+
+| Class | Package | Description |
+|-------|---------|-------------|
+| `DeepCloner` | `utils` | Component for deep-copying JSONB records via ObjectMapper serialization round-trip |
+| `CurrentCaretakerIdArgumentResolver` | `config` | Spring `HandlerMethodArgumentResolver` for `@CurrentCaretakerId` annotation |
+| `WebMvcConfig` | `config` | Registers custom argument resolvers |
+| `@CurrentCaretakerId` | `security.annotation` | Parameter annotation to inject resolved caretaker UUID |
+| `@CurrentUser` | `security.annotation` | Parameter annotation to inject `UserProjection` from security context |
+| `RRuleDto.convert()` | `dto.rrule` | Static factory method moved from `CaretakerRRuleService.convertToDto()` to DTO |
+| `CaretakerDto.convert()` | `dto.caretacker` | Static factory method for entity → DTO mapping |
+| `SimpleCaretakerDto` | `dto.caretacker` | Converted from class to record with `convert()` factory |
+| `PetDto.convert()` | `dto.pet` | Static factory accepting `Pet` + deep-copied `PetProfile` |
+| `OrderStatusMachine` | `service.order` | Removed `resolveRole()`, `allowedTransitions()`, `canView()`; Role enum moved to bottom; uses `@NoArgsConstructor(access = PRIVATE)` |
+| `OrderService` | `service.order` | Split `getOrderForActor` → `getOrderAsClient`/`getOrderAsCaretaker`; `transition()` now takes explicit `Role` parameter |
+| `CaretakerRRuleService` | `service.slot` | Refactored: extracted `applyFields()` and `buildRRule()` private methods; replaced `SlotGenerationScheduler` with `CaretakerSlotsRebuildTrigger`; uses `findByRruleIdAndCaretaker_CaretakerId` |
+
+### Test Coverage for New/Refactored Code
+
+| Test Class | Package | Covers |
+|------------|---------|--------|
+| `DeepClonerTest` | `utils` | `deepCopyPreference()`, `deepCopyPetProfile()` — independent copies, null handling |
+| `CurrentCaretakerIdArgumentResolverTest` | `config` | `supportsParameter()` (annotated UUID, wrong type, no annotation), `resolveArgument()` (found, not found → NotFoundException) |
+| `CaretakerDtoTest` | `dto.caretacker` | `CaretakerDto.convert()` static factory |
+| `SimpleCaretakerDtoTest` | `dto.caretacker` | `SimpleCaretakerDto.convert()` static factory |
+| `PetDtoTest` | `dto.pet` | `PetDto.convert()` static factory |
+| `CaretakerRRuleServiceTest` | `service` | Fixed: uses `CaretakerSlotsRebuildTrigger` mock, `findByRruleIdAndCaretaker_CaretakerId`, `RRuleDto.convert()` |
+| `OrderServiceTest` | `service.order` | Fixed: uses `getOrderAsClient`/`getModificationsAsClient`, `transition()` with explicit `Role` |
+| `OrderStatusMachineTest` | `service.order` | Fixed: removed tests for deleted `resolveRole()`, `allowedTransitions()`, `canView()` |
+| `PetServiceTest` (both packages) | `service`, `service.user` | Fixed: added `DeepCloner` mock |
+| `ElasticMockDataInitializerTest` | `utils` | Fixed: removed `mockDataEnabled` field (now `@ConditionalOnProperty`), removed `disabled_skips` test |
 | Security | Method-level `@HasUserRole`/`@HasAdminRole`/`@HasCaretakerRole` |
 | Testing | JSON fixtures via `ResourceLoader`, Mockito for service tests, MockMvc for controller tests |
 | Immutable models | Java records in `elastic/model/` package and DTO records (`CaretakerPreferences`, `PetProfile`) |
@@ -446,6 +482,11 @@ Allowed origins: `localhost:8080`, `localhost:8082`, `localhost:8083`
 | AdminOrderService | ✅ |
 | MockDataBuilder | ✅ |
 | ElasticMockDataInitializer | ✅ |
+| DeepCloner | ✅ |
+| CurrentCaretakerIdArgumentResolver | ✅ |
+| CaretakerDto.convert() | ✅ |
+| SimpleCaretakerDto.convert() | ✅ |
+| PetDto.convert() | ✅ |
 | CaretakerService | ❌ |
 | GoogleAuthenticationService | ❌ |
 | ElasticSlotSearchService | ❌ |

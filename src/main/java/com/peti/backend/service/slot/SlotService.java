@@ -1,7 +1,6 @@
 package com.peti.backend.service.slot;
 
-import static com.peti.backend.service.user.CaretakerService.convertToSimpleDto;
-
+import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
 import com.peti.backend.dto.slot.PagedSlotsResponse;
 import com.peti.backend.dto.slot.RequestCalendarSlots;
 import com.peti.backend.dto.slot.RequestSlotDto;
@@ -43,7 +42,7 @@ public class SlotService {
   public static SlotDto convertToDto(Slot slot) {
     return new SlotDto(
         slot.getSlotId(),
-        convertToSimpleDto(slot.getCaretaker()),
+        SimpleCaretakerDto.convert(slot.getCaretaker()),
         slot.getDate().toLocalDate(),
         slot.getTimeFrom().toLocalTime(),
         slot.getTimeTo().toLocalTime(),
@@ -69,7 +68,7 @@ public class SlotService {
     }
 
     SlotCursor cursor = new SlotCursor(
-        slotDtoList.getLast().caretaker().getRating(),
+        slotDtoList.getLast().caretaker().rating(),
         slots.getLast().getCreationTime(),
         requestSlotFilters.slotCursor().limit());
     return new PagedSlotsResponse(slotDtoList, cursor);

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import com.peti.backend.dto.pet.PetDto;
 import com.peti.backend.dto.pet.PetProfile;
@@ -17,6 +18,7 @@ import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.PetRepository;
+import com.peti.backend.utils.DeepCloner;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -38,6 +40,8 @@ class PetServiceTest {
   private PetRepository petRepository;
   @Mock
   private EntityManager entityManager;
+  @Mock
+  private DeepCloner deepCloner;
 
   @InjectMocks
   private PetService petService;
@@ -82,6 +86,8 @@ class PetServiceTest {
     pet.setPetDataFolder("default");
     pet.setPetOwner(owner);
     pet.setBreed(breed);
+
+    lenient().when(deepCloner.deepCopyPetProfile(any())).thenAnswer(inv -> inv.getArgument(0));
   }
 
   @Test

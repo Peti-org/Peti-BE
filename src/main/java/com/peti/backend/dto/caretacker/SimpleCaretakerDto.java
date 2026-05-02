@@ -1,16 +1,17 @@
 package com.peti.backend.dto.caretacker;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.peti.backend.model.domain.Caretaker;
 import java.util.UUID;
 
-@Getter
-@AllArgsConstructor
-public class SimpleCaretakerDto {
+public record SimpleCaretakerDto(UUID id, String firstName, String lastName, Integer rating) {
 
-  private final UUID id;
-  private final String firstName;
-  private final String lastName;
-  private final Integer rating;
+  public static SimpleCaretakerDto convert(Caretaker caretaker) {
+    return new SimpleCaretakerDto(
+        caretaker.getCaretakerId(),
+        caretaker.getUserReference().getFirstName(),
+        caretaker.getUserReference().getLastName(),
+        caretaker.getRating()
+    );
+  }
 
 }

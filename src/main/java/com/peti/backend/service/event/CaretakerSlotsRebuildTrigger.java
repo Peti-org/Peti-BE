@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,9 +36,24 @@ public class CaretakerSlotsRebuildTrigger {
   private final SlotGenerationService slotGenerationService;
   private final ElasticSlotCrudService elasticSlotCrudService;
 
+  @Value("${elasticsearch.data-generation.days-ahead:60}")
+  private int daysAhead;
+
   /**
-   * Rebuild Elastic slots for every date in [from..to] (inclusive).
+   * Triggers a rebuild of Elastic slot documents for given caretaker for the next {@code daysAhead} days starting from
+   * today.
    */
+  @Async
+  public void rebuild(Caretaker caretaker) {
+    LocalDate current = LocalDate.now();
+    LocalDate end = current.plusDays(daysAhead);
+    rebuild(caretaker, current, end);
+  }
+
+  /**
+   * Rebuild Elastic slots for every date in [from <-> to] (inclusive).
+   */
+  @Async
   public void rebuild(Caretaker caretaker, LocalDate from, LocalDate to) {
     if (caretaker == null || from == null || to == null || from.isAfter(to)) {
       log.debug("CaretakerSlotsRebuildTrigger called with invalid parameters, {}, {}, {}", caretaker, from, to);

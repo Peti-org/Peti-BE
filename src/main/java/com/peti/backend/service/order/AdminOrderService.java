@@ -4,6 +4,7 @@ import com.peti.backend.dto.order.AdminOrderDto;
 import com.peti.backend.dto.order.OrderModificationDto;
 import com.peti.backend.dto.order.UserInfoDto;
 import com.peti.backend.model.domain.Order;
+import com.peti.backend.model.domain.OrderModification;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.internal.OrderStatus;
@@ -62,7 +63,7 @@ public class AdminOrderService {
         .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
 
     Set<UUID> actorIds = order.getModifications().stream()
-        .map(m -> m.getActorId())
+        .map(OrderModification::getActorId)
         .filter(java.util.Objects::nonNull)
         .collect(Collectors.toSet());
 

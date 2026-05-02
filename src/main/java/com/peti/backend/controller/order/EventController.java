@@ -1,13 +1,14 @@
-package com.peti.backend.controller;
+package com.peti.backend.controller.order;
 
 import com.peti.backend.dto.event.EventDto;
 import com.peti.backend.dto.event.RequestEventDto;
 import com.peti.backend.model.projection.UserProjection;
+import com.peti.backend.security.annotation.CurrentCaretakerId;
+import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.event.EventService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,10 +17,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,23 +33,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventController {
 
   private final EventService eventService;
-  private final InputParamsResolver inputParamsResolver;
 
   @HasCaretakerRole
   @GetMapping("/caretaker/my")
   @Operation(summary = "List events for the current caretaker (excludes deleted)")
-  public ResponseEntity<List<EventDto>> getCaretakerEvents(
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    UUID caretakerId = inputParamsResolver.resolveCaretakerIdBy(userProjection.getUserId());
+  public ResponseEntity<List<EventDto>> getCaretakerEvents(@CurrentCaretakerId UUID caretakerId) {
     return ResponseEntity.ok(eventService.getEventsByCaretakerId(caretakerId));
   }
 
   @HasUserRole
   @GetMapping("/user/my")
   @Operation(summary = "List events for the current user (excludes deleted)")
-  public ResponseEntity<List<EventDto>> getUserEvents(
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    return ResponseEntity.ok(eventService.getEventsByUserId(userProjection.getUserId()));
+  public ResponseEntity<List<EventDto>> getUserEvents(@CurrentUser UserProjection user) {
+    return ResponseEntity.ok(eventService.getEventsByUserId(user.getUserId()));
   }
 
   @HasUserRole
@@ -62,24 +57,19 @@ public class EventController {
   @ApiResponse(responseCode = "404", description = "RRule not found")
   public ResponseEntity<EventDto> createEvent(
       @Valid @RequestBody RequestEventDto requestEventDto,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    return ResponseEntity.ok(eventService.createEvent(requestEventDto, userProjection.getUserId()));
+      @CurrentUser UserProjection user) {
+    return ResponseEntity.ok(eventService.createEvent(requestEventDto, user.getUserId()));
   }
 
   @HasUserRole
   @DeleteMapping("/{eventId}")
   @Operation(summary = "Soft-delete an event", description = "Triggers an Elastic slot rebuild.")
-  public ResponseEntity<Void> deleteEvent(@PathVariable UUID eventId,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    if (eventService.deleteEvent(eventId, userProjection.getUserId())) {
+  public ResponseEntity<Void> deleteEvent(
+      @PathVariable UUID eventId,
+      @CurrentUser UserProjection user) {
+    if (eventService.deleteEvent(eventId, user.getUserId())) {
       return ResponseEntity.ok().build();
     }
     return ResponseEntity.notFound().build();
   }
-
-  @ModelAttribute("userProjection")
-  public UserProjection getUserProjection(Authentication authentication) {
-    return (UserProjection) authentication.getPrincipal();
-  }
 }
-

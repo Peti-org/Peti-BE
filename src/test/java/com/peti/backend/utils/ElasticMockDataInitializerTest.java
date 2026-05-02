@@ -57,15 +57,6 @@ class ElasticMockDataInitializerTest {
   @InjectMocks
   private ElasticMockDataInitializer initializer;
 
-  @Test
-  @DisplayName("initializeMockData - skips when disabled")
-  void initializeMockData_disabled_skips() {
-    // mockDataEnabled defaults to false (no @Value injection in unit test)
-    initializer.initializeMockData();
-
-    verify(elasticsearchOperations, never()).indexOps(any(Class.class));
-    verify(slotRepository, never()).saveAll(anyList());
-  }
 
   @Test
   @DisplayName("initializeMockData - creates caretakers and saves slots when enabled")
@@ -136,7 +127,6 @@ class ElasticMockDataInitializerTest {
   // ── Helpers ───────────────────────────────────────────────────────
 
   private void enableMockData(int caretakers, int daysAhead) throws Exception {
-    setField("mockDataEnabled", true);
     setField("numberOfCaretakers", caretakers);
     setField("daysAhead", daysAhead);
   }

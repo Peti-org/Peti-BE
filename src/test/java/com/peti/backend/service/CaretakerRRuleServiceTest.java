@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +14,9 @@ import com.peti.backend.dto.rrule.RequestRRuleDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.repository.CaretakerRRuleRepository;
+import com.peti.backend.service.event.CaretakerSlotsRebuildTrigger;
 import com.peti.backend.service.slot.CaretakerRRuleService;
-import com.peti.backend.service.slot.SlotGenerationScheduler;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class CaretakerRRuleServiceTest {
+class CaretakerRRuleServiceTest {
 
   @Mock
   private CaretakerRRuleRepository rruleRepository;
@@ -40,7 +37,7 @@ public class CaretakerRRuleServiceTest {
   private EntityManager entityManager;
 
   @Mock
-  private SlotGenerationScheduler slotGenerationScheduler;
+  private CaretakerSlotsRebuildTrigger slotsRebuildTrigger;
 
   @InjectMocks
   private CaretakerRRuleService rruleService;
@@ -56,10 +53,8 @@ public class CaretakerRRuleServiceTest {
     caretakerId = UUID.fromString("223e4567-e89b-12d3-a456-426614174002");
     rruleId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
 
-    // Load test data
     requestRRuleDto = ResourceLoader.loadResource("rrule-create-request.json", RequestRRuleDto.class);
 
-    // Create mock entities
     caretaker = new Caretaker();
     caretaker.setCaretakerId(caretakerId);
 
@@ -80,10 +75,9 @@ public class CaretakerRRuleServiceTest {
   }
 
   @Test
-  public void testCreateRRule_Success() {
+  void testCreateRRule_Success() {
     when(entityManager.getReference(Caretaker.class, caretakerId)).thenReturn(caretaker);
     when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
-    when(slotGenerationScheduler.generateSlotsForSingleRRule(any(), any(), any())).thenReturn(10);
 
     RRuleDto result = rruleService.createRRule(requestRRuleDto, caretakerId);
 
@@ -96,13 +90,12 @@ public class CaretakerRRuleServiceTest {
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
     assertEquals(requestRRuleDto.priority(), result.priority());
     verify(rruleRepository).save(any(CaretakerRRule.class));
-    verify(slotGenerationScheduler).generateSlotsForSingleRRule(any(), any(), any());
+    verify(slotsRebuildTrigger).rebuild(caretaker);
   }
 
   @Test
-  public void testGetAllRRulesForCaretaker() {
-    List<CaretakerRRule> rrules = Arrays.asList(rrule);
-    when(rruleRepository.findAllByCaretaker_CaretakerId(caretakerId)).thenReturn(rrules);
+  void testGetAllRRulesForCaretaker() {
+    when(rruleRepository.findAllByCaretaker_CaretakerId(caretakerId)).thenReturn(List.of(rrule));
 
     List<RRuleDto> result = rruleService.getAllRRulesForCaretaker(caretakerId);
 
@@ -111,57 +104,53 @@ public class CaretakerRRuleServiceTest {
   }
 
   @Test
-  public void testUpdateRRule_Success() {
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
+  void testUpdateRRule_Success() {
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.of(rrule));
     when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
-    when(slotGenerationScheduler.deleteSlotsForRRule(any(), any())).thenReturn(5);
-    when(slotGenerationScheduler.generateSlotsForSingleRRule(any(), any(), any())).thenReturn(10);
 
     Optional<RRuleDto> result = rruleService.updateRRule(rruleId, requestRRuleDto, caretakerId);
 
     assertTrue(result.isPresent());
-    verify(slotGenerationScheduler).deleteSlotsForRRule(eq(rruleId), any(LocalDate.class));
-    verify(slotGenerationScheduler).generateSlotsForSingleRRule(eq(rruleId), any(), any());
     verify(rruleRepository).save(any(CaretakerRRule.class));
+    verify(slotsRebuildTrigger).rebuild(caretaker);
   }
 
   @Test
-  public void testUpdateRRule_WrongCaretaker() {
-    UUID differentCaretakerId = UUID.randomUUID();
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
+  void testUpdateRRule_NotFound() {
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.empty());
 
-    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, requestRRuleDto, differentCaretakerId);
+    Optional<RRuleDto> result = rruleService.updateRRule(rruleId, requestRRuleDto, caretakerId);
 
     assertFalse(result.isPresent());
   }
 
   @Test
-  public void testDeleteRRule_Success() {
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
-    when(slotGenerationScheduler.deleteSlotsForRRule(any(), any())).thenReturn(5);
+  void testDeleteRRule_Success() {
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.of(rrule));
 
     Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, caretakerId);
 
     assertTrue(result.isPresent());
-    verify(slotGenerationScheduler).deleteSlotsForRRule(eq(rruleId), any(LocalDate.class));
     verify(rruleRepository).deleteById(rruleId);
+    verify(slotsRebuildTrigger).rebuild(caretaker);
   }
 
   @Test
-  public void testDeleteRRule_WrongCaretaker() {
-    UUID differentCaretakerId = UUID.randomUUID();
-    when(rruleRepository.findById(rruleId)).thenReturn(Optional.of(rrule));
+  void testDeleteRRule_NotFound() {
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.empty());
 
-    Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, differentCaretakerId);
+    Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, caretakerId);
 
     assertFalse(result.isPresent());
   }
 
   @Test
-  public void testConvertToDto() {
-    rrule.setGeneratedTo(LocalDate.of(2026, 2, 17));
-
-    RRuleDto result = CaretakerRRuleService.convertToDto(rrule);
+  void testConvertToDto() {
+    RRuleDto result = RRuleDto.convert(rrule);
 
     assertNotNull(result);
     assertEquals(rruleId, result.rruleId());
@@ -174,4 +163,3 @@ public class CaretakerRRuleServiceTest {
     assertEquals(requestRRuleDto.priority(), result.priority());
   }
 }
-

@@ -11,6 +11,7 @@ import com.peti.backend.model.internal.EventStatus;
 import com.peti.backend.model.internal.OrderStatus;
 import com.peti.backend.repository.EventRepository;
 import com.peti.backend.repository.OrderRepository;
+import com.peti.backend.service.order.OrderStatusMachine.Role;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,40 +50,57 @@ public class OrderService {
             "Order reserved by caretaker"));
     event.setStatus(EventStatus.APPROVED);
 
-    Order saved = orderRepository.save(order);
-    return OrderDto.from(saved);
+    return OrderDto.from(orderRepository.save(order));
   }
 
   /**
-   * Returns an order if the requesting actor is a participant (client or caretaker).
-   * Throws {@link NotFoundException} otherwise to avoid leaking existence.
+   * Returns an order visible to the client.
+   * Throws {@link NotFoundException} if the user is not the client on this order.
    */
   @Transactional(readOnly = true)
-  public OrderDto getOrderForActor(UUID orderId, UUID actorId) {
+  public OrderDto getOrderAsClient(UUID orderId, UUID userId) {
     Order order = findActiveOrder(orderId);
-    if (!OrderStatusMachine.canView(actorId,
-        order.getClient().getUserId(),
-        order.getCaretaker().getCaretakerId())) {
+    if (!order.getClient().getUserId().equals(userId)) {
       throw new NotFoundException("Order not found: " + orderId);
     }
     return OrderDto.from(order);
   }
 
   /**
-   * Returns the modification history of the order, but only if the requesting actor
-   * is the client or caretaker on the order.
+   * Returns an order visible to the caretaker.
+   * Throws {@link NotFoundException} if the caretaker is not on this order.
    */
   @Transactional(readOnly = true)
-  public List<OrderModificationDto> getModificationsForActor(UUID orderId, UUID actorId) {
+  public OrderDto getOrderAsCaretaker(UUID orderId, UUID caretakerId) {
     Order order = findActiveOrder(orderId);
-    if (!OrderStatusMachine.canView(actorId,
-        order.getClient().getUserId(),
-        order.getCaretaker().getCaretakerId())) {
+    if (!order.getCaretaker().getCaretakerId().equals(caretakerId)) {
       throw new NotFoundException("Order not found: " + orderId);
     }
-    return order.getModifications().stream()
-        .map(OrderModificationDto::from)
-        .toList();
+    return OrderDto.from(order);
+  }
+
+  /**
+   * Returns modification history for the client view.
+   */
+  @Transactional(readOnly = true)
+  public List<OrderModificationDto> getModificationsAsClient(UUID orderId, UUID userId) {
+    Order order = findActiveOrder(orderId);
+    if (!order.getClient().getUserId().equals(userId)) {
+      throw new NotFoundException("Order not found: " + orderId);
+    }
+    return toModificationDtos(order);
+  }
+
+  /**
+   * Returns modification history for the caretaker view.
+   */
+  @Transactional(readOnly = true)
+  public List<OrderModificationDto> getModificationsAsCaretaker(UUID orderId, UUID caretakerId) {
+    Order order = findActiveOrder(orderId);
+    if (!order.getCaretaker().getCaretakerId().equals(caretakerId)) {
+      throw new NotFoundException("Order not found: " + orderId);
+    }
+    return toModificationDtos(order);
   }
 
   @Transactional(readOnly = true)
@@ -99,18 +117,18 @@ public class OrderService {
         .toList();
   }
 
+  /**
+   * Transitions an order to the target status. The caller must pass the actor's {@link Role}
+   * explicitly — it is determined by the URL path (client vs caretaker endpoint), not resolved
+   * at runtime.
+   */
   @Transactional
   public OrderDto transition(UUID orderId, OrderStatus targetStatus,
-      UUID actorId, String comment) {
+      UUID actorId, Role actorRole, String comment) {
     Order order = findActiveOrder(orderId);
 
-    OrderStatusMachine.Role role = OrderStatusMachine.resolveRole(actorId,
-        order.getClient().getUserId(),
-        order.getCaretaker().getCaretakerId());
-
-    if (!OrderStatusMachine.isAuthorized(targetStatus, role)) {
-      throw new BadRequestException(
-          "Not authorized to transition order to " + targetStatus);
+    if (!OrderStatusMachine.isAuthorized(targetStatus, actorRole)) {
+      throw new BadRequestException("Not authorized to transition order to " + targetStatus);
     }
 
     if (!OrderStatusMachine.canTransition(order.getStatus(), targetStatus)) {
@@ -126,9 +144,16 @@ public class OrderService {
     return OrderDto.from(orderRepository.save(order));
   }
 
+
   private Order findActiveOrder(UUID orderId) {
     return orderRepository.findByOrderIdAndDeletedFalse(orderId)
         .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+  }
+
+  private List<OrderModificationDto> toModificationDtos(Order order) {
+    return order.getModifications().stream()
+        .map(OrderModificationDto::from)
+        .toList();
   }
 
   private Order buildOrder(Event event) {

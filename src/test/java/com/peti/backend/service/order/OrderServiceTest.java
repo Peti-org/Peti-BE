@@ -16,6 +16,7 @@ import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.internal.OrderStatus;
 import com.peti.backend.repository.EventRepository;
 import com.peti.backend.repository.OrderRepository;
+import com.peti.backend.service.order.OrderStatusMachine.Role;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -104,61 +105,61 @@ class OrderServiceTest {
   }
 
   @Test
-  @DisplayName("getOrderForActor - participant client gets the order")
-  void getOrderForActor_clientCanView() {
+  @DisplayName("getOrderAsClient - client gets the order")
+  void getOrderAsClient_clientCanView() {
     Order order = ResourceLoader.loadResource("order-entity.json", Order.class);
     OrderDto expected = ResourceLoader.loadResource("order-response.json", OrderDto.class);
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.of(order));
 
-    OrderDto result = orderService.getOrderForActor(ORDER_ID, CLIENT_ID);
+    OrderDto result = orderService.getOrderAsClient(ORDER_ID, CLIENT_ID);
 
     assertThat(result).usingRecursiveComparison().isEqualTo(expected);
   }
 
   @Test
-  @DisplayName("getOrderForActor - non-participant gets NotFoundException (no leak)")
-  void getOrderForActor_strangerGets404() {
+  @DisplayName("getOrderAsClient - non-client gets NotFoundException")
+  void getOrderAsClient_strangerGets404() {
     Order order = ResourceLoader.loadResource("order-entity.json", Order.class);
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.of(order));
 
     UUID stranger = UUID.randomUUID();
-    assertThatThrownBy(() -> orderService.getOrderForActor(ORDER_ID, stranger))
+    assertThatThrownBy(() -> orderService.getOrderAsClient(ORDER_ID, stranger))
         .isInstanceOf(NotFoundException.class);
   }
 
   @Test
-  @DisplayName("getOrderForActor - missing order throws NotFoundException")
-  void getOrderForActor_notFound() {
+  @DisplayName("getOrderAsClient - missing order throws NotFoundException")
+  void getOrderAsClient_notFound() {
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.empty());
 
-    assertThatThrownBy(() -> orderService.getOrderForActor(ORDER_ID, CLIENT_ID))
+    assertThatThrownBy(() -> orderService.getOrderAsClient(ORDER_ID, CLIENT_ID))
         .isInstanceOf(NotFoundException.class);
   }
 
   @Test
-  @DisplayName("getModificationsForActor - non-participant rejected")
-  void getModificationsForActor_strangerRejected() {
+  @DisplayName("getModificationsAsClient - non-client rejected")
+  void getModificationsAsClient_strangerRejected() {
     Order order = ResourceLoader.loadResource("order-entity.json", Order.class);
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.of(order));
 
     UUID stranger = UUID.randomUUID();
-    assertThatThrownBy(() -> orderService.getModificationsForActor(ORDER_ID, stranger))
+    assertThatThrownBy(() -> orderService.getModificationsAsClient(ORDER_ID, stranger))
         .isInstanceOf(NotFoundException.class);
   }
 
   @Test
-  @DisplayName("getModificationsForActor - participant gets list")
-  void getModificationsForActor_participantGetsList() {
+  @DisplayName("getModificationsAsClient - client gets list")
+  void getModificationsAsClient_participantGetsList() {
     Order order = ResourceLoader.loadResource("order-entity.json", Order.class);
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.of(order));
 
     List<OrderModificationDto> mods =
-        orderService.getModificationsForActor(ORDER_ID, CLIENT_ID);
+        orderService.getModificationsAsClient(ORDER_ID, CLIENT_ID);
 
     assertThat(mods).isEmpty(); // fixture has no modifications
   }
@@ -187,7 +188,7 @@ class OrderServiceTest {
     when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
     OrderDto result = orderService.transition(
-        ORDER_ID, OrderStatus.DEFERRED_PAYMENT, CLIENT_ID, "Paid");
+        ORDER_ID, OrderStatus.DEFERRED_PAYMENT, CLIENT_ID, Role.CLIENT, "Paid");
 
     assertThat(result.status()).isEqualTo(OrderStatus.DEFERRED_PAYMENT);
   }
@@ -200,7 +201,7 @@ class OrderServiceTest {
         .thenReturn(Optional.of(order));
 
     assertThatThrownBy(() -> orderService.transition(
-        ORDER_ID, OrderStatus.PAID, CARETAKER_ID, null))
+        ORDER_ID, OrderStatus.PAID, CARETAKER_ID, Role.CARETAKER, null))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("Cannot transition");
   }
@@ -213,21 +214,20 @@ class OrderServiceTest {
         .thenReturn(Optional.of(order));
 
     assertThatThrownBy(() -> orderService.transition(
-        ORDER_ID, OrderStatus.DECLINED, CLIENT_ID, null))
+        ORDER_ID, OrderStatus.DECLINED, CLIENT_ID, Role.CLIENT, null))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("Not authorized");
   }
 
   @Test
-  @DisplayName("transition - unauthorized actor throws BadRequestException")
-  void transition_unauthorizedActor() {
+  @DisplayName("transition - null role throws BadRequestException")
+  void transition_nullRoleThrows() {
     Order order = ResourceLoader.loadResource("order-entity.json", Order.class);
     when(orderRepository.findByOrderIdAndDeletedFalse(ORDER_ID))
         .thenReturn(Optional.of(order));
 
-    UUID stranger = UUID.randomUUID();
     assertThatThrownBy(() -> orderService.transition(
-        ORDER_ID, OrderStatus.CANCELLED, stranger, null))
+        ORDER_ID, OrderStatus.CANCELLED, UUID.randomUUID(), null, null))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("Not authorized");
   }
@@ -236,4 +236,3 @@ class OrderServiceTest {
   @SuppressWarnings("unused")
   private static final TypeReference<List<OrderDto>> ORDER_LIST_TYPE = new TypeReference<>() {};
 }
-

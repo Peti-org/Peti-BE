@@ -2,27 +2,26 @@ package com.peti.backend.controller.user;
 
 import com.peti.backend.dto.caretacker.CaretakerDto;
 import com.peti.backend.dto.caretacker.CaretakerPreferences;
+import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
 import com.peti.backend.dto.rrule.RRuleDto;
-import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.projection.UserProjection;
+import com.peti.backend.security.annotation.CurrentCaretakerId;
+import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.slot.CaretakerRRuleService;
 import com.peti.backend.service.user.CaretakerService;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,37 +40,28 @@ public class CaretakerController {
 
   @HasAdminRole
   @GetMapping
-  public ResponseEntity<List<CaretakerDto>> getAllCaretakers() {
+  public ResponseEntity<List<SimpleCaretakerDto>> getAllCaretakers() {
     return ResponseEntity.ok(caretakerService.getAllCaretakers());
   }
 
   @HasUserRole
   @GetMapping("/me")
-  public ResponseEntity<CaretakerDto> getCaretakerById(
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
-    try {
-      UUID caretakerId = caretakerService.getCaretakerIdByUserId(userProjection.getUserId())
-          .orElseThrow(
-              () -> new NotFoundException("Caretaker not found for user: " + userProjection.getUserId()));
-      return caretakerService.getCaretakerById(caretakerId)
-          .map(ResponseEntity::ok)
-          .orElse(ResponseEntity.notFound().build());
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
+  public ResponseEntity<CaretakerDto> getMyCaretakerDetails(@CurrentCaretakerId UUID caretakerId) {
+    return caretakerService.getCaretakerById(caretakerId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @HasUserRole
   @PostMapping
-  public ResponseEntity<CaretakerDto> createCaretaker(
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+  public ResponseEntity<CaretakerDto> createCaretaker(@CurrentUser UserProjection userProjection) {
     return ResponseEntity.ok(caretakerService.createCaretaker(userProjection));
   }
 
   @HasUserRole
   @PutMapping
   public ResponseEntity<CaretakerDto> updateCaretaker(
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection,
+      @CurrentUser UserProjection userProjection,
       @RequestBody(
           description = "Caretaker preferences to update",
           required = true,
@@ -80,23 +70,12 @@ public class CaretakerController {
               schema = @Schema(implementation = CaretakerPreferences.class)
           )
       )
-      @org.springframework.web.bind.annotation.RequestBody @Valid CaretakerPreferences caretakerPreferences
-  ) {
+      @org.springframework.web.bind.annotation.RequestBody @Valid CaretakerPreferences caretakerPreferences) {
     return ResponseEntity.ok(caretakerService.updateCaretaker(userProjection, caretakerPreferences));
   }
 
   @GetMapping("/{caretakerId}/rrules")
-  public ResponseEntity<List<RRuleDto>> getCaretakerRRules(@PathVariable UUID caretakerId ) {
+  public ResponseEntity<List<RRuleDto>> getCaretakerRRules(@PathVariable UUID caretakerId) {
     return ResponseEntity.ok(rruleService.getAllRRulesForCaretaker(caretakerId));
-  }
-
-  @ModelAttribute("userProjection")
-  public UserProjection getUserProjection(Authentication authentication) {
-    try {
-      UserProjection projection = (UserProjection) authentication.getPrincipal();
-      return projection;
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
   }
 }

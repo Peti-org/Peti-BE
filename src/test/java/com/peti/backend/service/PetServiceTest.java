@@ -14,11 +14,13 @@ import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.PetRepository;
 import com.peti.backend.service.user.PetService;
+import com.peti.backend.utils.DeepCloner;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,9 +34,16 @@ public class PetServiceTest {
   private PetRepository petRepository;
   @Mock
   private EntityManager entityManager;
+  @Mock
+  private DeepCloner deepCloner;
 
   @InjectMocks
   private PetService petService;
+
+  @BeforeEach
+  void setUp() {
+    org.mockito.Mockito.lenient().when(deepCloner.deepCopyPetProfile(any())).thenAnswer(inv -> inv.getArgument(0));
+  }
 
   @Test
   public void testGetAllPets() {

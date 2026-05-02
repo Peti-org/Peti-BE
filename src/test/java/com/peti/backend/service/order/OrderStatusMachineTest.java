@@ -65,16 +65,6 @@ class OrderStatusMachineTest {
     assertThat(OrderStatusMachine.isTerminal(OrderStatus.PAID)).isTrue();
     assertThat(OrderStatusMachine.isTerminal(OrderStatus.DECLINED)).isTrue();
     assertThat(OrderStatusMachine.isTerminal(OrderStatus.CANCELLED)).isTrue();
-    assertThat(OrderStatusMachine.allowedTransitions(OrderStatus.PAID)).isEmpty();
-  }
-
-  @Test
-  @DisplayName("resolveRole correctly identifies client, caretaker, stranger")
-  void resolveRole() {
-    assertThat(OrderStatusMachine.resolveRole(CLIENT, CLIENT, CARETAKER)).isEqualTo(Role.CLIENT);
-    assertThat(OrderStatusMachine.resolveRole(CARETAKER, CLIENT, CARETAKER))
-        .isEqualTo(Role.CARETAKER);
-    assertThat(OrderStatusMachine.resolveRole(STRANGER, CLIENT, CARETAKER)).isNull();
   }
 
   @Test
@@ -99,14 +89,6 @@ class OrderStatusMachineTest {
   void cancelPermission() {
     assertThat(OrderStatusMachine.isAuthorized(OrderStatus.CANCELLED, Role.CLIENT)).isTrue();
     assertThat(OrderStatusMachine.isAuthorized(OrderStatus.CANCELLED, Role.CARETAKER)).isTrue();
-  }
-
-  @Test
-  @DisplayName("canView: returns true only for client or caretaker")
-  void canView() {
-    assertThat(OrderStatusMachine.canView(CLIENT, CLIENT, CARETAKER)).isTrue();
-    assertThat(OrderStatusMachine.canView(CARETAKER, CLIENT, CARETAKER)).isTrue();
-    assertThat(OrderStatusMachine.canView(STRANGER, CLIENT, CARETAKER)).isFalse();
   }
 }
 

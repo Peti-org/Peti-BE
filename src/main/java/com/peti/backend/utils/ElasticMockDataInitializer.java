@@ -49,7 +49,7 @@ public class ElasticMockDataInitializer {
 
   @Value("${elasticsearch.mock-data.caretakers:50}")
   private int numberOfCaretakers;
-  @Value("${elasticsearch.mock-data.days-ahead:60}")
+  @Value("${elasticsearch.data-generation.days-ahead:60}")
   private int daysAhead;
 
   @EventListener(ApplicationReadyEvent.class)

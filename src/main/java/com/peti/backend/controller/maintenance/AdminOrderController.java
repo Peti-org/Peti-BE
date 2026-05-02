@@ -1,4 +1,4 @@
-package com.peti.backend.controller.admin;
+package com.peti.backend.controller.maintenance;
 
 import com.peti.backend.dto.order.AdminOrderDto;
 import com.peti.backend.dto.order.OrderModificationDto;
