@@ -6,17 +6,19 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SecurityScheme(
-        name = "bearerAuth",
-        scheme = "bearer",
-        bearerFormat = "JWT",
-        type = SecuritySchemeType.HTTP,
-        in = SecuritySchemeIn.HEADER
+    name = "bearerAuth",
+    scheme = "bearer",
+    bearerFormat = "JWT",
+    type = SecuritySchemeType.HTTP,
+    in = SecuritySchemeIn.HEADER
 )
 @SpringBootApplication
 @EnableScheduling
+@EnableAsync
 @EnableElasticsearchRepositories(basePackages = "com.peti.backend.repository.elastic")
 public class PetiBeApplication {
 

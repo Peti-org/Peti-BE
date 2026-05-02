@@ -1,0 +1,5 @@
+{
+  // Expected output of MockDataBuilder.buildCaretaker(user, 0)
+  "rating": 3
+}
+

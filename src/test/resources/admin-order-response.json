@@ -1,0 +1,23 @@
+{
+  // Expected AdminOrderDto for order-with-modifications-entity.json
+  "orderId": "aaaa1111-1111-1111-1111-111111111111",
+  "client": {
+    "userId": "22222222-2222-2222-2222-222222222222",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com"
+  },
+  "caretakerId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+  "eventId": "eeee1111-1111-1111-1111-111111111111",
+  "price": 150.00,
+  "currency": "UAH",
+  "priceBreakdown": [
+    { "type": "BASE", "price": 120.00 },
+    { "type": "FEE",  "price": 30.00 }
+  ],
+  "status": "DEFERRED_PAYMENT",
+  "createdAt": "2026-04-30T10:00:00",
+  "updatedAt": "2026-04-30T11:00:00",
+  "deleted": false
+}
+

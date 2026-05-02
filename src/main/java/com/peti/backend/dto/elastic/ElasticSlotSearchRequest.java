@@ -37,7 +37,6 @@ public record ElasticSlotSearchRequest(
     @Positive(message = "Max price must be positive")
     BigDecimal maxPricePerHour,
 
-    @NotNull(message = "Price currency is required")
     String currency,
 
     // Minimum caretaker rating
