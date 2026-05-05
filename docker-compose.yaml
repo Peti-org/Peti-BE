@@ -65,7 +65,7 @@ services:
       - peti-network
 
   app:
-    image: peti/backend:v1.222
+    image: peti/backend:v1.1
     container_name: peti-app
     env_file:
       - ./.env
