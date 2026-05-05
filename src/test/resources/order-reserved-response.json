@@ -1,0 +1,14 @@
+{
+  "orderId": "aaaa1111-1111-1111-1111-111111111111",
+  "clientId": "22222222-2222-2222-2222-222222222222",
+  "caretakerId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+  "eventId": "eeee1111-1111-1111-1111-111111111111",
+  "price": 150.00,
+  "currency": "UAH",
+  "priceBreakdown": [
+    { "type": "BASE", "price": 120.00 },
+    { "type": "FEE",  "price": 30.00 }
+  ],
+  "status": "RESERVED"
+}
+

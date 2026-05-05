@@ -4,21 +4,19 @@ import com.peti.backend.dto.user.RequestUpdatePassword;
 import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
 import com.peti.backend.model.projection.UserProjection;
+import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.user.RoleService;
 import com.peti.backend.service.user.UserService;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +49,7 @@ public class UserController {
 
   @HasUserRole
   @GetMapping("/me")
-  public ResponseEntity<UserDto> getUserById(@Parameter(hidden = true) UserProjection userProjection) {
+  public ResponseEntity<UserDto> getUserById(@CurrentUser UserProjection userProjection) {
     return userService.getUserById(userProjection.getUserId())
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
@@ -59,7 +57,7 @@ public class UserController {
 
   @HasUserRole
   @PutMapping("/me")
-  public ResponseEntity<UserDto> updateUser(@Parameter(hidden = true) UserProjection userProjection,
+  public ResponseEntity<UserDto> updateUser(@CurrentUser UserProjection userProjection,
       @Valid @RequestBody RequestUpdateUser requestUpdateUser) {
     UserDto updatedUser = userService.updateUser(userProjection.getUserId(), requestUpdateUser);
     if (updatedUser != null) {
@@ -71,7 +69,7 @@ public class UserController {
 
   @HasUserRole
   @PutMapping("/me/password")
-  public ResponseEntity<Void> updatePassword(@Parameter(hidden = true) UserProjection userProjection,
+  public ResponseEntity<Void> updatePassword(@CurrentUser UserProjection userProjection,
       @Valid @RequestBody RequestUpdatePassword requestUpdatePassword) {
     if (userService.updatePassword(userProjection.getUserId(), requestUpdatePassword)) {
       return ResponseEntity.ok().build();
@@ -82,17 +80,8 @@ public class UserController {
 
   @HasUserRole
   @DeleteMapping("/me")
-  public ResponseEntity<Void> deleteUser(@Parameter(hidden = true) UserProjection userProjection) {
+  public ResponseEntity<Void> deleteUser(@CurrentUser UserProjection userProjection) {
     userService.deleteUser(userProjection.getUserId());
     return ResponseEntity.noContent().build();
-  }
-
-  @ModelAttribute("userProjection")
-  public UserProjection getUserProjection(Authentication authentication) {
-    try {
-      return (UserProjection) authentication.getPrincipal();
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
   }
 }

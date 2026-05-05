@@ -128,29 +128,5 @@ public class PetControllerTest {
   }
 
 
-  @Test
-  public void testGetUser_ValidAuthentication() {
-    UserProjection userProjection = ResourceLoader.loadResource("user-projection-entity.json", UserProjection.class);
-    Authentication authentication = mock(Authentication.class);
-    when(authentication.getPrincipal()).thenReturn(userProjection);
-
-    PetController controller = new PetController(petService);
-    UserProjection result = controller.getUserProjection(authentication);
-
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(userProjection.getUserId(), result.getUserId());
-  }
-
-  @Test
-  public void testGetUser_InvalidAuthentication() {
-    Authentication authentication = mock(Authentication.class);
-    org.mockito.Mockito.when(authentication.getPrincipal()).thenReturn("not a user");
-
-    PetController controller = new PetController(petService);
-
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      controller.getUserProjection(authentication);
-    });
-  }
 }
 

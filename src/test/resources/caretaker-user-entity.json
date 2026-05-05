@@ -1,0 +1,12 @@
+{
+  // Caretaker user fixture (used as actor in admin modification tests)
+  "userId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+  "firstName": "Jane",
+  "lastName": "Caretaker",
+  "email": "jane.caretaker@example.com",
+  "birthday": "1990-01-01",
+  "cityByCityId": { "cityId": 1 },
+  "password": "$2a$10$xxx",
+  "role": { "roleId": 2, "name": "CARETAKER" }
+}
+

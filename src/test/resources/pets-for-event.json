@@ -1,0 +1,27 @@
+[
+  // Two pets owned by user 22222222-2222-2222-2222-222222222222
+  {
+    "petId": "aaaaaaaa-1111-1111-1111-111111111111",
+    "name": "Rex",
+    "breed": {
+      "breedId": 1,
+      "petType": "Dog",
+      "breedName": "Labrador"
+    },
+    "petOwner": {
+      "userId": "22222222-2222-2222-2222-222222222222"
+    }
+  },
+  {
+    "petId": "bbbbbbbb-2222-2222-2222-222222222222",
+    "name": "Bella",
+    "breed": {
+      "breedId": 2,
+      "petType": "Dog",
+      "breedName": "Golden Retriever"
+    },
+    "petOwner": {
+      "userId": "22222222-2222-2222-2222-222222222222"
+    }
+  }
+]

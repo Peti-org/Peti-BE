@@ -1,0 +1,9 @@
+{
+  // Expected output of MockDataBuilder.populateUser(user, 0, city)
+  "firstName": "Oleksandr",
+  "lastName": "Shevchenko",
+  "email": "mock-caretaker-0@peti.com",
+  "password": "$2a$10$mockpasswordhash000000000000000",
+  "userDataFolder": "mock-data-0"
+}
+

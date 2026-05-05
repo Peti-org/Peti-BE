@@ -19,7 +19,11 @@ public class PetDto {
   private BreedDto breed;
   private PetProfile profile;
 
-  public static PetDto from(Pet pet) {
-    return new PetDto(pet.getPetId(), pet.getName(), pet.getBirthday().toLocalDate(), BreedDto.from(pet.getBreed()), pet.getContext());
+  public static PetDto convert(Pet pet, PetProfile petProfile) {
+    return new PetDto(pet.getPetId(),
+        pet.getName(),
+        pet.getBirthday().toLocalDate(),
+        BreedDto.from(pet.getBreed()),
+        petProfile);
   }
 }

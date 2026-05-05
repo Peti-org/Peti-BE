@@ -7,6 +7,7 @@ import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.repository.PetRepository;
+import com.peti.backend.utils.DeepCloner;
 import jakarta.persistence.EntityManager;
 import java.sql.Date;
 import java.util.List;
@@ -22,24 +23,25 @@ public class PetService {
 
   private final PetRepository petRepository;
   private final EntityManager entityManager;
+  private final DeepCloner deepCloner;
 
   public List<PetDto> getAllPets(UserProjection user) {
     List<Pet> pets = petRepository.findAllByPetOwner_UserId(user.getUserId());
     return pets.stream()
-        .map(PetDto::from)
+        .map(this::mapToDto)
         .toList();
   }
 
   public Optional<PetDto> getPetById(UUID id, UserProjection user) {
     return petRepository.findById(id)
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
-        .map(PetDto::from);
+        .map(this::mapToDto);
   }
 
   @Transactional
   public PetDto createPet(RequestPetDto requestPet, UserProjection user) {
     Pet savedPet = petRepository.save(toPet(requestPet, user.getUserId()));
-    return PetDto.from(savedPet);
+    return mapToDto(savedPet);
   }
 
   @Transactional
@@ -53,7 +55,7 @@ public class PetService {
           pet.setBreed(new Breed(requestPetDto.getBreedId()));
           return petRepository.save(pet);
         })
-        .map(PetDto::from);
+        .map(this::mapToDto);
   }
 
   public Optional<PetDto> deletePet(UUID id, UserProjection user) {
@@ -61,8 +63,12 @@ public class PetService {
         .filter(p -> p.getPetOwner().getUserId().equals(user.getUserId()))
         .map(pet -> {
           petRepository.deleteById(id);
-          return PetDto.from(pet);
+          return mapToDto(pet);
         });
+  }
+
+  private PetDto mapToDto(Pet pet) {
+    return PetDto.convert(pet, deepCloner.deepCopyPetProfile(pet.getContext()));
   }
 
   private Pet toPet(RequestPetDto petDto, UUID petOwnerId) {
@@ -71,7 +77,7 @@ public class PetService {
     pet.setBirthday(Date.valueOf(petDto.getDateOfBirth()));
     pet.setBreed(entityManager.getReference(Breed.class, petDto.getBreedId()));
     pet.setPetOwner(entityManager.getReference(User.class, petOwnerId));
-    pet.setContext(petDto.getProfile());
+    pet.setContext(deepCloner.deepCopyPetProfile(petDto.getProfile()));
     pet.setPetDataFolder("default"); //todo write anouther based on id
     return pet;
   }

@@ -4,10 +4,10 @@ import com.peti.backend.dto.content.CommentDto;
 import com.peti.backend.dto.content.RequestCommentDto;
 import com.peti.backend.dto.content.RequestReactionDto;
 import com.peti.backend.model.projection.UserProjection;
+import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.content.CommentService;
 import com.peti.backend.service.content.ReactionService;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,10 +16,8 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,7 +39,7 @@ public class InteractionController {
   public ResponseEntity<List<CommentDto>> getComments(
       @RequestParam String targetType,
       @RequestParam UUID targetId,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+      @CurrentUser UserProjection userProjection) {
     return ResponseEntity.ok(commentService.getComments(targetType, targetId, userProjection.getUserId()));
   }
 
@@ -49,7 +47,7 @@ public class InteractionController {
   @PostMapping("/comments")
   public ResponseEntity<CommentDto> createComment(
       @Valid @RequestBody RequestCommentDto request,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+      @CurrentUser UserProjection userProjection) {
     return ResponseEntity.ok(commentService.createComment(request, userProjection.getUserId()));
   }
 
@@ -57,7 +55,7 @@ public class InteractionController {
   @DeleteMapping("/comments/{commentId}")
   public ResponseEntity<Void> deleteComment(
       @PathVariable UUID commentId,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+      @CurrentUser UserProjection userProjection) {
     commentService.deleteComment(commentId, userProjection.getUserId());
     return ResponseEntity.noContent().build();
   }
@@ -66,19 +64,9 @@ public class InteractionController {
   @PostMapping("/reactions")
   public ResponseEntity<Map<String, Object>> toggleReaction(
       @Valid @RequestBody RequestReactionDto request,
-      @Parameter(hidden = true) @ModelAttribute("userProjection") UserProjection userProjection) {
+      @CurrentUser UserProjection userProjection) {
     boolean added = reactionService.toggleReaction(request, userProjection.getUserId());
     long count = reactionService.countReactions(request.targetType(), request.targetId());
     return ResponseEntity.ok(Map.of("reacted", added, "totalReactions", count));
   }
-
-  @ModelAttribute("userProjection")
-  public UserProjection getUserProjection(Authentication authentication) {
-    try {
-      return (UserProjection) authentication.getPrincipal();
-    } catch (ClassCastException e) {
-      throw new IllegalArgumentException("Authentication is wrong");
-    }
-  }
 }
-

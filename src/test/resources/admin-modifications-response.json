@@ -1,0 +1,32 @@
+[
+  // Expected admin modification list for order-with-modifications-entity.json
+  {
+    "modificationId": "11111111-aaaa-aaaa-aaaa-111111111111",
+    "orderId": "aaaa1111-1111-1111-1111-111111111111",
+    "status": "RESERVED",
+    "createdAt": "2026-04-30T10:00:00",
+    "actorId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+    "actor": {
+      "userId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+      "firstName": "Jane",
+      "lastName": "Caretaker",
+      "email": "jane.caretaker@example.com"
+    },
+    "comment": "Order reserved by caretaker"
+  },
+  {
+    "modificationId": "22222222-aaaa-aaaa-aaaa-222222222222",
+    "orderId": "aaaa1111-1111-1111-1111-111111111111",
+    "status": "DEFERRED_PAYMENT",
+    "createdAt": "2026-04-30T11:00:00",
+    "actorId": "22222222-2222-2222-2222-222222222222",
+    "actor": {
+      "userId": "22222222-2222-2222-2222-222222222222",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com"
+    },
+    "comment": "Payment received"
+  }
+]
+

@@ -56,12 +56,12 @@ public class RestExceptionHandler {
   }
 
   @ExceptionHandler(UsernameNotFoundException.class)
-  public ProblemDetail handleUerNotFoundException(UsernameNotFoundException exception) {
+  public ProblemDetail handleUserNotFoundException(UsernameNotFoundException exception) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
   }
 
   @ExceptionHandler(NotFoundException.class)
-  public ProblemDetail handleUerNotFoundException(NotFoundException exception) {
+  public ProblemDetail handleNotFoundException(NotFoundException exception) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
   }
 
@@ -70,6 +70,10 @@ public class RestExceptionHandler {
     return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
   }
 
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ProblemDetail handleIllegalArgumentException(IllegalArgumentException exception) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+  }
 
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleSecurityException(Exception exception) {
