@@ -6,6 +6,7 @@ import com.peti.backend.model.domain.Event;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.BookingInput;
 import com.peti.backend.repository.CaretakerRRuleRepository;
+import com.peti.backend.repository.CaretakerRepository;
 import com.peti.backend.repository.EventRepository;
 import com.peti.backend.service.elastic.ElasticSlotCrudService;
 import com.peti.backend.service.elastic.SlotGenerationService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
 public class CaretakerSlotsRebuildTrigger {
 
   private final CaretakerRRuleRepository rruleRepository;
+  private final CaretakerRepository caretakerRepository;
   private final EventRepository eventRepository;
   private final SlotGenerationService slotGenerationService;
   private final ElasticSlotCrudService elasticSlotCrudService;
@@ -44,17 +46,20 @@ public class CaretakerSlotsRebuildTrigger {
    * today.
    */
   @Async
-  public void rebuild(Caretaker caretaker) {
+  public void rebuild(UUID caretakerId) {
+
     LocalDate current = LocalDate.now();
     LocalDate end = current.plusDays(daysAhead);
-    rebuild(caretaker, current, end);
+    rebuild(caretakerId, current, end);
   }
 
   /**
    * Rebuild Elastic slots for every date in [from <-> to] (inclusive).
    */
   @Async
-  public void rebuild(Caretaker caretaker, LocalDate from, LocalDate to) {
+  public void rebuild(UUID caretakerId, LocalDate from, LocalDate to) {
+    Caretaker caretaker = caretakerRepository.findById(caretakerId).orElse(null);
+
     if (caretaker == null || from == null || to == null || from.isAfter(to)) {
       log.debug("CaretakerSlotsRebuildTrigger called with invalid parameters, {}, {}, {}", caretaker, from, to);
       return;

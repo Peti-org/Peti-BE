@@ -90,7 +90,7 @@ class CaretakerRRuleServiceTest {
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
     assertEquals(requestRRuleDto.priority(), result.priority());
     verify(rruleRepository).save(any(CaretakerRRule.class));
-    verify(slotsRebuildTrigger).rebuild(caretaker);
+    verify(slotsRebuildTrigger).rebuild(caretaker.getCaretakerId());
   }
 
   @Test
@@ -113,7 +113,7 @@ class CaretakerRRuleServiceTest {
 
     assertTrue(result.isPresent());
     verify(rruleRepository).save(any(CaretakerRRule.class));
-    verify(slotsRebuildTrigger).rebuild(caretaker);
+    verify(slotsRebuildTrigger).rebuild(caretaker.getCaretakerId());
   }
 
   @Test
@@ -135,7 +135,7 @@ class CaretakerRRuleServiceTest {
 
     assertTrue(result.isPresent());
     verify(rruleRepository).deleteById(rruleId);
-    verify(slotsRebuildTrigger).rebuild(caretaker);
+    verify(slotsRebuildTrigger).rebuild(caretaker.getCaretakerId());
   }
 
   @Test

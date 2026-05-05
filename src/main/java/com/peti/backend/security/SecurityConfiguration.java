@@ -36,6 +36,9 @@ public class SecurityConfiguration {
             .requestMatchers("/api/slots/filter").permitAll() //to view all slots unauthenticated
             .requestMatchers("/api/v2/catalog/**").permitAll() // to view all slots catalog endpoints unauthenticated
             .requestMatchers("/api/caretakers/*/rrules").permitAll() // to view all slots catalog endpoints unauthenticated
+            .requestMatchers("/api/interactions").permitAll() // to view interactions endpoints unauthenticated
+            .requestMatchers("/api/articles**").permitAll() // to view articles endpoints unauthenticated
+            .requestMatchers("/api/caretakers/by/cityId/**").permitAll() // to view caretakers by city id unauthenticated
             .requestMatchers("/api/ping").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/").permitAll()

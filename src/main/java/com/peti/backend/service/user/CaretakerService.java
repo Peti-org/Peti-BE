@@ -33,6 +33,13 @@ public class CaretakerService {
         .collect(Collectors.toList());
   }
 
+  public List<SimpleCaretakerDto> getCaretakersByCityId(Long cityId) {
+    List<Caretaker> caretakers = caretakerRepository.findAllByUserReference_CityByCityId_CityId(cityId);
+    return caretakers.stream()
+        .map(SimpleCaretakerDto::convert)
+        .collect(Collectors.toList());
+  }
+
   public Optional<CaretakerDto> getCaretakerById(UUID id) {
     return caretakerRepository.findById(id).map(this::mapToDto);
   }

@@ -16,13 +16,14 @@ import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.BookingInput;
 import com.peti.backend.model.internal.EventStatus;
 import com.peti.backend.repository.CaretakerRRuleRepository;
+import com.peti.backend.repository.CaretakerRepository;
 import com.peti.backend.repository.EventRepository;
 import com.peti.backend.service.elastic.ElasticSlotCrudService;
 import com.peti.backend.service.elastic.SlotGenerationService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,10 +39,16 @@ class CaretakerSlotsRebuildTriggerTest {
   private static final UUID CARETAKER_ID =
       UUID.fromString("b1a7e8e2-8c2e-4c1a-9e2a-123456789abc");
 
-  @Mock private CaretakerRRuleRepository rruleRepository;
-  @Mock private EventRepository eventRepository;
-  @Mock private SlotGenerationService slotGenerationService;
-  @Mock private ElasticSlotCrudService elasticSlotCrudService;
+  @Mock
+  private CaretakerRRuleRepository rruleRepository;
+  @Mock
+  private CaretakerRepository caretakerRepository;
+  @Mock
+  private EventRepository eventRepository;
+  @Mock
+  private SlotGenerationService slotGenerationService;
+  @Mock
+  private ElasticSlotCrudService elasticSlotCrudService;
 
   @InjectMocks
   private CaretakerSlotsRebuildTrigger trigger;
@@ -53,6 +60,7 @@ class CaretakerSlotsRebuildTriggerTest {
     LocalDate from = LocalDate.of(2026, 5, 1);
     LocalDate to = LocalDate.of(2026, 5, 3);
 
+    when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
     when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
         .thenReturn(List.of());
     when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
@@ -60,7 +68,7 @@ class CaretakerSlotsRebuildTriggerTest {
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of());
 
-    trigger.rebuild(caretaker, from, to);
+    trigger.rebuild(CARETAKER_ID, from, to);
 
     verify(elasticSlotCrudService, times(3))
         .replaceSlotsByCaretakerAndDate(eq(CARETAKER_ID.toString()), any(), any());
@@ -80,6 +88,7 @@ class CaretakerSlotsRebuildTriggerTest {
         petWithId(UUID.randomUUID()),
         petWithId(UUID.randomUUID()))));
 
+    when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
     when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
         .thenReturn(List.of());
     when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
@@ -87,7 +96,7 @@ class CaretakerSlotsRebuildTriggerTest {
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of());
 
-    trigger.rebuild(caretaker, day, day);
+    trigger.rebuild(CARETAKER_ID, day, day);
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<List<BookingInput>> bookingsCaptor =
@@ -108,6 +117,7 @@ class CaretakerSlotsRebuildTriggerTest {
     Caretaker caretaker = caretakerRef();
     LocalDate day = LocalDate.of(2026, 5, 2);
 
+    when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
     when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
         .thenReturn(List.of(new CaretakerRRule()));
     when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
@@ -115,7 +125,7 @@ class CaretakerSlotsRebuildTriggerTest {
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of(new ElasticSlotDocument()));
 
-    trigger.rebuild(caretaker, day, day);
+    trigger.rebuild(CARETAKER_ID, day, day);
 
     @SuppressWarnings("unchecked")
     ArgumentCaptor<List<ElasticSlotDocument>> docsCaptor =
@@ -137,7 +147,8 @@ class CaretakerSlotsRebuildTriggerTest {
   @Test
   @DisplayName("rebuild - from after to is a no-op")
   void rebuild_fromAfterTo() {
-    trigger.rebuild(caretakerRef(),
+    when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretakerRef()));
+    trigger.rebuild(CARETAKER_ID,
         LocalDate.of(2026, 5, 5), LocalDate.of(2026, 5, 1));
 
     verify(elasticSlotCrudService, never())

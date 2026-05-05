@@ -7,6 +7,7 @@ import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.repository.CaretakerRRuleRepository;
 import com.peti.backend.service.event.CaretakerSlotsRebuildTrigger;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public class CaretakerRRuleService {
   public RRuleDto createRRule(RequestRRuleDto createDto, UUID caretakerId) {
     CaretakerRRule saved = rruleRepository.save(buildRRule(createDto, caretakerId));
     // Trigger a rebuild of slots for caretaker
-    slotsRebuildTrigger.rebuild(saved.getCaretaker());
+    slotsRebuildTrigger.rebuild(caretakerId);
     return RRuleDto.convert(saved);
   }
 
@@ -47,7 +48,7 @@ public class CaretakerRRuleService {
           applyFields(existing, updateDto);
           CaretakerRRule saved = rruleRepository.save(existing);
           // Trigger a rebuild of slots for caretaker
-          slotsRebuildTrigger.rebuild(saved.getCaretaker());
+          slotsRebuildTrigger.rebuild(caretakerId);
           return RRuleDto.convert(saved);
         });
   }
@@ -60,7 +61,7 @@ public class CaretakerRRuleService {
           Caretaker caretaker = rrule.getCaretaker();
           rruleRepository.deleteById(rruleId);
           // Trigger a rebuild of slots for caretaker
-          slotsRebuildTrigger.rebuild(caretaker);
+          slotsRebuildTrigger.rebuild(caretakerId);
           return dto;
         });
   }
@@ -68,6 +69,7 @@ public class CaretakerRRuleService {
   private CaretakerRRule buildRRule(RequestRRuleDto request, UUID caretakerId) {
     CaretakerRRule rrule = new CaretakerRRule();
     rrule.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
+    rrule.setCreatedAt(LocalDateTime.now());
     applyFields(rrule, request);
     return rrule;
   }
