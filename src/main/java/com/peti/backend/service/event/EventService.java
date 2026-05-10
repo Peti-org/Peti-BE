@@ -53,7 +53,7 @@ public class EventService {
     Event event = buildEvent(rrule, pets, user, request);
     Event saved = eventRepository.save(event);
 
-    slotsRebuildTrigger.rebuild(rrule.getCaretaker(),
+    slotsRebuildTrigger.rebuild(rrule.getCaretaker().getCaretakerId(),
         request.datetimeFrom().toLocalDate(),
         request.datetimeTo().toLocalDate());
 
@@ -90,7 +90,7 @@ public class EventService {
     event.setStatus(EventStatus.DELETED);
     eventRepository.save(event);
 
-    slotsRebuildTrigger.rebuild(event.getCaretaker(),
+    slotsRebuildTrigger.rebuild(event.getCaretaker().getCaretakerId(),
         event.getDatetimeFrom().toLocalDate(),
         event.getDatetimeTo().toLocalDate());
     return true;

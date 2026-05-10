@@ -44,9 +44,22 @@ public class CaretakerController {
     return ResponseEntity.ok(caretakerService.getAllCaretakers());
   }
 
+  @GetMapping("/by/cityId/{cityId}")
+  public ResponseEntity<List<SimpleCaretakerDto>> getCaretakersByCity(@PathVariable Long cityId) {
+    return ResponseEntity.ok(caretakerService.getCaretakersByCityId(cityId));
+  }
+
   @HasUserRole
   @GetMapping("/me")
   public ResponseEntity<CaretakerDto> getMyCaretakerDetails(@CurrentCaretakerId UUID caretakerId) {
+    return caretakerService.getCaretakerById(caretakerId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+  }
+
+  @HasUserRole
+  @GetMapping("/{caretakerId}")
+  public ResponseEntity<CaretakerDto> getCaretakerDetails(@PathVariable UUID caretakerId) {
     return caretakerService.getCaretakerById(caretakerId)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());

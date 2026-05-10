@@ -89,7 +89,7 @@ class EventServiceTest {
     EventDto result = eventService.createEvent(request, USER_ID);
 
     assertThat(result).usingRecursiveComparison().isEqualTo(expected);
-    verify(slotsRebuildTrigger).rebuild(rrule.getCaretaker(),
+    verify(slotsRebuildTrigger).rebuild(rrule.getCaretaker().getCaretakerId(),
         FROM.toLocalDate(), TO.toLocalDate());
     verify(validator).validatePetOwnership(pets, List.of(PET_A, PET_B), USER_ID);
   }
@@ -170,7 +170,7 @@ class EventServiceTest {
     ArgumentCaptor<Event> savedCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(savedCaptor.capture());
     assertThat(savedCaptor.getValue().getStatus()).isEqualTo(EventStatus.DELETED);
-    verify(slotsRebuildTrigger).rebuild(event.getCaretaker(),
+    verify(slotsRebuildTrigger).rebuild(event.getCaretaker().getCaretakerId(),
         event.getDatetimeFrom().toLocalDate(), event.getDatetimeTo().toLocalDate());
   }
 
