@@ -102,11 +102,8 @@ public class CaretakerSlotsRebuildTrigger {
         ? dayStart : event.getDatetimeFrom();
     LocalDateTime toClipped = event.getDatetimeTo().isAfter(dayEnd)
         ? dayEnd : event.getDatetimeTo();
-    LocalTime timeFrom = fromClipped.toLocalTime();
-    LocalTime timeTo = toClipped.equals(dayEnd) ? LocalTime.of(23, 59, 59)
-        : toClipped.toLocalTime();
     int petCount = event.getPets() == null ? 1 : event.getPets().size();
-    return new BookingInput(timeFrom, timeTo, petCount);
+    return new BookingInput(fromClipped, toClipped, petCount);
   }
 }
 

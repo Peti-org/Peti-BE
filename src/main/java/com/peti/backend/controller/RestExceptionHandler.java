@@ -7,6 +7,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class RestExceptionHandler {
 
   @ExceptionHandler(BadRequestException.class)
   public ProblemDetail handleBadRequestException(BadRequestException exception) {
+    log.warn(exception.getMessage(), exception);
     ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     errorDetail.setProperty("description", exception.getMessage());
     return errorDetail;
@@ -34,12 +37,14 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+    log.warn("Invalid request body. Please check the format and content.", exception);
     return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
         "Invalid request body. Please check the format and content.");
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    log.warn("Validation failed", exception);
     ProblemDetail errorDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
     Map<String, String> errors = exception.getBindingResult().getFieldErrors().stream()
         .collect(Collectors.toMap(FieldError::getField, DefaultMessageSourceResolvable::getDefaultMessage));
@@ -49,6 +54,7 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+    log.warn("Data integrity violation", exception);
     if (exception.getMessage().contains("email")) {
       return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Email already exists");
     }
@@ -57,26 +63,31 @@ public class RestExceptionHandler {
 
   @ExceptionHandler(UsernameNotFoundException.class)
   public ProblemDetail handleUserNotFoundException(UsernameNotFoundException exception) {
+    log.warn("UsernameNotFoundException", exception);
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, exception.getMessage());
   }
 
   @ExceptionHandler(NotFoundException.class)
   public ProblemDetail handleNotFoundException(NotFoundException exception) {
+    log.warn("NotFoundException", exception);
     return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   public ProblemDetail handleAccessDeniedException(AccessDeniedException exception) {
+    log.warn("AccessDeniedException", exception);
     return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ProblemDetail handleIllegalArgumentException(IllegalArgumentException exception) {
+    log.warn("IllegalArgumentException", exception);
     return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
   }
 
   @ExceptionHandler(Exception.class)
-  public ProblemDetail handleSecurityException(Exception exception) {
+  public ProblemDetail handleGeneralException(Exception exception) {
+    log.warn("General exception", exception);
     ProblemDetail errorDetail = null;
 
     // TODO send this stack trace to an observability tool

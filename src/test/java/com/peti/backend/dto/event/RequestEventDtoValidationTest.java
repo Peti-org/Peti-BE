@@ -20,7 +20,8 @@ class RequestEventDtoValidationTest {
 
   private static Validator validator;
 
-  private static final UUID RRULE_ID = UUID.randomUUID();
+  private static final UUID CARETAKER_ID = UUID.randomUUID();
+  private static final String SLOT_TYPE = "WALKING";
   private static final LocalDateTime FROM = LocalDateTime.of(2026, 5, 1, 10, 0);
   private static final LocalDateTime TO = LocalDateTime.of(2026, 5, 1, 12, 0);
 
@@ -35,27 +36,39 @@ class RequestEventDtoValidationTest {
   @DisplayName("Valid DTO produces no violations")
   void validDto_noViolations() {
     RequestEventDto dto = new RequestEventDto(
-        RRULE_ID, FROM, TO, List.of(UUID.randomUUID()));
+        CARETAKER_ID, SLOT_TYPE, FROM, TO, List.of(UUID.randomUUID()));
 
     Set<ConstraintViolation<RequestEventDto>> violations = validator.validate(dto);
     assertTrue(violations.isEmpty());
   }
 
   @Test
-  @DisplayName("Missing rruleId triggers @NotNull")
-  void missingRRuleId() {
-    RequestEventDto dto = new RequestEventDto(null, FROM, TO, List.of(UUID.randomUUID()));
+  @DisplayName("Missing caretakerId triggers @NotNull")
+  void missingCaretakerId() {
+    RequestEventDto dto = new RequestEventDto(
+        null, SLOT_TYPE, FROM, TO, List.of(UUID.randomUUID()));
 
     Set<ConstraintViolation<RequestEventDto>> violations = validator.validate(dto);
     assertFalse(violations.isEmpty());
     assertTrue(violations.stream()
-        .anyMatch(v -> v.getMessage().contains("rruleId must not be null")));
+        .anyMatch(v -> v.getMessage().contains("caretakerId must not be null")));
+  }
+
+  @Test
+  @DisplayName("Missing slotType triggers @NotBlank")
+  void missingSlotType() {
+    RequestEventDto dto = new RequestEventDto(
+        CARETAKER_ID, null, FROM, TO, List.of(UUID.randomUUID()));
+
+    Set<ConstraintViolation<RequestEventDto>> violations = validator.validate(dto);
+    assertFalse(violations.isEmpty());
   }
 
   @Test
   @DisplayName("Missing datetimeFrom triggers @NotNull")
   void missingDatetimeFrom() {
-    RequestEventDto dto = new RequestEventDto(RRULE_ID, null, TO, List.of(UUID.randomUUID()));
+    RequestEventDto dto = new RequestEventDto(
+        CARETAKER_ID, SLOT_TYPE, null, TO, List.of(UUID.randomUUID()));
 
     Set<ConstraintViolation<RequestEventDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -65,7 +78,8 @@ class RequestEventDtoValidationTest {
   @Test
   @DisplayName("Empty pets list triggers @NotEmpty")
   void emptyPetsList() {
-    RequestEventDto dto = new RequestEventDto(RRULE_ID, FROM, TO, Collections.emptyList());
+    RequestEventDto dto = new RequestEventDto(
+        CARETAKER_ID, SLOT_TYPE, FROM, TO, Collections.emptyList());
 
     Set<ConstraintViolation<RequestEventDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()

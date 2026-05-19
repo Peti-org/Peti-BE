@@ -50,10 +50,6 @@ public class Event {
   @JoinColumn(name = "caretaker_id", referencedColumnName = "caretaker_id", nullable = false)
   private Caretaker caretaker;
 
-  /** The recurring rule this event was booked from. */
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "rrule_id", referencedColumnName = "rrule_id", nullable = false)
-  private CaretakerRRule rrule;
 
   @Basic
   @Column(name = "price", nullable = false)

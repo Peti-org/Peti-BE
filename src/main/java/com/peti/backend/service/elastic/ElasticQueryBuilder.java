@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElasticQueryBuilder {
 
-  private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
-
   public Query buildSearchQuery(ElasticSlotSearchRequest request) {
     List<Query> must = new ArrayList<>();
     addDateTimeFilters(must, request);
@@ -28,20 +26,25 @@ public class ElasticQueryBuilder {
     return Query.of(q -> q.bool(BoolQuery.of(b -> b.must(must))));
   }
 
+  /**
+   * Overlap logic: slot.fromDateTime <= requestEnd AND slot.toDateTime >= requestStart.
+   * Uses fromDateTime/toDateTime fields as stored in the index.
+   */
   private void addDateTimeFilters(List<Query> must, ElasticSlotSearchRequest req) {
-    must.add(Query.of(q -> q.range(r -> r.date(d -> d.field("date")
-        .gte(req.dateFrom().format(DateTimeFormatter.ISO_LOCAL_DATE))
-        .lte(req.dateTo().format(DateTimeFormatter.ISO_LOCAL_DATE))))));
-    if (req.timeFrom() != null) {
-      String timeStr = req.timeFrom().format(TIME_FMT);
-      must.add(Query.of(q -> q.range(r -> r.date(d -> d
-          .field("timeFrom").lte(timeStr)))));
-    }
-    if (req.timeTo() != null) {
-      String timeStr = req.timeTo().format(TIME_FMT);
-      must.add(Query.of(q -> q.range(r -> r.date(d -> d
-          .field("timeTo").gte(timeStr)))));
-    }
+    var timeFrom = req.timeFrom() != null ? req.timeFrom() : java.time.LocalTime.MIN;
+    var timeTo = req.timeTo() != null ? req.timeTo() : java.time.LocalTime.of(23, 59, 59);
+
+    String requestStart = req.dateFrom().atTime(timeFrom)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    String requestEnd = req.dateTo().atTime(timeTo)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+    // Slot starts before or at the requested end
+    must.add(Query.of(q -> q.range(r -> r.date(d -> d
+        .field("fromDateTime").lte(requestEnd)))));
+    // Slot ends after or at the requested start
+    must.add(Query.of(q -> q.range(r -> r.date(d -> d
+        .field("toDateTime").gte(requestStart)))));
   }
 
   private void addOptionalFilters(List<Query> must, ElasticSlotSearchRequest req) {

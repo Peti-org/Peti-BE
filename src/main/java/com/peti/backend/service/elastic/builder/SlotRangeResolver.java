@@ -1,9 +1,8 @@
-package com.peti.backend.service.elastic;
+package com.peti.backend.service.elastic.builder;
 
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.elastic.model.TimeRange;
 import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,38 +17,27 @@ public final class SlotRangeResolver {
   private SlotRangeResolver() {}
 
   /**
+   * segments sorted by timeFrom ascending, non-overlapping, positive capacity
    * For each capacity level 1..maxCapacity, build a list of continuous time ranges
    * where available capacity is at least that level.
    */
   public static Map<Integer, List<TimeRange>> resolveRangesByCapacity(List<TimeSegmentWithPricing> segments) {
     int maxCapacity = segments.stream().mapToInt(TimeSegmentWithPricing::capacity).max().orElse(0);
     Map<Integer, List<TimeRange>> result = new TreeMap<>();
-    for (int required = 1; required <= maxCapacity; required++) {
-      result.put(required, findContinuousRanges(segments, required));
+    for (int capacity = 1; capacity <= maxCapacity; capacity++) {
+      result.put(capacity, findContinuousRanges(segments, capacity));
     }
     return result;
   }
 
-  /**
-   * Return the ServiceConfig of the first segment whose range covers the start of the given range.
-   */
-  public static ServiceConfig findServiceConfigForRange(List<TimeSegmentWithPricing> segments, TimeRange range) {
-    for (TimeSegmentWithPricing segment : segments) {
-      if (!segment.timeFrom().isAfter(range.timeFrom()) && segment.timeTo().isAfter(range.timeFrom())) {
-        return segment.serviceConfig();
-      }
-    }
-    return null;
-  }
-
-  private static List<TimeRange> findContinuousRanges(List<TimeSegmentWithPricing> segments, int required) {
+  private static List<TimeRange> findContinuousRanges(List<TimeSegmentWithPricing> segments, int selectedCapacity) {
     List<TimeRange> ranges = new ArrayList<>();
-    LocalTime rangeStart = null;
-    LocalTime rangeEnd = null;
+    LocalDateTime rangeStart = null;
+    LocalDateTime rangeEnd = null;
 
     for (TimeSegmentWithPricing segment : segments) {
-      if (segment.capacity() >= required) {
-        if (rangeStart == null) {
+      if (segment.capacity() >= selectedCapacity) {
+        if (rangeStart == null) {//todo if one segmet is missing like 8-9,10-11,12-13 and we are looking for capacity 2, then we will have two ranges 8-9 and 12-13, but actually it should be one range 8-13
           rangeStart = segment.timeFrom();
         }
         rangeEnd = segment.timeTo();

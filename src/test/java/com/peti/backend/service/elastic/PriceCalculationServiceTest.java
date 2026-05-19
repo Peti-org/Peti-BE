@@ -179,12 +179,12 @@ class PriceCalculationServiceTest {
   // ── helpers ───────────────────────────────────────────────────────────────
 
   private ElasticSlotDocument createSlot(LocalTime timeFrom, LocalTime timeTo, ServiceConfig serviceConfig) {
+    LocalDate date = LocalDate.of(2026, 2, 15);
     return ElasticSlotDocument.builder()
         .id("slot-1")
         .caretakerId("caretaker-1")
-        .date(LocalDate.of(2026, 2, 15))
-        .timeFrom(timeFrom)
-        .timeTo(timeTo)
+        .fromDateTime(date.atTime(timeFrom))
+        .toDateTime(date.atTime(timeTo))
         .serviceConfig(serviceConfig)
         .capacity(3)
         .build();

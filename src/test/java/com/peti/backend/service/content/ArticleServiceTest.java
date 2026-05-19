@@ -80,7 +80,7 @@ class ArticleServiceTest {
     when(reactionRepository.existsByUser_UserIdAndTargetTypeAndTargetId(eq(currentUserId), eq("article"), any()))
         .thenReturn(true);
 
-    CursorPageResponse<ArticleDto> result = articleService.getArticleFeed(0, 5, currentUserId);
+    CursorPageResponse<ArticleDto> result = articleService.getALLArticleFeed(0, 5, currentUserId);
 
     assertEquals(1, result.items().size());
     assertTrue(result.items().get(0).userReacted());
@@ -95,7 +95,7 @@ class ArticleServiceTest {
     when(reactionRepository.existsByUser_UserIdAndTargetTypeAndTargetId(eq(currentUserId), eq("article"), any()))
         .thenReturn(false);
 
-    CursorPageResponse<ArticleDto> result = articleService.getArticleFeed(0, 5, currentUserId);
+    CursorPageResponse<ArticleDto> result = articleService.getALLArticleFeed(0, 5, currentUserId);
 
     assertFalse(result.items().get(0).userReacted());
   }
@@ -170,7 +170,7 @@ class ArticleServiceTest {
     PageImpl<Article> page = new PageImpl<>(List.of(), PageRequest.of(0, 5), 0);
     when(articleRepository.findAllByDeletedFalseOrderByCreatedAtDesc(any())).thenReturn(page);
 
-    CursorPageResponse<ArticleDto> result = articleService.getArticleFeed(0, 5, currentUserId);
+    CursorPageResponse<ArticleDto> result = articleService.getALLArticleFeed(0, 5, currentUserId);
 
     assertEquals(0, result.items().size());
     assertEquals(-1, result.nextCursor());

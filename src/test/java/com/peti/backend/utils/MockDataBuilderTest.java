@@ -103,7 +103,7 @@ class MockDataBuilderTest {
 
     assertThat(actual)
         .usingRecursiveComparison()
-        .ignoringFields("caretaker", "createdAt")
+        .ignoringFields("caretaker", "createdAt", "updatedAt")
         .isEqualTo(expected);
     assertThat(actual.getCaretaker()).isSameAs(caretaker);
     assertThat(actual.getCreatedAt()).isNotNull();

@@ -16,15 +16,17 @@ public interface CaretakerRRuleRepository extends JpaRepository<CaretakerRRule, 
 
   List<CaretakerRRule> findAllByCaretaker_CaretakerId(UUID caretakerId);
 
+  List<CaretakerRRule> findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(
+      UUID caretakerId, String slotType);
+
   Optional<CaretakerRRule> findByRruleIdAndCaretaker_CaretakerId(UUID id, UUID caretakerId);
 
-  @Query("SELECT r FROM CaretakerRRule r WHERE r.dtstart <= :now AND (r.dtend IS NULL OR r.dtend >= :now)")
+  @Query("SELECT r FROM CaretakerRRule r WHERE r.isEnabled = true")
   List<CaretakerRRule> findAllActive(@Param("now") LocalDateTime now);
 
   @Query("SELECT r FROM CaretakerRRule r WHERE " +
       "(r.generatedTo IS NULL OR r.generatedTo < :targetDate) " +
-      "AND r.dtstart <= :now " +
-      "AND (r.dtend IS NULL OR r.dtend >= :now)")
+      "AND r.isEnabled = true")
   List<CaretakerRRule> findAllNeedingGeneration(
       @Param("targetDate") LocalDate targetDate,
       @Param("now") LocalDateTime now);

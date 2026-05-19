@@ -41,8 +41,8 @@
     }
   },
   "rrule": "FREQ=DAILY",
-  "dtstart": "2026-05-01T08:00:00",
-  "dtend": "2026-05-31T20:00:00",
+  "slotStartTime": "08:00:00",
+  "slotDuration": "PT12H",
   "description": "Daily walks",
   "slotType": "WALKING",
   "capacity": 3,

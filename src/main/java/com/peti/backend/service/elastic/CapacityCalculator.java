@@ -8,6 +8,8 @@ import com.peti.backend.model.elastic.model.CapacityWithPricing;
 import java.time.LocalTime;
 import java.util.List;
 
+
+@Deprecated(since = "2024-06", forRemoval = true) // Replaced by CapacityTimelineBuilder
 /**
  * Computes the effective capacity and active {@link ServiceConfig} at a given
  * point in time, considering active RRules and bookings.
@@ -31,8 +33,8 @@ final class CapacityCalculator {
     int highestPriority = Integer.MIN_VALUE;
 
     for (CaretakerRRule rrule : rrules) {
-      LocalTime from = rrule.getDtstart().toLocalTime();
-      LocalTime to = rrule.getDtend().toLocalTime();
+      LocalTime from = rrule.getSlotStartTime();
+      LocalTime to = from.plus(rrule.getSlotDuration());
       if (!time.isBefore(from) && time.isBefore(to)) {
         totalCapacity += rrule.getCapacity();
         if (rrule.getPriority() > highestPriority
@@ -44,12 +46,12 @@ final class CapacityCalculator {
     }
 
     for (BookingInput booking : bookings) {
-      if (!time.isBefore(booking.timeFrom()) && time.isBefore(booking.timeTo())) {
+      if (!time.isBefore(booking.timeFrom().toLocalTime()) && time.isBefore(booking.timeTo().toLocalTime())) {
         totalCapacity -= booking.bookedCapacity();
       }
     }
 
-    return new CapacityWithPricing(Math.max(0, totalCapacity), selectedConfig);
+    return new CapacityWithPricing(Math.max(0, totalCapacity));
   }
 
   /** Resolve the ServiceConfig matching the rrule's slotType name (case-insensitive). */

@@ -49,7 +49,6 @@ class SlotSearchResultMapperTest {
   @DisplayName("toSearchResult maps fields correctly with successful price")
   void toSearchResult_success() {
     ElasticSlotDocument slot = buildSlot("s1", 5, LocalTime.of(8, 0), LocalTime.of(12, 0));
-    slot.setCaretakerPreferences(new CaretakerPreferences(List.of(CONFIG), Map.of()));
     PriceBreakdown breakdown = PriceBreakdown.builder()
         .basePrice(BigDecimal.valueOf(100)).total(BigDecimal.valueOf(130)).currency("UAH")
         .stepsCount(0).stepsPrice(BigDecimal.ZERO).extraPetsPrice(BigDecimal.ZERO)
@@ -103,10 +102,11 @@ class SlotSearchResultMapperTest {
   // ── helpers ───────────────────────────────────────────────────────────────
 
   private ElasticSlotDocument buildSlot(String id, int capacity, LocalTime from, LocalTime to) {
+    LocalDate date = LocalDate.of(2026, 3, 1);
     return ElasticSlotDocument.builder()
         .id(id).caretakerId("ct-1").caretakerFirstName("Іван").caretakerLastName("Шевченко")
         .caretakerRating(5).caretakerCityId("1").caretakerCityName("Київ")
-        .date(LocalDate.of(2026, 3, 1)).timeFrom(from).timeTo(to)
+        .fromDateTime(date.atTime(from)).toDateTime(date.atTime(to))
         .capacity(capacity).serviceConfig(CONFIG).build();
   }
 

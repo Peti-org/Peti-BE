@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.repository.elastic.ElasticSlotRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +70,7 @@ class ElasticSlotCrudServiceTest {
   void deleteByCaretakerAndDate() {
     LocalDate date = LocalDate.of(2026, 3, 1);
     crudService.deleteSlotsByCaretakerAndDate("ct-1", date);
-    verify(slotRepository).deleteByCaretakerIdAndDate("ct-1", date);
+    verify(slotRepository).deleteByCaretakerIdAndFromDateTimeBetween("ct-1", date.atStartOfDay(), date.plusDays(1).atStartOfDay());
   }
 
   @Test
@@ -91,7 +92,7 @@ class ElasticSlotCrudServiceTest {
     when(slotRepository.saveAll(newSlots)).thenReturn(newSlots);
 
     List<ElasticSlotDocument> result = crudService.replaceSlotsByCaretakerAndDate("ct-1", date, newSlots);
-    verify(slotRepository).deleteByCaretakerIdAndDate("ct-1", date);
+    verify(slotRepository).deleteByCaretakerIdAndFromDateTimeBetween("ct-1", date.atStartOfDay(), date.plusDays(1).atStartOfDay());
     verify(slotRepository).saveAll(newSlots);
     assertThat(result).hasSize(1);
   }
@@ -107,9 +108,8 @@ class ElasticSlotCrudServiceTest {
     return ElasticSlotDocument.builder()
         .id(id)
         .caretakerId("ct-1")
-        .date(LocalDate.of(2026, 3, 1))
-        .timeFrom(LocalTime.of(8, 0))
-        .timeTo(LocalTime.of(12, 0))
+        .fromDateTime(LocalDateTime.of(2026, 3, 1, 8, 0))
+        .toDateTime(LocalDateTime.of(2026, 3, 1, 12, 0))
         .capacity(3)
         .build();
   }

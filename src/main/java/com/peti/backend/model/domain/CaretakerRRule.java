@@ -2,6 +2,7 @@ package com.peti.backend.model.domain;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,12 +10,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import com.peti.backend.model.converter.DurationMinutesConverter;
 
 @Entity
 @Getter
@@ -38,11 +42,12 @@ public class CaretakerRRule {
 
   @Basic
   @Column(name = "dtstart", nullable = false)
-  private LocalDateTime dtstart;
+  private LocalTime slotStartTime;
 
   @Basic
-  @Column(name = "dtend")
-  private LocalDateTime dtend;
+  @Column(name = "duration", nullable = false)
+  @Convert(converter = DurationMinutesConverter.class)
+  private Duration slotDuration;
 
   @Basic
   @Column(name = "description", length = 255)
@@ -67,6 +72,10 @@ public class CaretakerRRule {
   @Basic
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
+
+  @Basic
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
 
   @Basic
   @Column(name = "is_enabled", nullable = false)

@@ -98,8 +98,8 @@ public class MockDataBuilder {
     CaretakerRRule rule = new CaretakerRRule();
     rule.setCaretaker(caretaker);
     rule.setRrule("FREQ=DAILY");
-    rule.setDtstart(LocalDateTime.of(date, LocalTime.of(startHour, 0)));
-    rule.setDtend(LocalDateTime.of(date, LocalTime.of(endHour, 0)));
+    rule.setSlotStartTime(LocalTime.of(startHour, 0));
+    rule.setSlotDuration(java.time.Duration.ofHours(endHour - startHour));
     rule.setSlotType(ServiceType.WALKING.name());
     rule.setCapacity(1 + (index % 3));
     rule.setIntervalMinutes(30);
@@ -108,6 +108,7 @@ public class MockDataBuilder {
     rule.setIsBusy(false);
     rule.setPriority(0);
     rule.setCreatedAt(LocalDateTime.now());
+    rule.setUpdatedAt(LocalDateTime.now());
     return rule;
   }
 

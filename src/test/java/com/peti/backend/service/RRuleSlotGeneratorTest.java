@@ -62,8 +62,8 @@ public class RRuleSlotGeneratorTest {
     rrule.setRruleId(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
     rrule.setCaretaker(caretaker);
     rrule.setRrule("FREQ=DAILY;COUNT=3");
-    rrule.setDtstart(LocalDateTime.of(2026, 2, 10, 9, 0));
-    rrule.setDtend(LocalDateTime.of(2026, 2, 10, 17, 0));
+    rrule.setSlotStartTime(LocalTime.of(9, 0));
+    rrule.setSlotDuration(java.time.Duration.ofHours(8));
     rrule.setSlotType("walk");
     rrule.setCapacity(5);
     rrule.setIntervalMinutes(30);
@@ -90,8 +90,8 @@ public class RRuleSlotGeneratorTest {
 
     int result = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
 
-    // Should generate slots for 3 days (COUNT=3), 1 time slot per day = 3 total
-    assertEquals(4, result);
+    // Should generate slots for 3 days (COUNT=3), 4 time slots per day = 12 total
+    assertEquals(12, result);
     verify(slotRepository).saveAll(anyList());
   }
 
