@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 
 //todo need to refactor to optimise logic and buisness needs at all
+  //possibly upgrade efficiency to nlog n if could be
 @Component
 @RequiredArgsConstructor
 public class RRuleCapacityChecker {

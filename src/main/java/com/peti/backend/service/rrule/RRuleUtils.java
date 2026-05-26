@@ -20,7 +20,7 @@ public class RRuleUtils {
   public static boolean isActiveOnDate(CaretakerRRule rrule, LocalDate date) {
     String rruleStr = rrule.getRrule();
     if (rruleStr == null || rruleStr.isBlank()) {
-      return true;
+      return false;
     }
     try {
       RecurrenceRule recurrenceRule = new RecurrenceRule(rruleStr);
