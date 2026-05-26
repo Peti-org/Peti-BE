@@ -8,7 +8,6 @@
   "slotType": "WALKING",
   "capacity": 5,
   "intervalMinutes": 30,
-  "generatedTo": "2026-02-17",
   "isEnabled": true,
   "isSchedule": false,
   "isBusy": false,

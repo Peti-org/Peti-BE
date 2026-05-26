@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import com.peti.backend.service.rrule.RRuleUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,7 @@ public class RRuleMatcher {
         .findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(caretakerId, slotType);
 
     List<CaretakerRRule> matching = candidates.stream()
+        .filter(rule -> RRuleUtils.isActiveOnDate(rule, from.toLocalDate()))
         .filter(rule -> overlapsTimeWindow(rule, from, to))
         .toList();
 

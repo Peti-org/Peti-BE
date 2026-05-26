@@ -19,7 +19,7 @@ This feature automatically generates caretaker availability slots based on RFC 5
 ### 2. Services
 
 #### RRuleSlotGenerator
-**Location:** `com.peti.backend.service.slot.RRuleSlotGenerator`
+**Location:** `com.peti.backend.service.rrule.RRuleSlotGenerator`
 
 Core service responsible for:
 - Parsing RRule strings using `lib-recur` library

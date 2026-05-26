@@ -11,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -65,9 +64,7 @@ public class CaretakerRRule {
   @Column(name = "interval_minutes", nullable = false)
   private Integer intervalMinutes;
 
-  @Basic
-  @Column(name = "generated_to")
-  private LocalDate generatedTo;
+
 
   @Basic
   @Column(name = "created_at", nullable = false)

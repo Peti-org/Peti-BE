@@ -1,13 +1,13 @@
 package com.peti.backend.utils;
 
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.BreedConfig;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.DaySchedule;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.PickupDelivery;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.PriceInfo;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.BreedConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.DaySchedule;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.PickupDelivery;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.PriceInfo;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.City;

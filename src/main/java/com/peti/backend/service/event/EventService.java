@@ -15,6 +15,7 @@ import com.peti.backend.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import com.peti.backend.service.slot.SlotsRebuildTrigger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +34,13 @@ public class EventService {
 
   private final EventValidator validator;
   private final EventPriceCalculator priceCalculator;
-  private final CaretakerSlotsRebuildTrigger slotsRebuildTrigger;
+  private final SlotsRebuildTrigger slotsRebuildTrigger;
   private final RRuleMatcher rruleMatcher;
   private final RRuleCapacityChecker capacityChecker;
 
+  //todo - validate time to have be min time + time interval*n where n any number available (duration need to be taken from carataker preferences)
+  //todo - when checking slots capacity need to check only events that is approved!!!
+  //todo -
   @Transactional
   public EventDto createEvent(RequestEventDto request, UUID userId) {
     validator.validateTimeOrder(request.datetimeFrom(), request.datetimeTo());
@@ -58,7 +62,7 @@ public class EventService {
     Event event = buildEvent(caretaker, pets, user, request);
     Event saved = eventRepository.save(event);
 
-    slotsRebuildTrigger.rebuild(request.caretakerId(),
+    slotsRebuildTrigger.rebuildAsync(request.caretakerId(),
         request.datetimeFrom().toLocalDate(),
         request.datetimeTo().toLocalDate());
 
@@ -95,7 +99,7 @@ public class EventService {
     event.setStatus(EventStatus.DELETED);
     eventRepository.save(event);
 
-    slotsRebuildTrigger.rebuild(event.getCaretaker().getCaretakerId(),
+    slotsRebuildTrigger.rebuildAsync(event.getCaretaker().getCaretakerId(),
         event.getDatetimeFrom().toLocalDate(),
         event.getDatetimeTo().toLocalDate());
     return true;

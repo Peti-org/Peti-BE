@@ -1,15 +1,15 @@
 package com.peti.backend.controller.user;
 
-import com.peti.backend.dto.caretacker.CaretakerDto;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
-import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.dto.caretaker.CaretakerDto;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.SimpleCaretakerDto;
 import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
 import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasUserRole;
-import com.peti.backend.service.slot.CaretakerRRuleService;
+import com.peti.backend.service.rrule.CaretakerRRuleService;
 import com.peti.backend.service.user.CaretakerService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,172 +1,119 @@
 package com.peti.backend.service.slot;
 
-import com.peti.backend.model.domain.CaretakerRRule;
-import com.peti.backend.repository.CaretakerRRuleRepository;
-import com.peti.backend.repository.SlotRepository;
-import java.sql.Date;
+import com.peti.backend.dto.slot.SlotGenerationMode;
+import com.peti.backend.dto.slot.SlotGenerationRequest;
+import com.peti.backend.model.domain.Caretaker;
+import com.peti.backend.repository.CaretakerRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Scheduled component that automatically generates caretaker slots based on RRule configurations.
- * Runs daily to ensure slots are available for the next 14 days.
+ * Scheduled component that generates caretaker slots. Supports two modes: DEFAULT (incremental) and FORCE (full
+ * regeneration).
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class SlotGenerationScheduler {
 
-  private final CaretakerRRuleRepository rruleRepository;
-  private final RRuleSlotGenerator slotGenerator;
-  private final SlotRepository slotRepository;
+  private final SlotsRebuildTrigger slotsRebuildTrigger;
+  private final CaretakerRepository caretakerRepository;
 
-  @Value("${app.slot-generation.days-ahead:14}")
+  @Value("${elasticsearch.data-generation.days-ahead:60}")
   private int daysAhead;
 
-  @Value("${app.slot-generation.batch-size:50}")
-  private int batchSize;
-
   /**
-   * Scheduled job that runs daily to generate slots for the next 14 days.
-   * Cron expression is configured via application.properties.
+   * Scheduled job — runs in DEFAULT (incremental) mode daily.
    */
   @Scheduled(cron = "${app.slot-generation.cron:0 0 2 * * *}")
   public void generateDailySlots() {
-    log.info("Starting scheduled slot generation job");
-    long startTime = System.currentTimeMillis();
-
-    try {
-      SlotGenerationResult result = generateSlots();
-
-      long duration = System.currentTimeMillis() - startTime;
-      log.info("Completed slot generation: {} RRules processed, {} slots created, {} errors in {}ms",
-          result.rruleProcessed, result.slotsCreated, result.errors, duration);
-
-    } catch (Exception e) {
-      log.error("Fatal error in scheduled slot generation: {}", e.getMessage(), e);
-    }
+    log.info("[SLOT-GEN] Starting scheduled slot generation in DEFAULT mode");
+    SlotGenerationRequest request = new SlotGenerationRequest(SlotGenerationMode.DEFAULT, null, null, null);
+    SlotGenerationResult result = generateSlots(request);
+    log.info("[SLOT-GEN] Completed scheduled DEFAULT generation: {}", result);
   }
 
   /**
-   * Generates slots for all active RRules.
-   * This method can be called manually or by the scheduler.
-   *
-   * @return Generation result statistics
+   * Entry point for slot generation triggered by admin or scheduler.
    */
-  public SlotGenerationResult generateSlots() {
-    LocalDate today = LocalDate.now();
-    LocalDate targetEndDate = today.plusDays(daysAhead);
-    LocalDateTime now = LocalDateTime.now();
+  public SlotGenerationResult generateSlots(SlotGenerationRequest request) {
+    SlotGenerationMode mode = request.modeOrDefault();
+    log.info("[SLOT-GEN] Running slot generation | mode={} | caretakerId={} | dateFrom={} | dateTo={}",
+        mode, request.caretakerId(), request.dateFrom(), request.dateTo());
 
-    log.info("Generating slots up to {} ({} days ahead)", targetEndDate, daysAhead);
-
-    // Fetch RRules that need generation (generatedTo is null or before targetEndDate)
-    List<CaretakerRRule> rrulesToProcess = rruleRepository.findAllNeedingGeneration(targetEndDate, now);
-    log.info("Found {} RRules needing slot generation", rrulesToProcess.size());
-
-    int totalSlotsCreated = 0;
-    int rruleProcessed = 0;
+    long startTime = System.currentTimeMillis();
+    List<Caretaker> caretakers = resolveCaretakers(request.caretakerId());
+    int processed = 0;
     int errors = 0;
 
-    // Process RRules in batches
-    for (int i = 0; i < rrulesToProcess.size(); i += batchSize) {
-      int endIndex = Math.min(i + batchSize, rrulesToProcess.size());
-      List<CaretakerRRule> batch = rrulesToProcess.subList(i, endIndex);
-
-      log.debug("Processing batch {}-{} of {} RRules", i + 1, endIndex, rrulesToProcess.size());
-
-      for (CaretakerRRule rrule : batch) {
-        try {
-          // Determine start date: either today or day after last generated date
-          LocalDate startDate = rrule.getGeneratedTo() != null
-              ? rrule.getGeneratedTo().plusDays(1)
-              : today;
-
-          // Only generate if there's a date range to cover
-          if (!startDate.isAfter(targetEndDate)) {
-            int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, targetEndDate);
-            totalSlotsCreated += slotsCreated;
-            log.debug("Generated {} slots for RRule {} from {} to {}",
-                slotsCreated, rrule.getRruleId(), startDate, targetEndDate);
-          }
-          rruleProcessed++;
-        } catch (Exception e) {
-          log.error("Error processing RRule {}: {}", rrule.getRruleId(), e.getMessage(), e);
-          errors++;
-        }
+    for (Caretaker caretaker : caretakers) {
+      try {
+        generateSlotsForCaretaker(caretaker, mode, request.dateFrom(), request.dateTo());
+        processed++;
+      } catch (Exception e) {
+        errors++;
+        log.error("[SLOT-GEN] Error processing caretaker {}: {}", caretaker.getCaretakerId(), e.getMessage(), e);
       }
-
-      log.debug("Completed batch processing: {} RRules processed so far", rruleProcessed);
     }
 
-    return new SlotGenerationResult(rruleProcessed, totalSlotsCreated, errors);
+    long duration = System.currentTimeMillis() - startTime;
+    SlotGenerationResult result = new SlotGenerationResult(processed, duration, errors);
+    log.info("[SLOT-GEN] Finished | mode={} | result={}", mode, result);
+    return result;
   }
 
-  /**
-   * Generates slots for a single RRule. Used when RRule is created or updated.
-   *
-   * @param rruleId The RRule ID
-   * @param startDate Start date for generation
-   * @param endDate End date for generation
-   * @return Number of slots created
-   */
-  @Transactional
-  public int generateSlotsForSingleRRule(UUID rruleId, LocalDate startDate, LocalDate endDate) {
-    return rruleRepository.findById(rruleId)
-        .map(rrule -> {
-          try {
-            int slotsCreated = slotGenerator.generateSlotsForRRule(rrule, startDate, endDate);
-            log.info("Generated {} slots for single RRule {} from {} to {}",
-                slotsCreated, rruleId, startDate, endDate);
-            return slotsCreated;
-          } catch (Exception e) {
-            log.error("Error generating slots for RRule {}: {}", rruleId, e.getMessage(), e);
-            return 0;
-          }
-        })
+  private List<Caretaker> resolveCaretakers(UUID caretakerId) {
+    if (caretakerId == null) {
+      return caretakerRepository.findAll();
+    }
+    return caretakerRepository.findById(caretakerId)
+        .map(List::of)
         .orElseGet(() -> {
-          log.warn("RRule {} not found for slot generation", rruleId);
-          return 0;
+          log.warn("[SLOT-GEN] Caretaker not found: {}", caretakerId);
+          return List.of();
         });
   }
 
-  /**
-   * Deletes future unoccupied slots generated by a specific RRule.
-   * Used when RRule is updated or deleted.
-   *
-   * @param rruleId The RRule ID
-   * @param fromDate Delete slots from this date onwards
-   * @return Number of slots deleted
-   */
-  @Transactional
-  public int deleteSlotsForRRule(UUID rruleId, LocalDate fromDate) {
-    try {
-      int deletedCount = slotRepository.deleteByRRuleIdAndDateAfterAndUnoccupied(
-          rruleId,
-          Date.valueOf(fromDate)
-      );
-      log.info("Deleted {} unoccupied slots for RRule {} from date {}",
-          deletedCount, rruleId, fromDate);
-      return deletedCount;
-    } catch (Exception e) {
-      log.error("Error deleting slots for RRule {}: {}", rruleId, e.getMessage(), e);
-      return 0;
+  private void generateSlotsForCaretaker(Caretaker caretaker, SlotGenerationMode mode,
+      LocalDate requestFrom, LocalDate requestTo) {
+    LocalDate today = LocalDate.now();
+    LocalDate endDate = requestTo != null ? requestTo : today.plusDays(daysAhead);
+    LocalDate startDate;
+
+    if (mode == SlotGenerationMode.FORCE) {
+      startDate = requestFrom != null ? requestFrom : today;
+    } else {
+      // DEFAULT/incremental: start from generatedTo (or today if null)
+      LocalDate generatedTo = caretaker.getGeneratedTo();
+      startDate = generatedTo != null ? generatedTo.plusDays(1) : today;
+      if (requestFrom != null && requestFrom.isAfter(startDate)) {
+        startDate = requestFrom;
+      }
     }
+
+    if (startDate.isAfter(endDate)) {
+      log.debug("[SLOT-GEN] Caretaker {} already generated up to {}, nothing to do",
+          caretaker.getCaretakerId(), caretaker.getGeneratedTo());
+      return;
+    }
+
+    log.info("[SLOT-GEN] Processing caretaker {} | mode={} | range=[{} -> {}]",
+        caretaker.getCaretakerId(), mode, startDate, endDate);
+
+    slotsRebuildTrigger.rebuild(caretaker.getCaretakerId(), startDate, endDate);
+
+    // Update generatedTo watermark
+    caretaker.setGeneratedTo(endDate);
+    caretakerRepository.save(caretaker);
   }
 
-  /**
-   * Result statistics for slot generation.
-   */
-  public record SlotGenerationResult(int rruleProcessed, int slotsCreated, int errors) {
+  public record SlotGenerationResult(int caretakersProcessed, long durationMs, int errors) {
+
   }
 }
-

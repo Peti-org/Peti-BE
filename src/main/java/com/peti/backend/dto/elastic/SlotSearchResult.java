@@ -1,8 +1,8 @@
 package com.peti.backend.dto.elastic;
 
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.DaySchedule;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.DaySchedule;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.elastic.model.PriceBreakdown;
 import java.time.LocalDate;
 import java.time.LocalTime;

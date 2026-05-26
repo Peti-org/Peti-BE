@@ -3,7 +3,7 @@ package com.peti.backend.utils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.ResourceLoader;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.City;

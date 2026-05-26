@@ -1,5 +1,6 @@
 package com.peti.backend.controller.maintenance;
 
+import com.peti.backend.dto.slot.SlotGenerationRequest;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.service.slot.SlotGenerationScheduler;
 import com.peti.backend.service.slot.SlotGenerationScheduler.SlotGenerationResult;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,26 +20,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/slots")
 @RequiredArgsConstructor
-@Tag(name = "Admin - Slot Management", description = "Administrative operations for slot generation")
+@Tag(name = "Admin", description = "Admin operations")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminSlotController {
 
   private final SlotGenerationScheduler slotGenerationScheduler;
 
   /**
-   * Manually trigger slot generation for all active RRules.
-   * This endpoint allows administrators to generate slots on-demand
-   * without waiting for the scheduled job.
+   * Manually trigger slot generation.
    *
-   * @return Statistics about the generation process
+   * @param request generation parameters (mode, optional date range, optional caretakerId)
+   * @return statistics about the generation process
    */
   @HasAdminRole
   @PostMapping("/generate")
   @Operation(summary = "Manually trigger slot generation",
-      description = "Generates slots for all active RRules for the next 14 days. " +
-          "This can be used to manually trigger slot generation without waiting for the scheduled job.")
-  public ResponseEntity<SlotGenerationResult> generateSlots() {
-    SlotGenerationResult result = slotGenerationScheduler.generateSlots();
+      description = "Generates slots with specified mode (DEFAULT=incremental, FORCE=full). "
+          + "Optionally specify caretakerId, dateFrom, dateTo.")
+  public ResponseEntity<SlotGenerationResult> generateSlots(
+      @RequestBody SlotGenerationRequest request) {
+    SlotGenerationResult result = slotGenerationScheduler.generateSlots(request);
     return ResponseEntity.ok(result);
   }
 }

@@ -2,7 +2,7 @@ package com.peti.backend.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
 import com.peti.backend.dto.pet.PetProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

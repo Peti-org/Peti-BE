@@ -13,7 +13,7 @@ import com.peti.backend.repository.CityRepository;
 import com.peti.backend.repository.RoleRepository;
 import com.peti.backend.repository.UserRepository;
 import com.peti.backend.repository.elastic.ElasticSlotRepository;
-import com.peti.backend.service.elastic.SlotGenerationService;
+import com.peti.backend.service.slot.builder.SlotGenerationService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(value = "elasticsearch.mock-data.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(value = "elasticsearch.mock-data.enabled", havingValue = "true")
 public class ElasticMockDataInitializer {
 
   private final ElasticSlotRepository slotRepository;

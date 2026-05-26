@@ -2,10 +2,10 @@ package com.peti.backend.service.event;
 
 import com.peti.backend.dto.PriceDto;
 import com.peti.backend.dto.PriceItem;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretacker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.Pet;
 import java.math.BigDecimal;

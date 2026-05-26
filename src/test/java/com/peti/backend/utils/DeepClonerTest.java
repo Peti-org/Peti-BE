@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
 import com.peti.backend.dto.pet.PetProfile;
 import com.peti.backend.dto.pet.PetProfile.Sex;
 import com.peti.backend.dto.pet.PetProfile.TriState;
