@@ -98,8 +98,8 @@ public record ElasticSlotSearchRequest(
     return new ElasticSlotSearchRequest(
         dateFrom,
         dateTo != null ? dateTo : dateFrom.plusDays(7),
-        timeFrom != null ? timeFrom : LocalTime.of(8, 0),
-        timeTo != null ? timeTo : LocalTime.of(20, 0),
+        timeFrom != null ? timeFrom : LocalTime.of(0, 0),
+        timeTo != null ? timeTo : LocalTime.of(23, 59),
         cityId,
         minPricePerHour,
         maxPricePerHour,

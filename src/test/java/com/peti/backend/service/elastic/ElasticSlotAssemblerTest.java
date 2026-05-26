@@ -10,27 +10,25 @@ import com.peti.backend.model.domain.User;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.model.elastic.model.TimeRange;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import com.peti.backend.service.elastic.builder.ElasticSlotAssembler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class ElasticSlotAssemblerTest {
 
-  private ElasticSlotAssembler assembler;
+  private static final LocalDate DATE = LocalDate.of(2026, 3, 1);
+
   private Caretaker caretaker;
   private ServiceConfig walkingConfig;
 
   @BeforeEach
   void setUp() {
-    assembler = new ElasticSlotAssembler();
-
     walkingConfig = new ServiceConfig(
         ServiceType.WALKING, false, true, false, 3,
         Duration.ofMinutes(60), Duration.ofMinutes(15), Duration.ofHours(2),
@@ -57,19 +55,15 @@ class ElasticSlotAssemblerTest {
   @Test
   @DisplayName("Assembles correct number of slots from capacity ranges")
   void assemblesCorrectSlots() {
-    LocalDate date = LocalDate.of(2026, 3, 1);
     Map<Integer, List<TimeRange>> capacityRanges = Map.of(
-        3, List.of(new TimeRange(LocalTime.of(8, 0), LocalTime.of(20, 0))),
-        2, List.of(new TimeRange(LocalTime.of(8, 0), LocalTime.of(20, 0)))
-    );
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(20, 0), 3, walkingConfig)
+        3, List.of(new TimeRange(DATE.atTime(8, 0), DATE.atTime(20, 0))),
+        2, List.of(new TimeRange(DATE.atTime(8, 0), DATE.atTime(20, 0)))
     );
 
-    List<ElasticSlotDocument> result = assembler.assemble(date, capacityRanges, segments, caretaker);
+    List<ElasticSlotDocument> result = ElasticSlotAssembler.assemble(capacityRanges, caretaker, walkingConfig);
 
     assertThat(result).hasSize(2);
-    assertThat(result).allMatch(s -> s.getDate().equals(date));
+    assertThat(result).allMatch(s -> s.getFromDateTime().toLocalDate().equals(DATE));
     assertThat(result).allMatch(s -> s.getCaretakerId().equals(caretaker.getCaretakerId().toString()));
     assertThat(result).allMatch(s -> s.getCaretakerFirstName().equals("Іван"));
     assertThat(result).allMatch(s -> s.getCaretakerCityId().equals("1"));
@@ -80,32 +74,26 @@ class ElasticSlotAssemblerTest {
   @Test
   @DisplayName("Splits ranges produce multiple slots per capacity level")
   void splitRanges() {
-    LocalDate date = LocalDate.of(2026, 3, 1);
     Map<Integer, List<TimeRange>> capacityRanges = Map.of(
         2, List.of(
-            new TimeRange(LocalTime.of(8, 0), LocalTime.of(10, 0)),
-            new TimeRange(LocalTime.of(14, 0), LocalTime.of(20, 0))
+            new TimeRange(DATE.atTime(8, 0), DATE.atTime(10, 0)),
+            new TimeRange(DATE.atTime(14, 0), DATE.atTime(20, 0))
         )
     );
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(10, 0), 2, walkingConfig),
-        new TimeSegmentWithPricing(LocalTime.of(14, 0), LocalTime.of(20, 0), 2, walkingConfig)
-    );
 
-    List<ElasticSlotDocument> result = assembler.assemble(date, capacityRanges, segments, caretaker);
+    List<ElasticSlotDocument> result = ElasticSlotAssembler.assemble(capacityRanges, caretaker, walkingConfig);
 
     assertThat(result).hasSize(2);
     assertThat(result).anyMatch(s ->
-        s.getTimeFrom().equals(LocalTime.of(8, 0)) && s.getTimeTo().equals(LocalTime.of(10, 0)));
+        s.getFromDateTime().equals(DATE.atTime(8, 0)) && s.getToDateTime().equals(DATE.atTime(10, 0)));
     assertThat(result).anyMatch(s ->
-        s.getTimeFrom().equals(LocalTime.of(14, 0)) && s.getTimeTo().equals(LocalTime.of(20, 0)));
+        s.getFromDateTime().equals(DATE.atTime(14, 0)) && s.getToDateTime().equals(DATE.atTime(20, 0)));
   }
 
   @Test
   @DisplayName("Empty capacity ranges produce no slots")
   void emptyRanges() {
-    List<ElasticSlotDocument> result = assembler.assemble(
-        LocalDate.of(2026, 3, 1), Map.of(), List.of(), caretaker);
+    List<ElasticSlotDocument> result = ElasticSlotAssembler.assemble(Map.of(), caretaker, walkingConfig);
     assertThat(result).isEmpty();
   }
 
@@ -113,18 +101,13 @@ class ElasticSlotAssemblerTest {
   @DisplayName("User without city - cityId and cityName are null")
   void userWithoutCity() {
     caretaker.getUserReference().setCityByCityId(null);
-    LocalDate date = LocalDate.of(2026, 3, 1);
     Map<Integer, List<TimeRange>> ranges = Map.of(
-        1, List.of(new TimeRange(LocalTime.of(8, 0), LocalTime.of(12, 0)))
-    );
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(12, 0), 1, walkingConfig)
+        1, List.of(new TimeRange(DATE.atTime(8, 0), DATE.atTime(12, 0)))
     );
 
-    List<ElasticSlotDocument> result = assembler.assemble(date, ranges, segments, caretaker);
+    List<ElasticSlotDocument> result = ElasticSlotAssembler.assemble(ranges, caretaker, walkingConfig);
     assertThat(result).hasSize(1);
     assertThat(result.get(0).getCaretakerCityId()).isNull();
     assertThat(result.get(0).getCaretakerCityName()).isNull();
   }
 }
-

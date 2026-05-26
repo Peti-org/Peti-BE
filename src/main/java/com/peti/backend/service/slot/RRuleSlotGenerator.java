@@ -57,9 +57,9 @@ public class RRuleSlotGenerator {
       // Parse the RRule string
       RecurrenceRule recurrenceRule = new RecurrenceRule(rrule.getRrule());
 
-      // Get start and end times from dtstart/dtend
-      LocalTime dailyStartTime = rrule.getDtstart().toLocalTime();
-      LocalTime dailyEndTime = rrule.getDtend() != null ? rrule.getDtend().toLocalTime() : dailyStartTime.plusHours(8);
+      // Get start and end times from slotStartTime/slotDuration
+      LocalTime dailyStartTime = rrule.getSlotStartTime();
+      LocalTime dailyEndTime = dailyStartTime.plus(rrule.getSlotDuration());
 
       // Divide time range into slots using SlotDivider
       List<TimeSlotPair> timeSlots = slotDivider.divideTimeRange(
@@ -78,7 +78,7 @@ public class RRuleSlotGenerator {
 
       // Get occurrences in the date range
       RecurrenceRuleIterator iterator = recurrenceRule.iterator(
-          new DateTime(rrule.getDtstart().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+          new DateTime(startDate.atTime(rrule.getSlotStartTime()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
       );
 
       List<Slot> slotsToCreate = new ArrayList<>();
@@ -101,10 +101,7 @@ public class RRuleSlotGenerator {
           break;
         }
 
-        // Check if dtend restriction applies
-        if (rrule.getDtend() != null && occurrenceDate.isAfter(rrule.getDtend().toLocalDate())) {
-          break;
-        }
+        // No dtend restriction needed - slot duration defines the end time
 
         // Update last generated date
         if (occurrenceDate.isAfter(lastGeneratedDate)) {

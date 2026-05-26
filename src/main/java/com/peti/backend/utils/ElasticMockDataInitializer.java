@@ -127,8 +127,8 @@ public class ElasticMockDataInitializer {
   private List<BookingInput> buildRandomBookings(CaretakerRRule rrule) {
     int count = rrule.getCapacity() / 2;
     List<BookingInput> bookings = new ArrayList<>();
-    LocalTime from = rrule.getDtstart().toLocalTime();
-    LocalTime to = rrule.getDtend().toLocalTime();
+    LocalTime from = rrule.getSlotStartTime();
+    LocalTime to = from.plus(rrule.getSlotDuration());
     int availableHours = to.getHour() - from.getHour();
     if (availableHours < 2 || count == 0) {
       return bookings;
@@ -141,7 +141,8 @@ public class ElasticMockDataInitializer {
       if (finish.isAfter(to)) {
         finish = to;
       }
-      bookings.add(new BookingInput(start, finish, rrule.getCapacity()));
+      LocalDate today = LocalDate.now();
+      bookings.add(new BookingInput(today.atTime(start), today.atTime(finish), rrule.getCapacity()));
     }
     return bookings;
   }
@@ -149,7 +150,7 @@ public class ElasticMockDataInitializer {
   private void recreateElasticIndex() {
     var indexOps = elasticsearchOperations.indexOps(ElasticSlotDocument.class);
     if (indexOps.exists()) {
-      log.info("Deleting existing walking-slots index to refresh mappings");
+      log.info("Deleting existing slots index to refresh mappings");
       indexOps.delete();
     }
     indexOps.create();

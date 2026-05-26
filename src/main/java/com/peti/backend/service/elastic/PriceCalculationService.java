@@ -7,6 +7,7 @@ import com.peti.backend.model.elastic.model.PriceBreakdown;
 import com.peti.backend.model.elastic.model.PriceCalculationResult;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,8 @@ public class PriceCalculationService {
       return PriceCalculationResult.error("Service configuration not available");
     }
 
-    long durationMinutes = slot.getDurationMinutes();
+    long durationMinutes = (slot.getFromDateTime() != null && slot.getToDateTime() != null)
+        ? Duration.between(slot.getFromDateTime(), slot.getToDateTime()).toMinutes() : 0;
     if (durationMinutes <= 0) {
       return PriceCalculationResult.error("Invalid slot duration");
     }

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.peti.backend.ResourceLoader;
-import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.exception.BadRequestException;
 import java.time.LocalDateTime;
@@ -41,7 +40,7 @@ class EventValidatorTest {
         "pets-for-event.json", new TypeReference<>() {});
 
     assertThatThrownBy(() -> validator.validatePetOwnership(
-        List.of(pets.get(0)), List.of(PET_A, PET_B), USER_ID))
+        List.of(pets.getFirst()), List.of(PET_A, PET_B), USER_ID))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("do not belong");
   }
@@ -58,25 +57,21 @@ class EventValidatorTest {
         .hasMessageContaining("do not belong");
   }
 
-  // ---------- validateTimeWindow ----------
+  // ---------- validateTimeOrder ----------
 
   @Test
-  @DisplayName("validateTimeWindow - valid window inside range passes")
-  void validateTimeWindow_valid() {
-    CaretakerRRule rrule = enabledRule();
-
-    assertThatCode(() -> validator.validateTimeWindow(rrule,
+  @DisplayName("validateTimeOrder - valid ordering passes")
+  void validateTimeOrder_valid() {
+    assertThatCode(() -> validator.validateTimeOrder(
         LocalDateTime.of(2026, 5, 2, 10, 0),
         LocalDateTime.of(2026, 5, 2, 11, 0)))
         .doesNotThrowAnyException();
   }
 
   @Test
-  @DisplayName("validateTimeWindow - from >= to throws BadRequestException")
-  void validateTimeWindow_fromAfterTo() {
-    CaretakerRRule rrule = enabledRule();
-
-    assertThatThrownBy(() -> validator.validateTimeWindow(rrule,
+  @DisplayName("validateTimeOrder - from >= to throws BadRequestException")
+  void validateTimeOrder_fromAfterTo() {
+    assertThatThrownBy(() -> validator.validateTimeOrder(
         LocalDateTime.of(2026, 5, 2, 11, 0),
         LocalDateTime.of(2026, 5, 2, 10, 0)))
         .isInstanceOf(BadRequestException.class)
@@ -84,43 +79,12 @@ class EventValidatorTest {
   }
 
   @Test
-  @DisplayName("validateTimeWindow - from before rrule.dtstart throws")
-  void validateTimeWindow_beforeDtstart() {
-    CaretakerRRule rrule = enabledRule();
-
-    assertThatThrownBy(() -> validator.validateTimeWindow(rrule,
-        LocalDateTime.of(2025, 12, 31, 10, 0),
-        LocalDateTime.of(2025, 12, 31, 11, 0)))
+  @DisplayName("validateTimeOrder - from equals to throws BadRequestException")
+  void validateTimeOrder_equal() {
+    LocalDateTime same = LocalDateTime.of(2026, 5, 2, 10, 0);
+    assertThatThrownBy(() -> validator.validateTimeOrder(same, same))
         .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("dtstart");
-  }
-
-  @Test
-  @DisplayName("validateTimeWindow - to after rrule.dtend throws")
-  void validateTimeWindow_afterDtend() {
-    CaretakerRRule rrule = enabledRule();
-
-    assertThatThrownBy(() -> validator.validateTimeWindow(rrule,
-        LocalDateTime.of(2027, 1, 1, 10, 0),
-        LocalDateTime.of(2027, 1, 1, 11, 0)))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("dtend");
-  }
-
-  @Test
-  @DisplayName("validateTimeWindow - disabled rrule throws")
-  void validateTimeWindow_disabled() {
-    CaretakerRRule rrule = enabledRule();
-    rrule.setIsEnabled(false);
-
-    assertThatThrownBy(() -> validator.validateTimeWindow(rrule,
-        LocalDateTime.of(2026, 5, 2, 10, 0),
-        LocalDateTime.of(2026, 5, 2, 11, 0)))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("disabled");
-  }
-
-  private CaretakerRRule enabledRule() {
-    return ResourceLoader.loadResource("rrule-for-event-entity.json", CaretakerRRule.class);
+        .hasMessageContaining("strictly before");
   }
 }
+

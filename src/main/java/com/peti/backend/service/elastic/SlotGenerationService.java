@@ -1,14 +1,22 @@
 package com.peti.backend.service.elastic;
 
+import static org.springframework.util.ObjectUtils.isEmpty;
+
+import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.BookingInput;
 import com.peti.backend.model.elastic.model.TimeRange;
 import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.internal.ServiceType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import com.peti.backend.service.elastic.builder.CapacityTimelineBuilder;
+import com.peti.backend.service.elastic.builder.ElasticSlotAssembler;
+import com.peti.backend.service.elastic.builder.SlotRangeResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,8 +38,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SlotGenerationService {
 
-  private final ElasticSlotAssembler assembler;
-
   /**
    * Generate all capacity-layered slot documents for a single caretaker on a single day.
    *
@@ -41,32 +47,49 @@ public class SlotGenerationService {
    * @param caretaker the caretaker domain entity (must have userReference loaded)
    * @return list of generated slot documents ready for indexing
    */
-  public List<ElasticSlotDocument> generateSlotsForDay(
-      LocalDate date,
-      List<CaretakerRRule> rrules,
-      List<BookingInput> bookings,
-      Caretaker caretaker
-  ) {
+  public List<ElasticSlotDocument> generateSlotsForDay(LocalDate date, List<CaretakerRRule> rrules,
+      List<BookingInput> bookings, Caretaker caretaker) {
     List<CaretakerRRule> validRules = filterValidRules(rrules);
     if (validRules.isEmpty()) {
       return List.of();
     }
 
-    List<TimeSegmentWithPricing> segments = CapacityTimelineBuilder.buildSegments(
-        validRules, bookings, caretaker.getCaretakerPreference()
-    );
-
-    int maxCapacity = segments.stream().mapToInt(TimeSegmentWithPricing::capacity).max().orElse(0);
-    if (maxCapacity == 0) {
+    if (isEmpty(caretaker.getCaretakerPreference()) || caretaker.getCaretakerPreference().services() == null) {
       return List.of();
     }
 
-    Map<Integer, List<TimeRange>> capacityRanges = SlotRangeResolver.resolveRangesByCapacity(segments);
+    // Each type of slot should be generated separately because if two slots with different type overlap
+    // we need to generate two separate segments for each type
+    Map<String, List<CaretakerRRule>> rulesByType = validRules.stream().collect(Collectors.groupingBy(
+        CaretakerRRule::getSlotType, Collectors.toList()));
 
-    return assembler.assemble(date, capacityRanges, segments, caretaker);
+    return rulesByType.values().stream()
+        .map(rules -> buildSlotsForSpecificType(date, rules, bookings, caretaker))
+        .flatMap(List::stream)
+        .toList();
   }
 
-  /** Filter out disabled rules and rules with invalid time ranges or zero capacity. */
+  private List<ElasticSlotDocument> buildSlotsForSpecificType(LocalDate date, List<CaretakerRRule> rrules,
+      List<BookingInput> bookings, Caretaker caretaker) {
+    //sort rrules by type and build for each slot type separately segments
+    String slotType = rrules.getFirst().getSlotType();
+    ServiceConfig serviceConfig = caretaker.getCaretakerPreference().services().stream()
+        .filter(config -> config.type().equals(ServiceType.fromName(slotType)))
+        .findFirst()
+        .orElse(null);
+
+    if (serviceConfig == null) {
+      return List.of();
+    }
+
+    List<TimeSegmentWithPricing> segments = CapacityTimelineBuilder.buildSegments(rrules, bookings, date);
+    Map<Integer, List<TimeRange>> capacityRanges = SlotRangeResolver.resolveRangesByCapacity(segments);
+    return ElasticSlotAssembler.assemble(capacityRanges, caretaker, serviceConfig);
+  }
+
+  /**
+   * Filter out disabled rules and rules with invalid time ranges or zero capacity.
+   */
   private List<CaretakerRRule> filterValidRules(List<CaretakerRRule> rrules) {
     if (rrules == null || rrules.isEmpty()) {
       return List.of();
@@ -74,8 +97,7 @@ public class SlotGenerationService {
     return rrules.stream()
         .filter(r -> Boolean.TRUE.equals(r.getIsEnabled()))
         .filter(r -> r.getCapacity() != null && r.getCapacity() > 0)
-        .filter(r -> r.getDtstart() != null && r.getDtend() != null)
-        .filter(r -> r.getDtstart().isBefore(r.getDtend()))
+        .filter(r -> r.getSlotStartTime() != null && r.getSlotDuration() != null)
         .toList();
   }
 }

@@ -16,9 +16,6 @@
     "caretakerIsDeleted": false,
     "rating": 50
   },
-  "rrule": {
-    "rruleId": "11111111-aaaa-1111-aaaa-111111111111"
-  },
   "status": "CREATED",
   "type": "WALKING",
   "createdAt": "2026-05-01T09:00:00",

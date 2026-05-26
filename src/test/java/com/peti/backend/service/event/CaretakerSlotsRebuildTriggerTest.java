@@ -107,8 +107,8 @@ class CaretakerSlotsRebuildTriggerTest {
     assertThat(bookingsCaptor.getValue()).hasSize(1);
     BookingInput b = bookingsCaptor.getValue().get(0);
     assertThat(b.bookedCapacity()).isEqualTo(2);
-    assertThat(b.timeFrom()).isEqualTo(java.time.LocalTime.of(10, 0));
-    assertThat(b.timeTo()).isEqualTo(java.time.LocalTime.of(12, 0));
+    assertThat(b.timeFrom()).isEqualTo(LocalDateTime.of(2026, 5, 2, 10, 0));
+    assertThat(b.timeTo()).isEqualTo(LocalDateTime.of(2026, 5, 2, 12, 0));
   }
 
   @Test

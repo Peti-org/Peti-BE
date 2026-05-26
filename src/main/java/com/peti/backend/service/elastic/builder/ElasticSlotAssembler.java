@@ -1,39 +1,35 @@
-package com.peti.backend.service.elastic;
+package com.peti.backend.service.elastic.builder;
 
 import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.TimeRange;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * Assembles {@link ElasticSlotDocument} instances from resolved capacity ranges,
  * caretaker domain entity, and service configuration.
  */
-@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ElasticSlotAssembler {
 
   /**
    * Build the final list of slot documents for one caretaker on one day.
    *
-   * @param date           the slot date
    * @param capacityRanges map of requiredCapacity → continuous time ranges
-   * @param segments       ordered segments used to look up ServiceConfig per range
    * @param caretaker      domain entity — source of all caretaker data
    * @return assembled slot documents ready for indexing
    */
-  public List<ElasticSlotDocument> assemble(
-      LocalDate date,
+  public static List<ElasticSlotDocument> assemble(
       Map<Integer, List<TimeRange>> capacityRanges,
-      List<TimeSegmentWithPricing> segments,
-      Caretaker caretaker
+      Caretaker caretaker,
+      ServiceConfig serviceConfig
   ) {
     List<ElasticSlotDocument> slots = new ArrayList<>();
     Instant now = Instant.now();
@@ -42,19 +38,14 @@ public class ElasticSlotAssembler {
     for (Map.Entry<Integer, List<TimeRange>> entry : capacityRanges.entrySet()) {
       int capacity = entry.getKey();
       for (TimeRange range : entry.getValue()) {
-        ServiceConfig serviceConfig = SlotRangeResolver.findServiceConfigForRange(segments, range);
-        if (serviceConfig == null) {
-          continue;
-        }
-        slots.add(buildDocument(date, capacity, range, serviceConfig, caretaker, user, now));
+        slots.add(buildDocument(capacity, range, serviceConfig, caretaker, user, now));
       }
     }
 
     return slots;
   }
 
-  private ElasticSlotDocument buildDocument(
-      LocalDate date,
+  private static ElasticSlotDocument buildDocument(
       int capacity,
       TimeRange range,
       ServiceConfig serviceConfig,
@@ -75,14 +66,11 @@ public class ElasticSlotAssembler {
         .caretakerRating(caretaker.getRating())
         .caretakerCityId(cityId)
         .caretakerCityName(cityName)
-        .caretakerPreferences(caretaker.getCaretakerPreference())
         .serviceConfig(serviceConfig)
-        .date(date)
-        .timeFrom(range.timeFrom())
-        .timeTo(range.timeTo())
+        .fromDateTime(range.timeFrom())
+        .toDateTime(range.timeTo())
         .capacity(capacity)
         .createdAt(now)
-        .updatedAt(now)
         .build();
   }
 }

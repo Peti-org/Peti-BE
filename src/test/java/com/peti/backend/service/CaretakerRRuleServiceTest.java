@@ -62,8 +62,9 @@ class CaretakerRRuleServiceTest {
     rrule.setRruleId(rruleId);
     rrule.setCaretaker(caretaker);
     rrule.setRrule(requestRRuleDto.rrule());
-    rrule.setDtstart(requestRRuleDto.dtstart());
-    rrule.setDtend(requestRRuleDto.dtend());
+    rrule.setSlotStartTime(requestRRuleDto.dtstart() != null ? requestRRuleDto.dtstart().toLocalTime() : null);
+    rrule.setSlotDuration(requestRRuleDto.dtstart() != null && requestRRuleDto.dtend() != null
+        ? java.time.Duration.between(requestRRuleDto.dtstart(), requestRRuleDto.dtend()) : null);
     rrule.setDescription(requestRRuleDto.description());
     rrule.setSlotType(requestRRuleDto.slotType().name());
     rrule.setCapacity(requestRRuleDto.capacity());

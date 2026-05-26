@@ -76,17 +76,19 @@ public class CaretakerRRuleService {
 
   private void applyFields(CaretakerRRule rrule, RequestRRuleDto dto) {
     rrule.setRrule(dto.rrule());
-    rrule.setDtstart(dto.dtstart());
-    rrule.setDtend(dto.dtend());
+    rrule.setSlotStartTime(dto.dtstart() != null ? dto.dtstart().toLocalTime() : null);
+    rrule.setSlotDuration(dto.dtstart() != null && dto.dtend() != null
+        ? java.time.Duration.between(dto.dtstart(), dto.dtend()) : null);
     rrule.setDescription(dto.description());
     rrule.setSlotType(dto.slotType().name());
     rrule.setCapacity(dto.capacity());
     rrule.setIntervalMinutes(dto.intervalMinutes());
-    rrule.setGeneratedTo(null); // Initially not generated
+    rrule.setGeneratedTo(null);
     rrule.setIsEnabled(dto.isEnabled());
     rrule.setIsSchedule(dto.isSchedule());
     rrule.setIsBusy(dto.isBusy());
     rrule.setPriority(dto.priority());
+    rrule.setUpdatedAt(LocalDateTime.now());
   }
 }
 

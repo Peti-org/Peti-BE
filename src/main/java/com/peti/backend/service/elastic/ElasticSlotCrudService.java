@@ -20,6 +20,17 @@ public class ElasticSlotCrudService {
 
   private final ElasticSlotRepository slotRepository;
 
+
+  public List<ElasticSlotDocument> replaceSlotsByCaretakerAndDate(
+      String caretakerId, LocalDate date, List<ElasticSlotDocument> newSlots) {
+    log.info("Replacing slots for caretaker {} on date {} with {} new slots",
+        caretakerId, date, newSlots.size());
+    deleteSlotsByCaretakerAndDate(caretakerId, date);
+    return bulkSaveSlots(newSlots);
+  }
+
+
+  // not used in production for now
   public List<ElasticSlotDocument> getAllSlots() {
     return StreamSupport.stream(slotRepository.findAll().spliterator(), false).toList();
   }
@@ -29,8 +40,8 @@ public class ElasticSlotCrudService {
   }
 
   public List<ElasticSlotDocument> getSlotsByCaretaker(String caretakerId) {
-    return slotRepository.findByCaretakerIdAndDateBetween(
-        caretakerId, LocalDate.now(), LocalDate.now().plusDays(30));
+    return slotRepository.findByCaretakerIdAndFromDateTimeBetween(
+        caretakerId, LocalDate.now().atStartOfDay(), LocalDate.now().plusDays(30).atStartOfDay());
   }
 
   public ElasticSlotDocument saveSlot(ElasticSlotDocument slot) {
@@ -43,20 +54,13 @@ public class ElasticSlotCrudService {
 
   public void deleteSlotsByCaretakerAndDate(String caretakerId, LocalDate date) {
     log.info("Deleting all slots for caretaker {} on date {}", caretakerId, date);
-    slotRepository.deleteByCaretakerIdAndDate(caretakerId, date);
+    slotRepository.deleteByCaretakerIdAndFromDateTimeBetween(
+        caretakerId, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
   }
 
   public List<ElasticSlotDocument> bulkSaveSlots(List<ElasticSlotDocument> slots) {
     log.info("Bulk saving {} slots", slots.size());
     return StreamSupport.stream(slotRepository.saveAll(slots).spliterator(), false).toList();
-  }
-
-  public List<ElasticSlotDocument> replaceSlotsByCaretakerAndDate(
-      String caretakerId, LocalDate date, List<ElasticSlotDocument> newSlots) {
-    log.info("Replacing slots for caretaker {} on date {} with {} new slots",
-        caretakerId, date, newSlots.size());
-    deleteSlotsByCaretakerAndDate(caretakerId, date);
-    return bulkSaveSlots(newSlots);
   }
 
   public long countSlots() {

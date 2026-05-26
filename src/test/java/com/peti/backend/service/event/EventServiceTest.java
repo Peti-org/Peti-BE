@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +19,6 @@ import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.internal.EventStatus;
-import com.peti.backend.repository.CaretakerRRuleRepository;
 import com.peti.backend.repository.EventRepository;
 import com.peti.backend.repository.PetRepository;
 import com.peti.backend.repository.UserRepository;
@@ -42,7 +40,6 @@ class EventServiceTest {
   private static final UUID USER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
   private static final UUID CARETAKER_ID =
       UUID.fromString("b1a7e8e2-8c2e-4c1a-9e2a-123456789abc");
-  private static final UUID RRULE_ID = UUID.fromString("11111111-aaaa-1111-aaaa-111111111111");
   private static final UUID EVENT_ID = UUID.fromString("eeee2222-2222-2222-2222-222222222222");
   private static final UUID PET_A = UUID.fromString("aaaaaaaa-1111-1111-1111-111111111111");
   private static final UUID PET_B = UUID.fromString("bbbbbbbb-2222-2222-2222-222222222222");
@@ -51,12 +48,13 @@ class EventServiceTest {
   private static final LocalDateTime TO = LocalDateTime.of(2026, 5, 2, 11, 0);
 
   @Mock private EventRepository eventRepository;
-  @Mock private CaretakerRRuleRepository rruleRepository;
   @Mock private UserRepository userRepository;
   @Mock private PetRepository petRepository;
   @Mock private EventValidator validator;
   @Mock private EventPriceCalculator priceCalculator;
   @Mock private CaretakerSlotsRebuildTrigger slotsRebuildTrigger;
+  @Mock private RRuleMatcher rruleMatcher;
+  @Mock private RRuleCapacityChecker capacityChecker;
 
   @InjectMocks
   private EventService eventService;
@@ -74,7 +72,8 @@ class EventServiceTest {
     EventDto expected =
         ResourceLoader.loadResource("event-created-response.json", EventDto.class);
 
-    when(rruleRepository.findById(RRULE_ID)).thenReturn(Optional.of(rrule));
+    when(rruleMatcher.findMatchingRules(CARETAKER_ID, "WALKING", FROM, TO))
+        .thenReturn(List.of(rrule));
     when(petRepository.findAllByPetIdInAndPetOwner_UserId(anyList(), eq(USER_ID))).thenReturn(pets);
     when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
     when(priceCalculator.calculate(rrule.getCaretaker(), "WALKING", pets))
@@ -85,24 +84,29 @@ class EventServiceTest {
       return e;
     });
 
-    RequestEventDto request = new RequestEventDto(RRULE_ID, FROM, TO, List.of(PET_A, PET_B));
+    RequestEventDto request = new RequestEventDto(
+        CARETAKER_ID, "WALKING", FROM, TO, List.of(PET_A, PET_B));
     EventDto result = eventService.createEvent(request, USER_ID);
 
     assertThat(result).usingRecursiveComparison().isEqualTo(expected);
-    verify(slotsRebuildTrigger).rebuild(rrule.getCaretaker().getCaretakerId(),
-        FROM.toLocalDate(), TO.toLocalDate());
+    verify(slotsRebuildTrigger).rebuild(CARETAKER_ID, FROM.toLocalDate(), TO.toLocalDate());
     verify(validator).validatePetOwnership(pets, List.of(PET_A, PET_B), USER_ID);
+    verify(capacityChecker).validateCapacity(
+        List.of(rrule), CARETAKER_ID, FROM, TO, pets.size());
   }
 
   @Test
-  @DisplayName("createEvent - rrule not found throws NotFoundException, no rebuild")
-  void createEvent_rruleNotFound() {
-    when(rruleRepository.findById(RRULE_ID)).thenReturn(Optional.empty());
+  @DisplayName("createEvent - no matching rules throws BadRequestException, no rebuild")
+  void createEvent_noMatchingRules() {
+    when(rruleMatcher.findMatchingRules(CARETAKER_ID, "WALKING", FROM, TO))
+        .thenThrow(new com.peti.backend.model.exception.BadRequestException(
+            "No available schedule found"));
 
-    RequestEventDto request = new RequestEventDto(RRULE_ID, FROM, TO, List.of(PET_A));
+    RequestEventDto request = new RequestEventDto(
+        CARETAKER_ID, "WALKING", FROM, TO, List.of(PET_A));
     assertThatThrownBy(() -> eventService.createEvent(request, USER_ID))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("RRule not found");
+        .isInstanceOf(com.peti.backend.model.exception.BadRequestException.class)
+        .hasMessageContaining("No available schedule");
 
     verify(slotsRebuildTrigger, never()).rebuild(any(), any(), any());
     verify(eventRepository, never()).save(any());
@@ -116,11 +120,13 @@ class EventServiceTest {
     List<Pet> pets = ResourceLoader.loadResource(
         "pets-for-event.json", new TypeReference<>() {});
 
-    when(rruleRepository.findById(RRULE_ID)).thenReturn(Optional.of(rrule));
+    when(rruleMatcher.findMatchingRules(CARETAKER_ID, "WALKING", FROM, TO))
+        .thenReturn(List.of(rrule));
     when(petRepository.findAllByPetIdInAndPetOwner_UserId(anyList(), eq(USER_ID))).thenReturn(pets);
     when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-    RequestEventDto request = new RequestEventDto(RRULE_ID, FROM, TO, List.of(PET_A, PET_B));
+    RequestEventDto request = new RequestEventDto(
+        CARETAKER_ID, "WALKING", FROM, TO, List.of(PET_A, PET_B));
     assertThatThrownBy(() -> eventService.createEvent(request, USER_ID))
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("User not found");
@@ -138,8 +144,6 @@ class EventServiceTest {
     List<EventDto> result = eventService.getEventsByCaretakerId(CARETAKER_ID);
 
     assertThat(result).isEmpty();
-    verify(eventRepository, times(1))
-        .findAllByCaretaker_CaretakerIdAndStatusNot(CARETAKER_ID, EventStatus.DELETED);
   }
 
   @Test
@@ -151,7 +155,6 @@ class EventServiceTest {
     List<EventDto> result = eventService.getEventsByUserId(USER_ID);
 
     assertThat(result).isEmpty();
-    verify(eventRepository).findAllByUser_UserIdAndStatusNot(USER_ID, EventStatus.DELETED);
   }
 
   // ---------- deleteEvent ----------

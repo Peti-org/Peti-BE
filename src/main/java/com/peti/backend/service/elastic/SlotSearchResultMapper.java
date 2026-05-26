@@ -8,6 +8,7 @@ import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.PetInfo;
 import com.peti.backend.model.elastic.model.PriceBreakdown;
 import com.peti.backend.model.elastic.model.PriceCalculationResult;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,18 +37,19 @@ public class SlotSearchResultMapper {
 
     return new SlotSearchResult(
         slot.getId(),
-        slot.getDate(),
-        slot.getTimeFrom(),
-        slot.getTimeTo(),
+        slot.getFromDateTime() != null ? slot.getFromDateTime().toLocalDate() : null,
+        slot.getFromDateTime() != null ? slot.getFromDateTime().toLocalTime() : null,
+        slot.getToDateTime() != null ? slot.getToDateTime().toLocalTime() : null,
         slot.getCapacity(),
-        slot.getDurationMinutes(),
+        slot.getFromDateTime() != null && slot.getToDateTime() != null
+            ? Duration.between(slot.getFromDateTime(), slot.getToDateTime()).toMinutes() : 0,
         slot.getCaretakerId(),
         slot.getCaretakerFirstName(),
         slot.getCaretakerLastName(),
         slot.getCaretakerRating(),
         slot.getCaretakerCityId(),
         slot.getCaretakerCityName(),
-        buildPreferencesSummary(slot.getCaretakerPreferences()),
+        buildPreferencesSummary(null),
         breakdown
     );
   }

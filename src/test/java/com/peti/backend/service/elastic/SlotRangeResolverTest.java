@@ -2,30 +2,24 @@ package com.peti.backend.service.elastic;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.model.elastic.model.TimeRange;
 import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
-import java.time.Duration;
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import com.peti.backend.service.elastic.builder.SlotRangeResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class SlotRangeResolverTest {
 
-  private static final ServiceConfig CONFIG = new ServiceConfig(
-      ServiceType.WALKING, false, true, false, 3,
-      Duration.ofMinutes(60), Duration.ofMinutes(15), Duration.ofHours(2),
-      Map.of(), List.of()
-  );
+  private static final LocalDate D = LocalDate.of(2026, 3, 1);
 
   @Test
   @DisplayName("Uniform capacity - one range per capacity level")
   void uniformCapacity() {
     List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(20, 0), 3, CONFIG)
+        new TimeSegmentWithPricing(D.atTime(8, 0), D.atTime(20, 0), 3)
     );
 
     Map<Integer, List<TimeRange>> result = SlotRangeResolver.resolveRangesByCapacity(segments);
@@ -33,8 +27,8 @@ class SlotRangeResolverTest {
     assertThat(result).hasSize(3);
     for (int cap = 1; cap <= 3; cap++) {
       assertThat(result.get(cap)).hasSize(1);
-      assertThat(result.get(cap).get(0).timeFrom()).isEqualTo(LocalTime.of(8, 0));
-      assertThat(result.get(cap).get(0).timeTo()).isEqualTo(LocalTime.of(20, 0));
+      assertThat(result.get(cap).get(0).timeFrom()).isEqualTo(D.atTime(8, 0));
+      assertThat(result.get(cap).get(0).timeTo()).isEqualTo(D.atTime(20, 0));
     }
   }
 
@@ -42,16 +36,16 @@ class SlotRangeResolverTest {
   @DisplayName("Capacity dip creates split ranges at higher levels")
   void capacityDipSplitsHigherLevels() {
     List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(10, 0), 3, CONFIG),
-        new TimeSegmentWithPricing(LocalTime.of(10, 0), LocalTime.of(12, 0), 1, CONFIG),
-        new TimeSegmentWithPricing(LocalTime.of(12, 0), LocalTime.of(20, 0), 3, CONFIG)
+        new TimeSegmentWithPricing(D.atTime(8, 0), D.atTime(10, 0), 3),
+        new TimeSegmentWithPricing(D.atTime(10, 0), D.atTime(12, 0), 1),
+        new TimeSegmentWithPricing(D.atTime(12, 0), D.atTime(20, 0), 3)
     );
 
     Map<Integer, List<TimeRange>> result = SlotRangeResolver.resolveRangesByCapacity(segments);
 
     // cap=1 : one continuous 8-20
     assertThat(result.get(1)).hasSize(1);
-    assertThat(result.get(1).get(0)).isEqualTo(new TimeRange(LocalTime.of(8, 0), LocalTime.of(20, 0)));
+    assertThat(result.get(1).get(0)).isEqualTo(new TimeRange(D.atTime(8, 0), D.atTime(20, 0)));
 
     // cap=2 : split into 8-10 and 12-20
     assertThat(result.get(2)).hasSize(2);
@@ -66,34 +60,4 @@ class SlotRangeResolverTest {
     Map<Integer, List<TimeRange>> result = SlotRangeResolver.resolveRangesByCapacity(List.of());
     assertThat(result).isEmpty();
   }
-
-  @Test
-  @DisplayName("findServiceConfigForRange returns correct config")
-  void findServiceConfigForRange() {
-    ServiceConfig other = new ServiceConfig(
-        ServiceType.SITTING, false, false, false, 1,
-        Duration.ofMinutes(60), Duration.ofMinutes(30), Duration.ofHours(1),
-        Map.of(), List.of()
-    );
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(14, 0), 3, CONFIG),
-        new TimeSegmentWithPricing(LocalTime.of(14, 0), LocalTime.of(20, 0), 2, other)
-    );
-
-    assertThat(SlotRangeResolver.findServiceConfigForRange(segments,
-        new TimeRange(LocalTime.of(8, 0), LocalTime.of(14, 0)))).isEqualTo(CONFIG);
-    assertThat(SlotRangeResolver.findServiceConfigForRange(segments,
-        new TimeRange(LocalTime.of(14, 0), LocalTime.of(20, 0)))).isEqualTo(other);
-  }
-
-  @Test
-  @DisplayName("findServiceConfigForRange returns null for unmatched range")
-  void findServiceConfig_noMatch() {
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(LocalTime.of(8, 0), LocalTime.of(14, 0), 3, CONFIG)
-    );
-    assertThat(SlotRangeResolver.findServiceConfigForRange(segments,
-        new TimeRange(LocalTime.of(20, 0), LocalTime.of(22, 0)))).isNull();
-  }
 }
-

@@ -11,8 +11,8 @@
       "rating": 50
     },
     "rrule": "FREQ=WEEKLY;BYDAY=SA,SU",
-    "dtstart": "2026-01-01T09:00:00",
-    "dtend": "2026-12-31T18:00:00",
+    "slotStartTime": "09:00:00",
+    "slotDuration": "PT9H",
     "description": "Available on weekends 9am-6pm",
     "slotType": "STANDARD",
     "createdAt": "2026-01-01T08:00:00",
@@ -33,8 +33,8 @@
       "rating": 50
     },
     "rrule": "FREQ=WEEKLY;BYDAY=MO,WE,FR",
-    "dtstart": "2026-01-01T18:00:00",
-    "dtend": "2026-12-31T21:00:00",
+    "slotStartTime": "18:00:00",
+    "slotDuration": "PT3H",
     "description": "Evening availability Mon/Wed/Fri 6pm-9pm",
     "slotType": "PREMIUM",
     "createdAt": "2026-01-01T08:00:00",

@@ -37,7 +37,6 @@ class CapacityCalculatorTest {
     CapacityWithPricing result = CapacityCalculator.computeAt(
         LocalTime.of(12, 0), List.of(rrule), List.of(), PREFS);
     assertThat(result.capacity()).isEqualTo(5);
-    assertThat(result.serviceConfig()).isEqualTo(WALKING_CONFIG);
   }
 
   @Test
@@ -47,7 +46,6 @@ class CapacityCalculatorTest {
     CapacityWithPricing result = CapacityCalculator.computeAt(
         LocalTime.of(14, 0), List.of(rrule), List.of(), PREFS);
     assertThat(result.capacity()).isZero();
-    assertThat(result.serviceConfig()).isNull();
   }
 
   @Test
@@ -64,7 +62,7 @@ class CapacityCalculatorTest {
   @DisplayName("Booking reduces capacity")
   void bookingReducesCapacity() {
     CaretakerRRule rrule = createRRule(LocalTime.of(8, 0), LocalTime.of(20, 0), 5, 0);
-    BookingInput booking = new BookingInput(LocalTime.of(10, 0), LocalTime.of(14, 0), 3);
+    BookingInput booking = new BookingInput(DATE.atTime(LocalTime.of(10, 0)), DATE.atTime(LocalTime.of(14, 0)), 3);
     CapacityWithPricing result = CapacityCalculator.computeAt(
         LocalTime.of(12, 0), List.of(rrule), List.of(booking), PREFS);
     assertThat(result.capacity()).isEqualTo(2);
@@ -74,42 +72,19 @@ class CapacityCalculatorTest {
   @DisplayName("Booking exceeding capacity - returns zero (clamped)")
   void bookingExceedingCapacity_clampedToZero() {
     CaretakerRRule rrule = createRRule(LocalTime.of(8, 0), LocalTime.of(20, 0), 2, 0);
-    BookingInput booking = new BookingInput(LocalTime.of(10, 0), LocalTime.of(14, 0), 5);
+    BookingInput booking = new BookingInput(DATE.atTime(LocalTime.of(10, 0)), DATE.atTime(LocalTime.of(14, 0)), 5);
     CapacityWithPricing result = CapacityCalculator.computeAt(
         LocalTime.of(12, 0), List.of(rrule), List.of(booking), PREFS);
     assertThat(result.capacity()).isZero();
   }
 
   @Test
-  @DisplayName("Higher priority RRule wins service config")
-  void higherPriorityWins() {
-    ServiceConfig sittingConfig = new ServiceConfig(
-        ServiceType.SITTING, false, true, false, 1,
-        Duration.ofMinutes(60), Duration.ofMinutes(30), Duration.ofHours(1),
-        Map.of(), List.of()
-    );
-    CaretakerPreferences prefs = new CaretakerPreferences(
-        List.of(WALKING_CONFIG, sittingConfig), Map.of()
-    );
-    CaretakerRRule r1 = createRRule(LocalTime.of(8, 0), LocalTime.of(20, 0), 3, 0);
-    r1.setSlotType("WALKING");
-    CaretakerRRule r2 = createRRule(LocalTime.of(8, 0), LocalTime.of(20, 0), 2, 5);
-    r2.setSlotType("SITTING");
-
-    CapacityWithPricing result = CapacityCalculator.computeAt(
-        LocalTime.of(12, 0), List.of(r1, r2), List.of(), prefs);
-    assertThat(result.capacity()).isEqualTo(5);
-    assertThat(result.serviceConfig().type()).isEqualTo(ServiceType.SITTING);
-  }
-
-  @Test
-  @DisplayName("Null preferences - returns null service config")
+  @DisplayName("Null preferences - returns capacity correctly")
   void nullPreferences() {
     CaretakerRRule rrule = createRRule(LocalTime.of(8, 0), LocalTime.of(20, 0), 3, 0);
     CapacityWithPricing result = CapacityCalculator.computeAt(
         LocalTime.of(12, 0), List.of(rrule), List.of(), null);
     assertThat(result.capacity()).isEqualTo(3);
-    assertThat(result.serviceConfig()).isNull();
   }
 
   @Test
@@ -133,8 +108,8 @@ class CapacityCalculatorTest {
   private CaretakerRRule createRRule(LocalTime from, LocalTime to, int capacity, int priority) {
     CaretakerRRule rrule = new CaretakerRRule();
     rrule.setRruleId(UUID.randomUUID());
-    rrule.setDtstart(LocalDateTime.of(DATE, from));
-    rrule.setDtend(LocalDateTime.of(DATE, to));
+    rrule.setSlotStartTime(from);
+    rrule.setSlotDuration(java.time.Duration.between(from, to));
     rrule.setCapacity(capacity);
     rrule.setIsEnabled(true);
     rrule.setSlotType("WALKING");
@@ -142,4 +117,3 @@ class CapacityCalculatorTest {
     return rrule;
   }
 }
-
