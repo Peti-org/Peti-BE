@@ -1,12 +1,13 @@
 {
   // Expected output of MockDataBuilder.buildPreferences(0)
-  "services": [
-    {
+  "services": {
+    "WALKING": {
       "type": "WALKING",
       "frozen": false,
       "priceNegotiable": true,
       "isVip": false,
       "maxSimultaneousPets": 2,
+      "maxSimultaneousPeople": 20,
       "baseDuration": "PT1H",
       "stepDuration": "PT30M",
       "minAdvanceMinutesBeforeSalesClose": "PT10M",
@@ -18,13 +19,10 @@
             "include": [],
             "exclude": []
           },
-          "sameForAllWeights": true,
-          "pickupDelivery": {
-            "pickup": true,
-            "bring": true
-          },
+          "sameForAllWeights": false,
+          "deliveryOptions": ["PICK_UP", "BRING"],
           "weightTiers": {
-            "Medium": {
+            "MEDIUM": {
               "tierPrice": {
                 "priceForService": 80,
                 "pricePerExtendingStep": 20,
@@ -37,15 +35,6 @@
       },
       "tasksIncluded": []
     }
-  ],
-  "weeklySchedule": {
-    "MONDAY": { "enabled": true, "from": "08:00", "to": "20:00" },
-    "TUESDAY": { "enabled": true, "from": "08:00", "to": "20:00" },
-    "WEDNESDAY": { "enabled": true, "from": "09:00", "to": "18:00" },
-    "THURSDAY": { "enabled": true, "from": "08:00", "to": "20:00" },
-    "FRIDAY": { "enabled": true, "from": "09:00", "to": "22:00" },
-    "SATURDAY": { "enabled": true, "from": "09:00", "to": "18:00" },
-    "SUNDAY": { "enabled": false, "from": "09:00", "to": "18:00" }
   }
 }
 

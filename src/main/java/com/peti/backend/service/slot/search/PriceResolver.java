@@ -1,9 +1,10 @@
 package com.peti.backend.service.slot.search;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PriceInfo;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.PetConfig;
+import com.peti.backend.dto.caretaker.PriceInfo;
+import com.peti.backend.dto.caretaker.ServiceConfig;
+import com.peti.backend.dto.caretaker.WeightTier;
+import com.peti.backend.dto.caretaker.WeightTierConfig;
 import com.peti.backend.model.elastic.model.PetInfo;
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -61,23 +62,38 @@ public class PriceResolver {
     if (petConfig == null || !petConfig.enabled()) {
       return Optional.empty();
     }
-    if (petConfig.petPrice() != null) {
-      return Optional.of(petConfig.petPrice());
+    if (petConfig.sameForAllWeights()) {
+      return Optional.ofNullable(petConfig.petPrice());
     }
-    Map<String, WeightTier> tiers = petConfig.weightTiers();
+    WeightTier tier = parseWeightTier(pet.weightCategory());
+    if (tier == null) {
+      return Optional.empty();
+    }
+    Map<WeightTier, WeightTierConfig> tiers = petConfig.weightTiers();
     if (tiers == null) {
       return Optional.empty();
     }
-    WeightTier tier = tiers.get(pet.weightCategory());
-    if (tier == null || !tier.enabled()) {
+    WeightTierConfig tierConfig = tiers.get(tier);
+    if (tierConfig == null || !tierConfig.enabled()) {
       return Optional.empty();
     }
-    return Optional.of(tier.tierPrice());
+    return Optional.of(tierConfig.tierPrice());
   }
 
   /** Provider tax rate — reserved for future use; {@link ServiceConfig} has no tax field yet. */
   public BigDecimal resolveProviderTaxRate(ServiceConfig config) {
     return null;
+  }
+
+  private WeightTier parseWeightTier(String category) {
+    if (category == null) {
+      return null;
+    }
+    try {
+      return WeightTier.valueOf(category.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   // ── internal helper ───────────────────────────────────────────────────────
@@ -95,4 +111,3 @@ public class PriceResolver {
         .orElse(BigDecimal.ZERO);
   }
 }
-

@@ -152,11 +152,13 @@ class CapacityTimelineBuilderTest {
     rrule.setRruleId(UUID.randomUUID());
     rrule.setSlotStartTime(startTime);
     rrule.setSlotDuration(duration);
-    rrule.setCapacity(capacity);
+    rrule.setPetCapacity(capacity);
+    rrule.setPeopleCapacity(20);
     rrule.setIsEnabled(true);
     rrule.setSlotType("WALKING");
     rrule.setPriority(0);
     rrule.setCreatedAt(DATE.minusDays(10).atStartOfDay());
+    rrule.setRrule("FREQ=DAILY");
     return rrule;
   }
 }

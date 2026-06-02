@@ -13,6 +13,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
   Optional<User> findByEmail(String email);
 
+  boolean existsByEmail(String email);
+
   @Query(value = """
       SELECT new com.peti.backend.model.projection.UserProjection(user.userId, user.email, user.password, user.role.roleId)
       FROM User user WHERE user.email = :email

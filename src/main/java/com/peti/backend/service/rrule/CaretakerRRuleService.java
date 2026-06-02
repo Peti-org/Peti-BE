@@ -27,7 +27,16 @@ public class CaretakerRRuleService {
   private final SlotsRebuildTrigger slotsRebuildTrigger;
 
   public List<RRuleDto> getAllRRulesForCaretaker(UUID caretakerId) {
-    List<CaretakerRRule> rrules = rruleRepository.findAllByCaretaker_CaretakerId(caretakerId);
+    List<CaretakerRRule> rrules =
+        rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(caretakerId);
+    return rrules.stream()
+        .map(RRuleDto::convert)
+        .collect(Collectors.toList());
+  }
+
+  public List<RRuleDto> getScheduleCaretaker(UUID caretakerId) {
+    List<CaretakerRRule> rrules =
+        rruleRepository.findAllByCaretaker_CaretakerIdAndIsScheduleTrue(caretakerId);
     return rrules.stream()
         .map(RRuleDto::convert)
         .collect(Collectors.toList());
@@ -54,12 +63,23 @@ public class CaretakerRRuleService {
   }
 
   @Transactional
+  public Optional<RRuleDto> setEnabled(UUID rruleId, UUID caretakerId, boolean enabled) {
+    return rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId)
+        .map(existing -> {
+          existing.setIsEnabled(enabled);
+          existing.setUpdatedAt(LocalDateTime.now());
+          CaretakerRRule saved = rruleRepository.save(existing);
+          slotsRebuildTrigger.rebuildAsync(caretakerId);
+          return RRuleDto.convert(saved);
+        });
+  }
+
+  @Transactional
   public Optional<RRuleDto> deleteRRule(UUID rruleId, UUID caretakerId) {
     return rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId)
         .map(rrule -> {
           RRuleDto dto = RRuleDto.convert(rrule);
-          Caretaker caretaker = rrule.getCaretaker();
-          rruleRepository.deleteById(rruleId);
+          rruleRepository.delete(rrule);
           // Trigger a rebuild of slots for caretaker
           slotsRebuildTrigger.rebuildAsync(caretakerId);
           return dto;
@@ -76,13 +96,12 @@ public class CaretakerRRuleService {
 
   private void applyFields(CaretakerRRule rrule, RequestRRuleDto dto) {
     rrule.setRrule(dto.rrule());
-    rrule.setSlotStartTime(dto.dtstart() != null ? dto.dtstart().toLocalTime() : null);//todo refactor this to have same fields in dto and model
-    rrule.setSlotDuration(dto.dtstart() != null && dto.dtend() != null
-        ? java.time.Duration.between(dto.dtstart(), dto.dtend()) : null);
+    rrule.setSlotStartTime(dto.slotStartTime());
+    rrule.setSlotDuration(dto.slotDuration());
     rrule.setDescription(dto.description());
     rrule.setSlotType(dto.slotType().name());
-    rrule.setCapacity(dto.capacity());
-    rrule.setIntervalMinutes(dto.intervalMinutes());
+    rrule.setPetCapacity(dto.petCapacity());
+    rrule.setPeopleCapacity(dto.peopleCapacity());
     rrule.setIsEnabled(dto.isEnabled());
     rrule.setIsSchedule(dto.isSchedule());
     rrule.setIsBusy(dto.isBusy());

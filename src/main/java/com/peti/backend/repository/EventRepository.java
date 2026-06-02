@@ -34,5 +34,21 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
       @Param("caretakerId") UUID caretakerId,
       @Param("dayStart") LocalDateTime dayStart,
       @Param("dayEnd") LocalDateTime dayEnd);
+
+  /**
+   * Find APPROVED events for the caretaker that overlap the given window
+   * [{@code dayStart}, {@code dayEnd}). Used for capacity validation.
+   */
+  @Query("""
+      SELECT e FROM Event e
+      WHERE e.caretaker.caretakerId = :caretakerId
+        AND e.status = com.peti.backend.model.internal.EventStatus.APPROVED
+        AND e.datetimeFrom < :dayEnd
+        AND e.datetimeTo > :dayStart
+      """)
+  List<Event> findApprovedOverlapping(
+      @Param("caretakerId") UUID caretakerId,
+      @Param("dayStart") LocalDateTime dayStart,
+      @Param("dayEnd") LocalDateTime dayEnd);
 }
 

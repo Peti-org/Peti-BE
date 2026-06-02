@@ -92,6 +92,7 @@ class EventServiceTest {
     assertThat(result).usingRecursiveComparison().isEqualTo(expected);
     verify(slotsRebuildTrigger).rebuildAsync(CARETAKER_ID, FROM.toLocalDate(), TO.toLocalDate());
     verify(validator).validatePetOwnership(pets, List.of(PET_A, PET_B), USER_ID);
+    verify(validator).validateDuration(rrule.getCaretaker(), "WALKING", FROM, TO);
     verify(capacityChecker).validateCapacity(
         List.of(rrule), CARETAKER_ID, FROM, TO, pets.size());
   }

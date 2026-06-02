@@ -40,7 +40,7 @@ public class RRuleCapacityChecker {
   public void validateCapacity(List<CaretakerRRule> matchingRules,
       UUID caretakerId, LocalDateTime from, LocalDateTime to, int petCount) {
 
-    List<Event> overlappingEvents = eventRepository.findActiveOverlapping(
+    List<Event> overlappingEvents = eventRepository.findApprovedOverlapping(
         caretakerId, from, to);
 
     List<LocalTime> boundaries = buildBoundaries(matchingRules, from, to);
@@ -108,7 +108,7 @@ public class RRuleCapacityChecker {
       LocalTime intervalStart, LocalTime intervalEnd) {
     return rules.stream()
         .filter(rule -> coversInterval(rule, intervalStart, intervalEnd))
-        .mapToInt(CaretakerRRule::getCapacity)
+        .mapToInt(CaretakerRRule::getPetCapacity)
         .sum();
   }
 

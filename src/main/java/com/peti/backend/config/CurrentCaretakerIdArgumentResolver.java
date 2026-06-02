@@ -3,6 +3,7 @@ package com.peti.backend.config;
 import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
+import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.service.user.CaretakerService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * Resolves method parameters annotated with {@link CurrentCaretakerId}.
  * Extracts the authenticated {@link UserProjection} from the security context,
  * then looks up the corresponding caretaker ID via {@link CaretakerService}.
+ *
+ * <p>Usage is restricted to handler methods also annotated with {@link HasCaretakerRole}.
+ * Static enforcement happens at startup via {@code CurrentCaretakerIdUsageValidator};
+ * this resolver keeps a defensive runtime check as a second line of defense.
  */
 @Component
 @RequiredArgsConstructor
@@ -38,11 +43,21 @@ public class CurrentCaretakerIdArgumentResolver implements HandlerMethodArgument
       ModelAndViewContainer mavContainer,
       @NonNull NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory) {
+    requireCaretakerRoleOnHandler(parameter);
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     UserProjection user = (UserProjection) authentication.getPrincipal();
     return caretakerService.getCaretakerIdByUserId(user.getUserId())
         .orElseThrow(() -> new NotFoundException(
             "Caretaker profile not found for user: " + user.getUserId()));
+  }
+
+  private static void requireCaretakerRoleOnHandler(MethodParameter parameter) {
+    if (parameter.getMethodAnnotation(HasCaretakerRole.class) == null) {
+      throw new IllegalStateException(
+          "@CurrentCaretakerId requires the handler method to be annotated with @HasCaretakerRole: "
+              + parameter.getContainingClass().getName() + "#"
+              + (parameter.getMethod() != null ? parameter.getMethod().getName() : "<unknown>"));
+    }
   }
 }
 

@@ -23,7 +23,7 @@ class CaretakerDtoTest {
     caretaker.setUserReference(user);
     caretaker.setRating(5);
 
-    CaretakerPreferences preferences = new CaretakerPreferences(null, null);
+    CaretakerPreferences preferences = new CaretakerPreferences(null);
 
     CaretakerDto dto = CaretakerDto.convert(caretaker, preferences);
 

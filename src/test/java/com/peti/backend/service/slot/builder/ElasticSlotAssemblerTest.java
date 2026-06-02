@@ -3,7 +3,7 @@ package com.peti.backend.service.slot.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.dto.caretaker.CaretakerPreferences;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.City;
 import com.peti.backend.model.domain.User;
@@ -30,7 +30,7 @@ class ElasticSlotAssemblerTest {
   @BeforeEach
   void setUp() {
     walkingConfig = new ServiceConfig(
-        ServiceType.WALKING, false, true, false, 3,
+        ServiceType.WALKING, false, true, false, 3, 20,
         Duration.ofMinutes(60), Duration.ofMinutes(15), Duration.ofHours(2),
         Map.of(), List.of()
     );
@@ -49,7 +49,8 @@ class ElasticSlotAssemblerTest {
     caretaker.setCaretakerId(UUID.randomUUID());
     caretaker.setRating(5);
     caretaker.setUserReference(user);
-    caretaker.setCaretakerPreference(new CaretakerPreferences(List.of(walkingConfig), Map.of()));
+    caretaker.setCaretakerPreference(new CaretakerPreferences(
+        new java.util.EnumMap<>(Map.of(ServiceType.WALKING, walkingConfig))));
   }
 
   @Test

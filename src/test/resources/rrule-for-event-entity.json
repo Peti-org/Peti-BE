@@ -6,13 +6,14 @@
     "caretakerIsDeleted": false,
     "rating": 50,
     "caretakerPreference": {
-      "services": [
-        {
+      "services": {
+        "WALKING": {
           "type": "WALKING",
           "frozen": false,
           "priceNegotiable": true,
           "isVip": false,
           "maxSimultaneousPets": 3,
+          "maxSimultaneousPeople": 20,
           "baseDuration": "PT1H",
           "stepDuration": "PT30M",
           "minAdvanceMinutesBeforeSalesClose": "PT2H",
@@ -28,15 +29,12 @@
                 "currency": "UAH",
                 "pickupPrice": null
               },
-              "pickupDelivery": { "pickup": true, "bring": false },
+              "deliveryOptions": ["PICK_UP"],
               "weightTiers": null
             }
           },
           "tasksIncluded": ["Feeding"]
         }
-      ],
-      "weeklySchedule": {
-        "MONDAY": { "enabled": true, "from": "08:00", "to": "20:00" }
       }
     }
   },
@@ -45,11 +43,12 @@
   "slotDuration": "PT12H",
   "description": "Daily walks",
   "slotType": "WALKING",
-  "capacity": 3,
-  "intervalMinutes": 30,
+  "petCapacity": 3,
+  "peopleCapacity": 20,
   "createdAt": "2026-04-01T08:00:00",
   "isEnabled": true,
   "isSchedule": false,
   "isBusy": false,
   "priority": 1
 }
+

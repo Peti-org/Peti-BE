@@ -38,15 +38,16 @@ public class EventService {
   private final RRuleMatcher rruleMatcher;
   private final RRuleCapacityChecker capacityChecker;
 
-  //todo - validate time to have be min time + time interval*n where n any number available (duration need to be taken from carataker preferences)
-  //todo - when checking slots capacity need to check only events that is approved!!!
-  //todo -
   @Transactional
   public EventDto createEvent(RequestEventDto request, UUID userId) {
     validator.validateTimeOrder(request.datetimeFrom(), request.datetimeTo());
 
     List<CaretakerRRule> matchingRules = rruleMatcher.findMatchingRules(
         request.caretakerId(), request.slotType(),
+        request.datetimeFrom(), request.datetimeTo());
+
+    Caretaker caretaker = matchingRules.getFirst().getCaretaker();
+    validator.validateDuration(caretaker, request.slotType(),
         request.datetimeFrom(), request.datetimeTo());
 
     List<Pet> pets = petRepository.findAllByPetIdInAndPetOwner_UserId(request.petsIds(), userId);
@@ -58,7 +59,6 @@ public class EventService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
-    Caretaker caretaker = matchingRules.getFirst().getCaretaker();
     Event event = buildEvent(caretaker, pets, user, request);
     Event saved = eventRepository.save(event);
 

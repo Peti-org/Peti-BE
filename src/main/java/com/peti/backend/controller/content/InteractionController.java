@@ -60,7 +60,6 @@ public class InteractionController {
     return ResponseEntity.noContent().build();
   }
 
-  //todo user can add reaction to his own content!!!! (it shouldn't be like this)
   @HasUserRole
   @PostMapping("/reactions")
   public ResponseEntity<Map<String, Object>> toggleReaction(

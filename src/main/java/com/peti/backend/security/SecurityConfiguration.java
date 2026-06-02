@@ -41,6 +41,7 @@ public class SecurityConfiguration {
             .requestMatchers("/api/articles").permitAll() // to view articles feed unauthenticated
             .requestMatchers("/api/caretakers/by/cityId/**").permitAll() // to view caretakers by city id unauthenticated
             .requestMatchers("/api/ping").permitAll()
+            .requestMatchers("/api/stats").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/").permitAll()
             .requestMatchers("/api-docs/**").permitAll()

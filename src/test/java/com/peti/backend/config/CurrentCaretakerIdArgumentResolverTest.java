@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.peti.backend.model.exception.NotFoundException;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
+import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.service.user.CaretakerService;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,7 +82,7 @@ class CurrentCaretakerIdArgumentResolverTest {
   void resolveArgument_caretakerFound_returnsId() {
     when(caretakerService.getCaretakerIdByUserId(USER_ID)).thenReturn(Optional.of(CARETAKER_ID));
 
-    MethodParameter parameter = mock(MethodParameter.class);
+    MethodParameter parameter = parameterWithCaretakerRole(true);
     UUID result = resolver.resolveArgument(parameter, null, null, null);
 
     assertThat(result).isEqualTo(CARETAKER_ID);
@@ -92,11 +93,32 @@ class CurrentCaretakerIdArgumentResolverTest {
   void resolveArgument_caretakerNotFound_throwsException() {
     when(caretakerService.getCaretakerIdByUserId(USER_ID)).thenReturn(Optional.empty());
 
-    MethodParameter parameter = mock(MethodParameter.class);
+    MethodParameter parameter = parameterWithCaretakerRole(true);
 
     assertThatThrownBy(() -> resolver.resolveArgument(parameter, null, null, null))
         .isInstanceOf(NotFoundException.class)
         .hasMessageContaining("Caretaker profile not found");
+  }
+
+  @Test
+  @DisplayName("resolveArgument fails fast when handler method lacks @HasCaretakerRole")
+  void resolveArgument_missingCaretakerRoleAnnotation_throwsIllegalState() {
+    MethodParameter parameter = parameterWithCaretakerRole(false);
+
+    assertThatThrownBy(() -> resolver.resolveArgument(parameter, null, null, null))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("@HasCaretakerRole");
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static MethodParameter parameterWithCaretakerRole(boolean present) {
+    MethodParameter parameter = mock(MethodParameter.class);
+    HasCaretakerRole annotation = present ? mock(HasCaretakerRole.class) : null;
+    when(parameter.getMethodAnnotation(HasCaretakerRole.class)).thenReturn(annotation);
+    if (!present) {
+      when(parameter.getContainingClass()).thenReturn((Class) Object.class);
+    }
+    return parameter;
   }
 }
 

@@ -3,7 +3,7 @@ package com.peti.backend.service.slot.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.dto.caretaker.CaretakerPreferences;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.City;
@@ -37,13 +37,13 @@ class SlotGenerationServiceTest {
     service = new SlotGenerationService();
 
     defaultServiceConfig = new ServiceConfig(
-        ServiceType.WALKING, false, true, false, 3,
+        ServiceType.WALKING, false, true, false, 3, 20,
         Duration.ofMinutes(60), Duration.ofMinutes(15), Duration.ofHours(2),
         Map.of(), List.of("feeding")
     );
 
     CaretakerPreferences prefs = new CaretakerPreferences(
-        List.of(defaultServiceConfig), null
+        new java.util.EnumMap<>(Map.of(ServiceType.WALKING, defaultServiceConfig))
     );
 
     City city = new City();
@@ -71,10 +71,13 @@ class SlotGenerationServiceTest {
     rrule.setRruleId(UUID.randomUUID());
     rrule.setSlotStartTime(from);
     rrule.setSlotDuration(Duration.between(from, to));
-    rrule.setCapacity(capacity);
+    rrule.setPetCapacity(capacity);
+    rrule.setPeopleCapacity(20);
     rrule.setIsEnabled(true);
     rrule.setSlotType("WALKING");
     rrule.setPriority(0);
+    rrule.setRrule("FREQ=DAILY");
+    rrule.setCreatedAt(testDate.minusDays(10).atStartOfDay());
     return rrule;
   }
 

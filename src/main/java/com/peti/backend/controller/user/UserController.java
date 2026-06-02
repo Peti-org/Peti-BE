@@ -1,5 +1,7 @@
 package com.peti.backend.controller.user;
 
+import com.peti.backend.dto.user.ChangeEmailResponse;
+import com.peti.backend.dto.user.RequestChangeEmail;
 import com.peti.backend.dto.user.RequestUpdatePassword;
 import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
@@ -76,6 +78,16 @@ public class UserController {
     } else {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  @HasUserRole
+  @PutMapping("/me/email")
+  public ResponseEntity<ChangeEmailResponse> changeEmail(
+      @CurrentUser UserProjection userProjection,
+      @Valid @RequestBody RequestChangeEmail request) {
+    ChangeEmailResponse response = userService.changeEmail(
+        userProjection.getUserId(), request);
+    return ResponseEntity.ok(response);
   }
 
   @HasUserRole

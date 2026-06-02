@@ -39,7 +39,7 @@ class RRuleCapacityCheckerTest {
   void singleRule_sufficient() {
     // Rule covers 08:00-14:00, capacity 5. Event uses 2 pets in 10:00-12:00
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 5);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(eventWithPetsAndTime(2,
             LocalDateTime.of(2026, 5, 2, 10, 0),
             LocalDateTime.of(2026, 5, 2, 12, 0))));
@@ -52,7 +52,7 @@ class RRuleCapacityCheckerTest {
   @DisplayName("Single rule - insufficient capacity throws")
   void singleRule_insufficient() {
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 3);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(eventWithPetsAndTime(2,
             LocalDateTime.of(2026, 5, 2, 10, 0),
             LocalDateTime.of(2026, 5, 2, 12, 0))));
@@ -81,7 +81,7 @@ class RRuleCapacityCheckerTest {
     CaretakerRRule ruleA = buildRule(LocalTime.of(8, 0), Duration.ofHours(4), 3);
     CaretakerRRule ruleB = buildRule(LocalTime.of(10, 0), Duration.ofHours(4), 2);
 
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, from, to))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, from, to))
         .thenReturn(List.of());
 
     // Available min = 2, requesting 2 should pass
@@ -104,7 +104,7 @@ class RRuleCapacityCheckerTest {
     // Sub-intervals: [10:00-11:00] -> cap 3, used 0 = 3
     //                [11:00-12:00] -> cap 3, used 2 = 1  <-- bottleneck
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 3);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(eventWithPetsAndTime(2,
             LocalDateTime.of(2026, 5, 2, 11, 0),
             LocalDateTime.of(2026, 5, 2, 12, 0))));
@@ -123,7 +123,7 @@ class RRuleCapacityCheckerTest {
   @DisplayName("No existing events - full capacity available at minimum point")
   void noExistingEvents_fullCapacity() {
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 5);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of());
 
     assertThatNoException().isThrownBy(() ->
@@ -140,7 +140,7 @@ class RRuleCapacityCheckerTest {
     //               [11:00-12:00] -> cap 5, used 2 = 3
     // Min = 2
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 5);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(
             eventWithPetsAndTime(2, FROM, TO),
             eventWithPetsAndTime(1, FROM,
@@ -169,7 +169,7 @@ class RRuleCapacityCheckerTest {
     CaretakerRRule ruleA = buildRule(LocalTime.of(8, 0), Duration.ofHours(2), 2);
     CaretakerRRule ruleB = buildRule(LocalTime.of(10, 0), Duration.ofHours(2), 4);
 
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, from, to))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, from, to))
         .thenReturn(List.of());
 
     assertThatNoException().isThrownBy(() ->
@@ -199,7 +199,7 @@ class RRuleCapacityCheckerTest {
     CaretakerRRule ruleA = buildRule(LocalTime.of(8, 0), Duration.ofHours(2), 3);
     CaretakerRRule ruleB = buildRule(LocalTime.of(10, 0), Duration.ofHours(2), 3);
 
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, from, to))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, from, to))
         .thenReturn(List.of(eventWithPetsAndTime(2,
             LocalDateTime.of(2026, 5, 2, 9, 0),
             LocalDateTime.of(2026, 5, 2, 11, 0))));
@@ -222,7 +222,7 @@ class RRuleCapacityCheckerTest {
     event.setDatetimeTo(TO);
     event.setPets(null);
 
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(event));
 
     assertThatNoException().isThrownBy(() ->
@@ -238,7 +238,7 @@ class RRuleCapacityCheckerTest {
     event.setDatetimeTo(TO);
     event.setPets(new HashSet<>());
 
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(event));
 
     assertThatNoException().isThrownBy(() ->
@@ -249,7 +249,7 @@ class RRuleCapacityCheckerTest {
   @DisplayName("Requesting zero pets always passes")
   void requestingZeroPets_alwaysPasses() {
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 1);
-    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+    when(eventRepository.findApprovedOverlapping(CARETAKER_ID, FROM, TO))
         .thenReturn(List.of(eventWithPetsAndTime(1, FROM, TO)));
 
     // Even though capacity is fully used, requesting 0 should pass
@@ -262,7 +262,8 @@ class RRuleCapacityCheckerTest {
     rule.setRruleId(UUID.randomUUID());
     rule.setSlotStartTime(start);
     rule.setSlotDuration(duration);
-    rule.setCapacity(capacity);
+    rule.setPetCapacity(capacity);
+    rule.setPeopleCapacity(20);
     rule.setIsEnabled(true);
     return rule;
   }

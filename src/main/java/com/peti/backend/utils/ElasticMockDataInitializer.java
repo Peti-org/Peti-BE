@@ -125,7 +125,7 @@ public class ElasticMockDataInitializer {
   }
 
   private List<BookingInput> buildRandomBookings(CaretakerRRule rrule) {
-    int count = rrule.getCapacity() / 2;
+    int count = rrule.getPetCapacity() / 2;
     List<BookingInput> bookings = new ArrayList<>();
     LocalTime from = rrule.getSlotStartTime();
     LocalTime to = from.plus(rrule.getSlotDuration());
@@ -142,7 +142,7 @@ public class ElasticMockDataInitializer {
         finish = to;
       }
       LocalDate today = LocalDate.now();
-      bookings.add(new BookingInput(today.atTime(start), today.atTime(finish), rrule.getCapacity()));
+      bookings.add(new BookingInput(today.atTime(start), today.atTime(finish), rrule.getPetCapacity()));
     }
     return bookings;
   }
