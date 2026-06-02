@@ -18,7 +18,7 @@ import com.peti.backend.repository.CityRepository;
 import com.peti.backend.repository.RoleRepository;
 import com.peti.backend.repository.UserRepository;
 import com.peti.backend.repository.elastic.ElasticSlotRepository;
-import com.peti.backend.service.elastic.SlotGenerationService;
+import com.peti.backend.service.slot.builder.SlotGenerationService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

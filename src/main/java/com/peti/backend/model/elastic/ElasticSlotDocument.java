@@ -1,6 +1,6 @@
 package com.peti.backend.model.elastic;
 
-import com.peti.backend.dto.caretacker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

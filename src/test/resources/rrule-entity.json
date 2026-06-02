@@ -10,7 +10,6 @@
   "slotType": "walk",
   "capacity": 5,
   "intervalMinutes": 30,
-  "generatedTo": "2026-02-17",
   "createdAt": "2026-02-03T08:00:00",
   "isEnabled": true,
   "isSchedule": false,

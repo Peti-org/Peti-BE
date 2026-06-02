@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
-@Tag(name = "Admin: Orders", description = "Admin operations for inspecting orders")
+@Tag(name = "Admin", description = "Admin operations")
 @SecurityRequirement(name = "bearerAuth")
 public class AdminOrderController {
 

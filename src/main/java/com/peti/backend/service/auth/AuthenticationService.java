@@ -43,7 +43,6 @@ public class AuthenticationService {
     user.setCityByCityId(cityDto.toCityWithId());
     user.setRole(roleService.getUserRole());
 
-    // todo check if really user has city in representation and role (don't has fixxxxx)
     UserDto registeredUser = userService.createUser(user);
 
     // Set city for the registered user, as a database doesn't return it automatically

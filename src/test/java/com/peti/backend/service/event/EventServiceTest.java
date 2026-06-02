@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import com.peti.backend.service.slot.SlotsRebuildTrigger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,7 @@ class EventServiceTest {
   @Mock private PetRepository petRepository;
   @Mock private EventValidator validator;
   @Mock private EventPriceCalculator priceCalculator;
-  @Mock private CaretakerSlotsRebuildTrigger slotsRebuildTrigger;
+  @Mock private SlotsRebuildTrigger slotsRebuildTrigger;
   @Mock private RRuleMatcher rruleMatcher;
   @Mock private RRuleCapacityChecker capacityChecker;
 
@@ -89,7 +90,7 @@ class EventServiceTest {
     EventDto result = eventService.createEvent(request, USER_ID);
 
     assertThat(result).usingRecursiveComparison().isEqualTo(expected);
-    verify(slotsRebuildTrigger).rebuild(CARETAKER_ID, FROM.toLocalDate(), TO.toLocalDate());
+    verify(slotsRebuildTrigger).rebuildAsync(CARETAKER_ID, FROM.toLocalDate(), TO.toLocalDate());
     verify(validator).validatePetOwnership(pets, List.of(PET_A, PET_B), USER_ID);
     verify(capacityChecker).validateCapacity(
         List.of(rrule), CARETAKER_ID, FROM, TO, pets.size());
@@ -173,7 +174,7 @@ class EventServiceTest {
     ArgumentCaptor<Event> savedCaptor = ArgumentCaptor.forClass(Event.class);
     verify(eventRepository).save(savedCaptor.capture());
     assertThat(savedCaptor.getValue().getStatus()).isEqualTo(EventStatus.DELETED);
-    verify(slotsRebuildTrigger).rebuild(event.getCaretaker().getCaretakerId(),
+    verify(slotsRebuildTrigger).rebuildAsync(event.getCaretaker().getCaretakerId(),
         event.getDatetimeFrom().toLocalDate(), event.getDatetimeTo().toLocalDate());
   }
 

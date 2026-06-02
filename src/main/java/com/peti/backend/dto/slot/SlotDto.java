@@ -1,6 +1,6 @@
 package com.peti.backend.dto.slot;
 
-import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.dto.caretaker.SimpleCaretakerDto;
 import com.peti.backend.model.internal.ServiceType;
 import java.math.BigDecimal;
 import java.time.LocalDate;

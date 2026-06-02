@@ -155,6 +155,108 @@ class RRuleCapacityCheckerTest {
         .hasMessageContaining("Available: 2");
   }
 
+  @Test
+  @DisplayName("Adjacent rules with shared boundary - no gap, each covers its interval")
+  void adjacentRules_sharedBoundary() {
+    // Request: 08:00-12:00
+    // Rule A: 08:00-10:00, capacity 2
+    // Rule B: 10:00-12:00, capacity 4
+    // Sub-intervals: [08:00-10:00] -> A = 2, [10:00-12:00] -> B = 4
+    // Min capacity = 2
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime to = LocalDateTime.of(2026, 5, 2, 12, 0);
+
+    CaretakerRRule ruleA = buildRule(LocalTime.of(8, 0), Duration.ofHours(2), 2);
+    CaretakerRRule ruleB = buildRule(LocalTime.of(10, 0), Duration.ofHours(2), 4);
+
+    when(eventRepository.findActiveOverlapping(CARETAKER_ID, from, to))
+        .thenReturn(List.of());
+
+    assertThatNoException().isThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(ruleA, ruleB), CARETAKER_ID, from, to, 2));
+
+    assertThatThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(ruleA, ruleB), CARETAKER_ID, from, to, 3))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("Available: 2");
+  }
+
+  @Test
+  @DisplayName("Adjacent rules with event exactly at boundary point")
+  void adjacentRules_eventAtBoundary() {
+    // Request: 08:00-12:00
+    // Rule A: 08:00-10:00, capacity 3
+    // Rule B: 10:00-12:00, capacity 3
+    // Event: 09:00-11:00 with 2 pets (spans boundary)
+    // Sub-intervals: [08:00-09:00] -> A=3, used 0 = 3
+    //               [09:00-10:00] -> A=3, used 2 = 1
+    //               [10:00-11:00] -> B=3, used 2 = 1
+    //               [11:00-12:00] -> B=3, used 0 = 3
+    // Min = 1
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 8, 0);
+    LocalDateTime to = LocalDateTime.of(2026, 5, 2, 12, 0);
+
+    CaretakerRRule ruleA = buildRule(LocalTime.of(8, 0), Duration.ofHours(2), 3);
+    CaretakerRRule ruleB = buildRule(LocalTime.of(10, 0), Duration.ofHours(2), 3);
+
+    when(eventRepository.findActiveOverlapping(CARETAKER_ID, from, to))
+        .thenReturn(List.of(eventWithPetsAndTime(2,
+            LocalDateTime.of(2026, 5, 2, 9, 0),
+            LocalDateTime.of(2026, 5, 2, 11, 0))));
+
+    assertThatNoException().isThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(ruleA, ruleB), CARETAKER_ID, from, to, 1));
+
+    assertThatThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(ruleA, ruleB), CARETAKER_ID, from, to, 2))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("Available: 1");
+  }
+
+  @Test
+  @DisplayName("Event with null pets treated as zero usage")
+  void eventWithNullPets_treatedAsZero() {
+    CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 3);
+    Event event = new Event();
+    event.setDatetimeFrom(FROM);
+    event.setDatetimeTo(TO);
+    event.setPets(null);
+
+    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+        .thenReturn(List.of(event));
+
+    assertThatNoException().isThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(rule), CARETAKER_ID, FROM, TO, 3));
+  }
+
+  @Test
+  @DisplayName("Event with empty pets set treated as zero usage")
+  void eventWithEmptyPets_treatedAsZero() {
+    CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 3);
+    Event event = new Event();
+    event.setDatetimeFrom(FROM);
+    event.setDatetimeTo(TO);
+    event.setPets(new HashSet<>());
+
+    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+        .thenReturn(List.of(event));
+
+    assertThatNoException().isThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(rule), CARETAKER_ID, FROM, TO, 3));
+  }
+
+  @Test
+  @DisplayName("Requesting zero pets always passes")
+  void requestingZeroPets_alwaysPasses() {
+    CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(6), 1);
+    when(eventRepository.findActiveOverlapping(CARETAKER_ID, FROM, TO))
+        .thenReturn(List.of(eventWithPetsAndTime(1, FROM, TO)));
+
+    // Even though capacity is fully used, requesting 0 should pass
+    assertThatNoException().isThrownBy(() ->
+        capacityChecker.validateCapacity(List.of(rule), CARETAKER_ID, FROM, TO, 0));
+  }
+
   private CaretakerRRule buildRule(LocalTime start, Duration duration, int capacity) {
     CaretakerRRule rule = new CaretakerRRule();
     rule.setRruleId(UUID.randomUUID());
@@ -180,4 +282,3 @@ class RRuleCapacityCheckerTest {
     return event;
   }
 }
-

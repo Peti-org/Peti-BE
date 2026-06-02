@@ -1,8 +1,8 @@
 package com.peti.backend.service.user;
 
-import com.peti.backend.dto.caretacker.CaretakerDto;
-import com.peti.backend.dto.caretacker.CaretakerPreferences;
-import com.peti.backend.dto.caretacker.SimpleCaretakerDto;
+import com.peti.backend.dto.caretaker.CaretakerDto;
+import com.peti.backend.dto.caretaker.CaretakerPreferences;
+import com.peti.backend.dto.caretaker.SimpleCaretakerDto;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.exception.BadRequestException;

@@ -2,7 +2,7 @@ package com.peti.backend.controller.slot;
 
 import com.peti.backend.dto.elastic.ElasticSlotSearchRequest;
 import com.peti.backend.dto.elastic.ElasticSlotSearchResponse;
-import com.peti.backend.service.elastic.ElasticSlotSearchService;
+import com.peti.backend.service.slot.SlotSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Catalog V2 (Elasticsearch)", description = "Elasticsearch-based catalog with flexible slots")
 public class ElasticCatalogController {
 
-  private final ElasticSlotSearchService searchService;
+  private final SlotSearchService searchService;
 
   @PostMapping("/search")
   @Operation(summary = "Search available slots",

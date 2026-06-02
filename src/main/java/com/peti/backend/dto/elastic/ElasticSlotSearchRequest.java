@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public record ElasticSlotSearchRequest(
 
     // Price range - ше питання, як ми будемо рахувати ціну, бо вона залежить від тварин і їх кількості і бла-бла-бла, що еластік не може сам порахувати, а видавати юзеру якусь фігню не прикольно
     @Positive(message = "Min price must be positive")
-    BigDecimal minPricePerHour,//todo add calculation service on top of standart price
+    BigDecimal minPricePerHour,
 
     @Positive(message = "Max price must be positive")
     BigDecimal maxPricePerHour,
@@ -91,15 +92,23 @@ public record ElasticSlotSearchRequest(
     DESC
   }
 
+  public LocalDateTime startDateTime() {
+    return dateFrom.atTime(timeFrom != null ? timeFrom : LocalTime.MIN);
+  }
+
+  public LocalDateTime endDateTime() {
+    return dateTo.atTime(timeTo != null ? timeTo : LocalTime.MAX);
+  }
+
   /**
    * Apply default values.
    */
   public ElasticSlotSearchRequest withDefaults() {
     return new ElasticSlotSearchRequest(
         dateFrom,
-        dateTo != null ? dateTo : dateFrom.plusDays(7),
-        timeFrom != null ? timeFrom : LocalTime.of(0, 0),
-        timeTo != null ? timeTo : LocalTime.of(23, 59),
+        dateTo,
+        timeFrom != null ? timeFrom : LocalTime.MIN,
+        timeTo != null ? timeTo : LocalTime.MAX,
         cityId,
         minPricePerHour,
         maxPricePerHour,

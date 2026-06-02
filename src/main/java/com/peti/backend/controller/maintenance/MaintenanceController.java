@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/api")
-@Tag(name = "Maintenance", description = "Endpoint only needed for maintenance don't expose them publicly")
+@Tag(name = "Admin", description = "Admin operations")
 public class MaintenanceController {
 
   @GetMapping("/ping")
