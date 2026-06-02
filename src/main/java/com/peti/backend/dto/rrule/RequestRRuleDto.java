@@ -5,29 +5,30 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.LocalTime;
 
 public record RequestRRuleDto(
     @NotBlank(message = "RRule must not be empty")
     String rrule,
 
-    @NotNull(message = "Start date/time is required")
-    LocalDateTime dtstart,
+    @NotNull(message = "Slot start time is required")
+    LocalTime slotStartTime,
 
-    LocalDateTime dtend,
+    @NotNull(message = "Slot duration is required")
+    Duration slotDuration,
 
     String description,
 
     @NotNull(message = "Slot type is required")
     ServiceType slotType,
 
-    @NotNull(message = "Capacity is required")
-    @Positive(message = "Capacity must be positive")
-    Integer capacity,
+    @NotNull(message = "Pet capacity is required")
+    @Positive(message = "Pet capacity must be positive")
+    Integer petCapacity,
 
-    @NotNull(message = "Interval minutes is required")
-    @Min(value = 1, message = "Interval must be at least 1 minute")
-    Integer intervalMinutes,
+    @Positive(message = "People capacity must be positive")
+    Integer peopleCapacity,
 
     @NotNull(message = "IsEnabled is required")
     Boolean isEnabled,

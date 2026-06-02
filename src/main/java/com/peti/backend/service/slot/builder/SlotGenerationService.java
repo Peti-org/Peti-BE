@@ -2,14 +2,13 @@ package com.peti.backend.service.slot.builder;
 
 import static org.springframework.util.ObjectUtils.isEmpty;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.BookingInput;
 import com.peti.backend.model.elastic.model.TimeRange;
 import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
-import com.peti.backend.model.internal.ServiceType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +69,7 @@ public class SlotGenerationService {
       List<BookingInput> bookings, Caretaker caretaker) {
     //sort rrules by type and build for each slot type separately segments
     String slotType = rrules.getFirst().getSlotType();
-    ServiceConfig serviceConfig = caretaker.getCaretakerPreference().services().stream()
-        .filter(config -> config.type().equals(ServiceType.fromName(slotType)))
-        .findFirst()
-        .orElse(null);
+    ServiceConfig serviceConfig = caretaker.getCaretakerPreference().getService(slotType);
 
     if (serviceConfig == null) {
       return List.of();
@@ -93,7 +89,7 @@ public class SlotGenerationService {
     }
     return rrules.stream()
         .filter(r -> Boolean.TRUE.equals(r.getIsEnabled()))
-        .filter(r -> r.getCapacity() != null && r.getCapacity() > 0)
+        .filter(r -> r.getPetCapacity() != null && r.getPetCapacity() > 0)
         .filter(r -> r.getSlotStartTime() != null && r.getSlotDuration() != null)
         .toList();
   }

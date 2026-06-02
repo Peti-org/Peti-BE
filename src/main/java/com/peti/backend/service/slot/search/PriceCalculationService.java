@@ -1,6 +1,6 @@
 package com.peti.backend.service.slot.search;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.PetInfo;
 import com.peti.backend.model.elastic.model.PriceBreakdown;

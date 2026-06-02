@@ -3,6 +3,9 @@ package com.peti.backend.service.user;
 import static com.peti.backend.service.user.RoleService.convertToAuthority;
 
 import com.peti.backend.dto.CityDto;
+import com.peti.backend.dto.user.AuthResponse;
+import com.peti.backend.dto.user.ChangeEmailResponse;
+import com.peti.backend.dto.user.RequestChangeEmail;
 import com.peti.backend.dto.user.RequestUpdatePassword;
 import com.peti.backend.dto.user.RequestUpdateUser;
 import com.peti.backend.dto.user.UserDto;
@@ -10,6 +13,7 @@ import com.peti.backend.model.domain.City;
 import com.peti.backend.model.domain.Role;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.repository.UserRepository;
+import com.peti.backend.security.JwtService;
 import jakarta.persistence.EntityManager;
 import java.sql.Date;
 import java.util.Collections;
@@ -31,8 +35,10 @@ public class UserService implements UserDetailsService {
   private final UserRepository userRepository;
   private final RoleService roleService;
   private final EntityManager entityManager;
-
   private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
+  private final EmailChangeNotifier emailChangeNotifier;
+  private final UserValidator userValidator;
 
   public static UserDto convertToDto(User user, CityDto city) {
     if (user == null) {
@@ -90,28 +96,40 @@ public class UserService implements UserDetailsService {
   }
 
   public UserDto updateUser(UUID userId, RequestUpdateUser updatedUser) {
-    return userRepository.findById(userId)
-        .map(existingUser -> {
-          existingUser.setFirstName(updatedUser.getFirstName());
-          existingUser.setLastName(updatedUser.getLastName());
-          existingUser.setBirthday(Date.valueOf(updatedUser.getBirthDate()));
-          existingUser.setCityByCityId(entityManager.getReference(City.class, updatedUser.getCityId()));
+    User existingUser = userValidator.findUserOrThrow(userId);
+    existingUser.setFirstName(updatedUser.getFirstName());
+    existingUser.setLastName(updatedUser.getLastName());
+    existingUser.setBirthday(Date.valueOf(updatedUser.getBirthDate()));
+    existingUser.setCityByCityId(entityManager.getReference(City.class, updatedUser.getCityId()));
 
-          User savedUser = userRepository.save(existingUser);
-          return convertToDto(savedUser, CityService.convertToDto(savedUser.getCityByCityId()));
-        })
-        .orElse(null);
+    User savedUser = userRepository.save(existingUser);
+    return convertToDto(savedUser, CityService.convertToDto(savedUser.getCityByCityId()));
   }
 
   public boolean updatePassword(UUID userId, RequestUpdatePassword passwordDto) {
-    return userRepository.findById(userId)
-        .filter(user -> passwordEncoder.matches(passwordDto.getOldPassword(), user.getPassword()))
-        .map(existingUser -> {
-          existingUser.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
-          userRepository.save(existingUser);
-          return true;
-        })
-        .orElse(false);
+    User user = userValidator.findUserOrThrow(userId);
+    userValidator.verifyPassword(user, passwordDto.getOldPassword());
+    user.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
+    userRepository.save(user);
+    return true;
+  }
+
+  @Transactional
+  public ChangeEmailResponse changeEmail(UUID userId, RequestChangeEmail request) {
+    User user = userValidator.findUserOrThrow(userId);
+    userValidator.verifyPassword(user, request.currentPassword());
+    userValidator.verifyEmailNotSame(user, request.newEmail());
+    userValidator.verifyEmailNotTaken(request.newEmail());
+
+    String oldEmail = user.getEmail();
+    user.setEmail(request.newEmail());
+    User saved = userRepository.save(user);
+
+    emailChangeNotifier.notifyEmailChanged(oldEmail, request.newEmail());
+
+    AuthResponse auth = jwtService.generateAuthResponse(saved.getEmail());
+    UserDto userDto = convertToDto(saved, CityService.convertToDto(saved.getCityByCityId()));
+    return new ChangeEmailResponse(userDto, auth);
   }
 
   public void deleteUser(UUID userId) {

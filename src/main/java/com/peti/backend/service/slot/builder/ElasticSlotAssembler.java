@@ -1,6 +1,6 @@
 package com.peti.backend.service.slot.builder;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
@@ -66,6 +66,7 @@ public class ElasticSlotAssembler {
         .caretakerRating(caretaker.getRating())
         .caretakerCityId(cityId)
         .caretakerCityName(cityName)
+        .serviceType(serviceConfig.type() != null ? serviceConfig.type().name() : null)
         .serviceConfig(serviceConfig)
         .fromDateTime(range.timeFrom())
         .toDateTime(range.timeTo())

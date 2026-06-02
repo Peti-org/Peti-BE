@@ -34,4 +34,6 @@ public interface ElasticSlotRepository extends ElasticsearchRepository<ElasticSl
    * Count slots for a caretaker.
    */
   long countByCaretakerId(String caretakerId);
+
+  long countByServiceType(String serviceType);
 }

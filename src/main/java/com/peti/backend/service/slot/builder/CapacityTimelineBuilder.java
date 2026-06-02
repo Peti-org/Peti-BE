@@ -73,8 +73,8 @@ public final class CapacityTimelineBuilder {
     for (CaretakerRRule rrule : activeRules) {
       LocalDateTime start = date.atTime(rrule.getSlotStartTime());
       LocalDateTime end = start.plus(rrule.getSlotDuration());
-      deltas.merge(start, rrule.getCapacity(), Integer::sum);
-      deltas.merge(end, -rrule.getCapacity(), Integer::sum);
+      deltas.merge(start, rrule.getPetCapacity(), Integer::sum);
+      deltas.merge(end, -rrule.getPetCapacity(), Integer::sum);
     }
 
     for (BookingInput booking : bookings) {

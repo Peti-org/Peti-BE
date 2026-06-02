@@ -1,0 +1,22 @@
+{
+  "caretakerId": "b1a7e8e2-8c2e-4c1a-9e2a-123456789abc",
+  "caretakerIsDeleted": false,
+  "rating": 50,
+  "caretakerPreference": {
+    "services": {
+      "WALKING": {
+        "type": "WALKING",
+        "frozen": false,
+        "priceNegotiable": true,
+        "isVip": false,
+        "maxSimultaneousPets": 3,
+        "baseDuration": "PT1H",
+        "stepDuration": "PT30M",
+        "minAdvanceMinutesBeforeSalesClose": "PT2H",
+        "configs": {},
+        "tasksIncluded": []
+      }
+    }
+  }
+}
+

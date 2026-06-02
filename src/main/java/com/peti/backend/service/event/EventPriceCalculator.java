@@ -3,15 +3,14 @@ package com.peti.backend.service.event;
 import com.peti.backend.dto.PriceDto;
 import com.peti.backend.dto.PriceItem;
 import com.peti.backend.dto.caretaker.CaretakerPreferences;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.PetConfig;
+import com.peti.backend.dto.caretaker.PriceInfo;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.Pet;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
@@ -60,11 +59,11 @@ public class EventPriceCalculator {
     if (preferences == null || preferences.services() == null) {
       throw new IllegalStateException("Caretaker has no preferences configured");
     }
-    return preferences.services().stream()
-        .filter(s -> s.type().name().equals(slotType))
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException(
-            "Caretaker has no service config for type: " + slotType));
+    ServiceConfig config = preferences.getService(slotType);
+    if (config == null) {
+      throw new IllegalStateException("Caretaker has no service config for type: " + slotType);
+    }
+    return config;
   }
 
   /**
@@ -81,20 +80,10 @@ public class EventPriceCalculator {
     if (petConfig == null || !petConfig.enabled()) {
       return BigDecimal.ZERO;
     }
-    // petPrice override takes precedence
-    if (petConfig.petPrice() != null) {
-      return petConfig.petPrice().priceForService();
-    }
-    // Fall back to weight tiers — pick first enabled tier (future: match by pet weight)
-    Map<String, WeightTier> tiers = petConfig.weightTiers();
-    if (tiers == null || tiers.isEmpty()) {
-      return BigDecimal.ZERO;
-    }
-    return tiers.values().stream()
-        .filter(WeightTier::enabled)
-        .map(t -> t.tierPrice().priceForService())
-        .findFirst()
-        .orElse(BigDecimal.ZERO);
+    double weightKg = pet.getContext() != null && pet.getContext().weightKg() != null
+        ? pet.getContext().weightKg().doubleValue() : 0;
+    PriceInfo price = petConfig.resolvePriceForWeight(weightKg);
+    return price != null ? price.priceForService() : BigDecimal.ZERO;
   }
 
   private String resolveCurrency(ServiceConfig config) {
@@ -103,19 +92,9 @@ public class EventPriceCalculator {
     }
     return config.configs().values().stream()
         .filter(PetConfig::enabled)
-        .map(pc -> {
-          if (pc.petPrice() != null) {
-            return pc.petPrice().currency();
-          }
-          if (pc.weightTiers() != null) {
-            return pc.weightTiers().values().stream()
-                .filter(WeightTier::enabled)
-                .map(t -> t.tierPrice().currency())
-                .findFirst().orElse(null);
-          }
-          return null;
-        })
+        .map(pc -> pc.resolvePriceForWeight(0))
         .filter(java.util.Objects::nonNull)
+        .map(PriceInfo::currency)
         .findFirst()
         .orElse("UAH");
   }

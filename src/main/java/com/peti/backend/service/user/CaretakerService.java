@@ -80,7 +80,7 @@ public class CaretakerService {
     caretaker.setUserReference(new User(userProjection.getUserId()));
     caretaker.setCaretakerIsDeleted(false);
     caretaker.setRating(0);
-    caretaker.setCaretakerPreference(new CaretakerPreferences(null, null));
+    caretaker.setCaretakerPreference(new CaretakerPreferences(null));
 
     return caretaker;
   }

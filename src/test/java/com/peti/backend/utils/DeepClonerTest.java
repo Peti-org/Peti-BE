@@ -27,7 +27,7 @@ class DeepClonerTest {
   @Test
   @DisplayName("deepCopyPreference creates an independent copy")
   void deepCopyPreference_createsIndependentCopy() {
-    CaretakerPreferences original = new CaretakerPreferences(null, null);
+    CaretakerPreferences original = new CaretakerPreferences(null);
 
     CaretakerPreferences copy = deepCloner.deepCopyPreference(original);
 

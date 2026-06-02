@@ -1,0 +1,29 @@
+}
+  ]
+    }
+      "tasksIncluded": []
+      "configs": {},
+      "minAdvanceMinutesBeforeSalesClose": "PT4H",
+      "stepDuration": "PT1H",
+      "baseDuration": "PT2H",
+      "maxSimultaneousPets": 2,
+      "isVip": false,
+      "priceNegotiable": false,
+      "frozen": false,
+      "type": "SITTING",
+    {
+    },
+      "tasksIncluded": []
+      "configs": {},
+      "minAdvanceMinutesBeforeSalesClose": "PT2H",
+      "stepDuration": "PT30M",
+      "baseDuration": "PT1H",
+      "maxSimultaneousPets": 3,
+      "isVip": false,
+      "priceNegotiable": true,
+      "frozen": false,
+      "type": "WALKING",
+    {
+  "services": [
+  // Legacy on-disk shape: services as an array (pre-2026-06 schema).
+

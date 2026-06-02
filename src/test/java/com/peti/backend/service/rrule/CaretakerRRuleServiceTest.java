@@ -61,13 +61,12 @@ class CaretakerRRuleServiceTest {
     rrule.setRruleId(rruleId);
     rrule.setCaretaker(caretaker);
     rrule.setRrule(requestRRuleDto.rrule());
-    rrule.setSlotStartTime(requestRRuleDto.dtstart() != null ? requestRRuleDto.dtstart().toLocalTime() : null);
-    rrule.setSlotDuration(requestRRuleDto.dtstart() != null && requestRRuleDto.dtend() != null
-        ? java.time.Duration.between(requestRRuleDto.dtstart(), requestRRuleDto.dtend()) : null);
+    rrule.setSlotStartTime(requestRRuleDto.slotStartTime());
+    rrule.setSlotDuration(requestRRuleDto.slotDuration());
     rrule.setDescription(requestRRuleDto.description());
     rrule.setSlotType(requestRRuleDto.slotType().name());
-    rrule.setCapacity(requestRRuleDto.capacity());
-    rrule.setIntervalMinutes(requestRRuleDto.intervalMinutes());
+    rrule.setPetCapacity(requestRRuleDto.petCapacity());
+    rrule.setPeopleCapacity(requestRRuleDto.peopleCapacity());
     rrule.setIsEnabled(requestRRuleDto.isEnabled());
     rrule.setIsSchedule(requestRRuleDto.isSchedule());
     rrule.setIsBusy(requestRRuleDto.isBusy());
@@ -83,8 +82,8 @@ class CaretakerRRuleServiceTest {
 
     assertNotNull(result);
     assertEquals(requestRRuleDto.rrule(), result.rrule());
-    assertEquals(requestRRuleDto.capacity(), result.capacity());
-    assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
+    assertEquals(requestRRuleDto.petCapacity(), result.petCapacity());
+    assertEquals(requestRRuleDto.peopleCapacity(), result.peopleCapacity());
     assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
     assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
@@ -95,9 +94,20 @@ class CaretakerRRuleServiceTest {
 
   @Test
   void testGetAllRRulesForCaretaker() {
-    when(rruleRepository.findAllByCaretaker_CaretakerId(caretakerId)).thenReturn(List.of(rrule));
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(caretakerId)).thenReturn(List.of(rrule));
 
     List<RRuleDto> result = rruleService.getAllRRulesForCaretaker(caretakerId);
+
+    assertEquals(1, result.size());
+    assertEquals(rruleId, result.get(0).rruleId());
+  }
+
+  @Test
+  void testGetScheduleCaretaker() {
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndIsScheduleTrue(caretakerId))
+        .thenReturn(List.of(rrule));
+
+    List<RRuleDto> result = rruleService.getScheduleCaretaker(caretakerId);
 
     assertEquals(1, result.size());
     assertEquals(rruleId, result.get(0).rruleId());
@@ -134,7 +144,7 @@ class CaretakerRRuleServiceTest {
     Optional<RRuleDto> result = rruleService.deleteRRule(rruleId, caretakerId);
 
     assertTrue(result.isPresent());
-    verify(rruleRepository).deleteById(rruleId);
+    verify(rruleRepository).delete(rrule);
     verify(slotsRebuildTrigger).rebuildAsync(caretaker.getCaretakerId());
   }
 
@@ -149,17 +159,59 @@ class CaretakerRRuleServiceTest {
   }
 
   @Test
+  void testSetEnabled_Disable() {
+    rrule.setIsEnabled(true);
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.of(rrule));
+    when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
+
+    Optional<RRuleDto> result = rruleService.setEnabled(rruleId, caretakerId, false);
+
+    assertTrue(result.isPresent());
+    assertFalse(rrule.getIsEnabled());
+    verify(rruleRepository).save(rrule);
+    verify(slotsRebuildTrigger).rebuildAsync(caretakerId);
+  }
+
+  @Test
+  void testSetEnabled_Enable_OnDisabledRrule() {
+    rrule.setIsEnabled(false);
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.of(rrule));
+    when(rruleRepository.save(any(CaretakerRRule.class))).thenReturn(rrule);
+
+    Optional<RRuleDto> result = rruleService.setEnabled(rruleId, caretakerId, true);
+
+    assertTrue(result.isPresent());
+    assertTrue(rrule.getIsEnabled());
+    verify(rruleRepository).save(rrule);
+    verify(slotsRebuildTrigger).rebuildAsync(caretakerId);
+  }
+
+  @Test
+  void testSetEnabled_NotFound() {
+    when(rruleRepository.findByRruleIdAndCaretaker_CaretakerId(rruleId, caretakerId))
+        .thenReturn(Optional.empty());
+
+    Optional<RRuleDto> result = rruleService.setEnabled(rruleId, caretakerId, true);
+
+    assertFalse(result.isPresent());
+    verify(slotsRebuildTrigger, org.mockito.Mockito.never()).rebuildAsync(any());
+  }
+
+  @Test
   void testConvertToDto() {
     RRuleDto result = RRuleDto.convert(rrule);
 
     assertNotNull(result);
     assertEquals(rruleId, result.rruleId());
     assertEquals(requestRRuleDto.rrule(), result.rrule());
-    assertEquals(requestRRuleDto.capacity(), result.capacity());
-    assertEquals(requestRRuleDto.intervalMinutes(), result.intervalMinutes());
+    assertEquals(requestRRuleDto.petCapacity(), result.petCapacity());
+    assertEquals(requestRRuleDto.peopleCapacity(), result.peopleCapacity());
     assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
     assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
     assertEquals(requestRRuleDto.priority(), result.priority());
   }
 }
+

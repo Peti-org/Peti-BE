@@ -1,13 +1,13 @@
 package com.peti.backend.utils;
 
+import com.peti.backend.dto.caretaker.BreedConfig;
 import com.peti.backend.dto.caretaker.CaretakerPreferences;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.BreedConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.DaySchedule;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PickupDelivery;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PriceInfo;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.DeliveryOption;
+import com.peti.backend.dto.caretaker.PetConfig;
+import com.peti.backend.dto.caretaker.PriceInfo;
+import com.peti.backend.dto.caretaker.ServiceConfig;
+import com.peti.backend.dto.caretaker.WeightTier;
+import com.peti.backend.dto.caretaker.WeightTierConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.domain.City;
@@ -19,8 +19,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builds mock domain objects for Elasticsearch slot initialization. Pure logic — no Spring/DB dependencies; fully
@@ -101,8 +104,8 @@ public class MockDataBuilder {
     rule.setSlotStartTime(LocalTime.of(startHour, 0));
     rule.setSlotDuration(java.time.Duration.ofHours(endHour - startHour));
     rule.setSlotType(ServiceType.WALKING.name());
-    rule.setCapacity(1 + (index % 3));
-    rule.setIntervalMinutes(30);
+    rule.setPetCapacity(1 + (index % 3));
+    rule.setPeopleCapacity(20);
     rule.setIsEnabled(true);
     rule.setIsSchedule(true);
     rule.setIsBusy(false);
@@ -122,31 +125,30 @@ public class MockDataBuilder {
         BigDecimal.valueOf(20 + (index % 41)),
         null, "UAH", null
     );
-    WeightTier tier = new WeightTier(price, true);
+    Map<WeightTier, WeightTierConfig> tiers = new EnumMap<>(WeightTier.class);
+    tiers.put(WeightTier.MEDIUM, new WeightTierConfig(true, price));
+
+    Set<DeliveryOption> delivery = EnumSet.noneOf(DeliveryOption.class);
+    if (index % 2 == 0) delivery.add(DeliveryOption.PICK_UP);
+    if (index % 3 == 0) delivery.add(DeliveryOption.BRING);
+
     PetConfig petConfig = new PetConfig(
         true,
         new BreedConfig(true, List.of(), List.of()),
-        true, null,
-        new PickupDelivery(index % 2 == 0, index % 3 == 0),
-        Map.of("Medium", tier)
+        false, null,
+        delivery,
+        tiers
     );
     ServiceConfig walkingConfig = new ServiceConfig(
         ServiceType.WALKING, false, true, false,
-        2 + (index % 4),
+        2 + (index % 4), 20,
         Duration.ofHours(1), Duration.ofMinutes(30),
         Duration.ofMinutes(10 + (index % 50)),
         Map.of("Dog", petConfig), List.of()
     );
-    Map<String, DaySchedule> schedule = Map.of(
-        "MONDAY", new DaySchedule(true, LocalTime.of(8, 0), LocalTime.of(20, 0)),
-        "TUESDAY", new DaySchedule(true, LocalTime.of(8, 0), LocalTime.of(20, 0)),
-        "WEDNESDAY", new DaySchedule(true, LocalTime.of(9, 0), LocalTime.of(18, 0)),
-        "THURSDAY", new DaySchedule(true, LocalTime.of(8, 0), LocalTime.of(20, 0)),
-        "FRIDAY", new DaySchedule(true, LocalTime.of(9, 0), LocalTime.of(22, 0)),
-        "SATURDAY", new DaySchedule(true, LocalTime.of(9, 0), LocalTime.of(18, 0)),
-        "SUNDAY", new DaySchedule(false, LocalTime.of(9, 0), LocalTime.of(18, 0))
-    );
-    return new CaretakerPreferences(List.of(walkingConfig), schedule);
+    Map<ServiceType, ServiceConfig> services = new EnumMap<>(ServiceType.class);
+    services.put(ServiceType.WALKING, walkingConfig);
+    return new CaretakerPreferences(services);
   }
 
   /**

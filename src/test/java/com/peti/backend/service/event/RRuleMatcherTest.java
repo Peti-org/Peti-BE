@@ -32,7 +32,7 @@ class RRuleMatcherTest {
   @DisplayName("findMatchingRules - returns rules overlapping the time window")
   void findMatchingRules_overlapping() {
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(4)); // 08:00-12:00
-    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotType(
         CARETAKER_ID, "WALKING")).thenReturn(List.of(rule));
 
     LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
@@ -48,7 +48,7 @@ class RRuleMatcherTest {
   @DisplayName("findMatchingRules - no overlap throws BadRequestException")
   void findMatchingRules_noOverlap() {
     CaretakerRRule rule = buildRule(LocalTime.of(8, 0), Duration.ofHours(2)); // 08:00-10:00
-    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotType(
         CARETAKER_ID, "WALKING")).thenReturn(List.of(rule));
 
     LocalDateTime from = LocalDateTime.of(2026, 5, 2, 14, 0);
@@ -63,7 +63,7 @@ class RRuleMatcherTest {
   @Test
   @DisplayName("findMatchingRules - no candidates throws BadRequestException")
   void findMatchingRules_noCandidates() {
-    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotType(
         CARETAKER_ID, "SITTING")).thenReturn(List.of());
 
     LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
@@ -79,7 +79,7 @@ class RRuleMatcherTest {
   void findMatchingRules_multipleRules() {
     CaretakerRRule morning = buildRule(LocalTime.of(8, 0), Duration.ofHours(4)); // 08-12
     CaretakerRRule afternoon = buildRule(LocalTime.of(14, 0), Duration.ofHours(4)); // 14-18
-    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndSlotType(
         CARETAKER_ID, "WALKING")).thenReturn(List.of(morning, afternoon));
 
     LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
@@ -97,6 +97,8 @@ class RRuleMatcherTest {
     rule.setSlotStartTime(start);
     rule.setSlotDuration(duration);
     rule.setIsEnabled(true);
+    rule.setRrule("FREQ=DAILY");
+    rule.setCreatedAt(LocalDateTime.of(2026, 1, 1, 0, 0));
     return rule;
   }
 }

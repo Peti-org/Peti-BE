@@ -8,6 +8,7 @@ import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
 import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasAdminRole;
+import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.security.annotation.HasUserRole;
 import com.peti.backend.service.rrule.CaretakerRRuleService;
 import com.peti.backend.service.user.CaretakerService;
@@ -49,7 +50,7 @@ public class CaretakerController {
     return ResponseEntity.ok(caretakerService.getCaretakersByCityId(cityId));
   }
 
-  @HasUserRole
+  @HasCaretakerRole
   @GetMapping("/me")
   public ResponseEntity<CaretakerDto> getMyCaretakerDetails(@CurrentCaretakerId UUID caretakerId) {
     return caretakerService.getCaretakerById(caretakerId)
@@ -85,10 +86,5 @@ public class CaretakerController {
       )
       @org.springframework.web.bind.annotation.RequestBody @Valid CaretakerPreferences caretakerPreferences) {
     return ResponseEntity.ok(caretakerService.updateCaretaker(userProjection, caretakerPreferences));
-  }
-
-  @GetMapping("/{caretakerId}/rrules")
-  public ResponseEntity<List<RRuleDto>> getCaretakerRRules(@PathVariable UUID caretakerId) {
-    return ResponseEntity.ok(rruleService.getAllRRulesForCaretaker(caretakerId));
   }
 }

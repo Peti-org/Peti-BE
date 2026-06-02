@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.dto.elastic.ElasticSlotSearchRequest;
 import com.peti.backend.dto.elastic.ElasticSlotSearchRequest.SortDirection;
 import com.peti.backend.dto.elastic.ElasticSlotSearchRequest.SortField;
@@ -40,7 +40,7 @@ class SlotSearchResultMapperTest {
   private SlotSearchResultMapper mapper;
 
   private static final ServiceConfig CONFIG = new ServiceConfig(
-      ServiceType.WALKING, false, true, false, 3,
+      ServiceType.WALKING, false, true, false, 3, 20,
       Duration.ofMinutes(60), Duration.ofMinutes(15), Duration.ofHours(2),
       Map.of(), List.of()
   );

@@ -57,14 +57,12 @@ public class CaretakerRRule {
   private String slotType;
 
   @Basic
-  @Column(name = "capacity", nullable = false)
-  private Integer capacity;
+  @Column(name = "pet_capacity", nullable = false)
+  private Integer petCapacity;
 
   @Basic
-  @Column(name = "interval_minutes", nullable = false)
-  private Integer intervalMinutes;
-
-
+  @Column(name = "people_capacity", nullable = false)
+  private Integer peopleCapacity;
 
   @Basic
   @Column(name = "created_at", nullable = false)
