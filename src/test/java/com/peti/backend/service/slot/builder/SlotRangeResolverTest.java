@@ -3,7 +3,7 @@ package com.peti.backend.service.slot.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.model.elastic.model.TimeRange;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeSegment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +17,8 @@ class SlotRangeResolverTest {
   @Test
   @DisplayName("Uniform capacity - one range per capacity level")
   void uniformCapacity() {
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(D.atTime(8, 0), D.atTime(20, 0), 3)
+    List<TimeSegment> segments = List.of(
+        new TimeSegment(D.atTime(8, 0), D.atTime(20, 0), 3)
     );
 
     Map<Integer, List<TimeRange>> result = SlotRangeResolver.resolveRangesByCapacity(segments);
@@ -34,10 +34,10 @@ class SlotRangeResolverTest {
   @Test
   @DisplayName("Capacity dip creates split ranges at higher levels")
   void capacityDipSplitsHigherLevels() {
-    List<TimeSegmentWithPricing> segments = List.of(
-        new TimeSegmentWithPricing(D.atTime(8, 0), D.atTime(10, 0), 3),
-        new TimeSegmentWithPricing(D.atTime(10, 0), D.atTime(12, 0), 1),
-        new TimeSegmentWithPricing(D.atTime(12, 0), D.atTime(20, 0), 3)
+    List<TimeSegment> segments = List.of(
+        new TimeSegment(D.atTime(8, 0), D.atTime(10, 0), 3),
+        new TimeSegment(D.atTime(10, 0), D.atTime(12, 0), 1),
+        new TimeSegment(D.atTime(12, 0), D.atTime(20, 0), 3)
     );
 
     Map<Integer, List<TimeRange>> result = SlotRangeResolver.resolveRangesByCapacity(segments);

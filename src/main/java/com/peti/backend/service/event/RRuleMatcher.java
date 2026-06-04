@@ -35,6 +35,7 @@ public class RRuleMatcher {
         .findAllByCaretaker_CaretakerIdAndSlotType(caretakerId, slotType);
 
     List<CaretakerRRule> matching = candidates.stream()
+        .filter(r -> Boolean.TRUE.equals(r.getIsEnabled()))
         .filter(rule -> RRuleUtils.isActiveOnDate(rule, from.toLocalDate()))
         .filter(rule -> overlapsTimeWindow(rule, from, to))
         .toList();

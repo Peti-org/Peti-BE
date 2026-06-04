@@ -1,9 +1,14 @@
 package com.peti.backend.service.slot.builder;
 
+import static com.peti.backend.model.elastic.model.Capacity.fromNegativeBooking;
+import static com.peti.backend.model.elastic.model.Capacity.fromNegativeRRule;
+import static com.peti.backend.model.elastic.model.Capacity.fromPositiveBooking;
+import static com.peti.backend.model.elastic.model.Capacity.fromPositiveRRule;
+
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.elastic.model.BookingInput;
-import com.peti.backend.model.elastic.model.CapacityWithPricing;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.Capacity;
+import com.peti.backend.model.elastic.model.TimeSegment;
 import com.peti.backend.service.rrule.RRuleUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>Filter RRules whose recurrence pattern includes the given date</li>
  *   <li>Collect all time boundaries from rrule start/end and booking start/end</li>
  *   <li>At each boundary, compute net capacity = sum of active rrules − sum of active bookings</li>
- *   <li>Convert boundary map into consecutive {@link TimeSegmentWithPricing} entries</li>
+ *   <li>Convert boundary map into consecutive {@link TimeSegment} entries</li>
  * </ol>
  */
 @Slf4j
@@ -38,7 +43,7 @@ public final class CapacityTimelineBuilder {
    * @param date     the concrete date to generate segments for
    * @return ordered list of time segments with positive capacity
    */
-  public static List<TimeSegmentWithPricing> buildSegments(
+  public static List<TimeSegment> buildSegments(
       List<CaretakerRRule> rrules,
       List<BookingInput> bookings,
       LocalDate date) {
@@ -48,7 +53,7 @@ public final class CapacityTimelineBuilder {
       return List.of();
     }
 
-    TreeMap<LocalDateTime, CapacityWithPricing> timeline = buildTimeline(activeRules, bookings, date);
+    TreeMap<LocalDateTime, Capacity> timeline = buildTimeline(activeRules, bookings, date);
     return convertToSegments(timeline);
   }
 
@@ -66,28 +71,28 @@ public final class CapacityTimelineBuilder {
    * Sweep-line algorithm: collect capacity deltas at each boundary, then sweep left-to-right accumulating a running
    * total. O((R+K) log(R+K)) complexity.
    */
-  private static TreeMap<LocalDateTime, CapacityWithPricing> buildTimeline(List<CaretakerRRule> activeRules,
+  private static TreeMap<LocalDateTime, Capacity> buildTimeline(List<CaretakerRRule> activeRules,
       List<BookingInput> bookings, LocalDate date) {
-    TreeMap<LocalDateTime, Integer> deltas = new TreeMap<>();
+    TreeMap<LocalDateTime, Capacity> deltas = new TreeMap<>();
 
     for (CaretakerRRule rrule : activeRules) {
       LocalDateTime start = date.atTime(rrule.getSlotStartTime());
       LocalDateTime end = start.plus(rrule.getSlotDuration());
-      deltas.merge(start, rrule.getPetCapacity(), Integer::sum);
-      deltas.merge(end, -rrule.getPetCapacity(), Integer::sum);
+      deltas.merge(start, fromPositiveRRule(rrule), Capacity::sum);
+      deltas.merge(end, fromNegativeRRule(rrule), Capacity::sum);
     }
 
     for (BookingInput booking : bookings) {
-      deltas.merge(booking.timeFrom(), -booking.bookedCapacity(), Integer::sum);
-      deltas.merge(booking.timeTo(), booking.bookedCapacity(), Integer::sum);
+      deltas.merge(booking.timeFrom(), fromNegativeBooking(booking), Capacity::sum);
+      deltas.merge(booking.timeTo(), fromPositiveBooking(booking), Capacity::sum);
     }
 
-    TreeMap<LocalDateTime, CapacityWithPricing> timeline = new TreeMap<>();
-    int runningCapacity = 0;
+    TreeMap<LocalDateTime, Capacity> timeline = new TreeMap<>();
+    Capacity runningCapacity = new Capacity(0, 0);
 
     for (var entry : deltas.entrySet()) {
-      runningCapacity += entry.getValue();
-      timeline.put(entry.getKey(), new CapacityWithPricing(Math.max(0, runningCapacity)));
+      runningCapacity = runningCapacity.sum(entry.getValue());
+      timeline.put(entry.getKey(), runningCapacity.clampToZero());
     }
 
     return timeline;
@@ -97,18 +102,17 @@ public final class CapacityTimelineBuilder {
   /**
    * Convert the boundary map into consecutive time segments. Only segments with positive capacity are included.
    */
-  private static List<TimeSegmentWithPricing> convertToSegments(TreeMap<LocalDateTime, CapacityWithPricing> timeline) {
-    List<TimeSegmentWithPricing> segments = new ArrayList<>();
+  private static List<TimeSegment> convertToSegments(TreeMap<LocalDateTime, Capacity> timeline) {
+    List<TimeSegment> segments = new ArrayList<>();
     List<LocalDateTime> boundaries = new ArrayList<>(timeline.keySet());
 
     for (int i = 0; i < boundaries.size() - 1; i++) {
       LocalDateTime segStart = boundaries.get(i);
       LocalDateTime segEnd = boundaries.get(i + 1);
-      CapacityWithPricing info = timeline.get(segStart);
+      Capacity capacity = timeline.get(segStart);
 
-      if (segStart.isBefore(segEnd) && info.capacity() > 0) {
-        segments.add(new TimeSegmentWithPricing(
-            segStart, segEnd, info.capacity()));
+      if (segStart.isBefore(segEnd) && capacity.isPositive()) {
+        segments.add(new TimeSegment(segStart, segEnd, capacity.getCapacity()));
       }
     }
     return segments;

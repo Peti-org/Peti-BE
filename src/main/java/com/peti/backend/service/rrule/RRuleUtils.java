@@ -24,8 +24,7 @@ public class RRuleUtils {
     }
     try {
       RecurrenceRule recurrenceRule = new RecurrenceRule(rruleStr);
-      LocalDateTime dtStart = rrule.getCreatedAt().toLocalDate().atTime(
-          rrule.getSlotStartTime()); //todo here can be very old rrule need to check what will be efficiency of this iterator then
+      LocalDateTime dtStart = rrule.getCreatedAt().toLocalDate().atTime(rrule.getSlotStartTime());
       DateTime startDateTimePoint = toRfc5545(dtStart);
 
       RecurrenceRuleIterator iterator = recurrenceRule.iterator(startDateTimePoint);
@@ -53,5 +52,4 @@ public class RRuleUtils {
   private static LocalDate toLocalDate(DateTime dateTime) {
     return LocalDate.ofInstant(Instant.ofEpochMilli(dateTime.getTimestamp()), ZoneId.systemDefault());
   }
-
 }

@@ -27,11 +27,9 @@ public record RequestRRuleDto(
     @Positive(message = "Pet capacity must be positive")
     Integer petCapacity,
 
+    @NotNull(message = "People capacity is required")
     @Positive(message = "People capacity must be positive")
     Integer peopleCapacity,
-
-    @NotNull(message = "IsEnabled is required")
-    Boolean isEnabled,
 
     @NotNull(message = "IsSchedule is required")
     Boolean isSchedule,

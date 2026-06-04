@@ -9,7 +9,7 @@ import com.peti.backend.model.elastic.model.PetInfo;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.peti.backend.service.slot.builder.ElasticAggregationHelper;
+import com.peti.backend.service.slot.search.ElasticAggregationHelper;
 import com.peti.backend.service.slot.search.ElasticQueryBuilder;
 import com.peti.backend.service.slot.search.SlotSearchResultMapper;
 import lombok.RequiredArgsConstructor;

@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CaretakerRRuleServiceTest {
+class RRuleServiceTest {
 
   @Mock
   private CaretakerRRuleRepository rruleRepository;
@@ -39,7 +39,7 @@ class CaretakerRRuleServiceTest {
   private SlotsRebuildTrigger slotsRebuildTrigger;
 
   @InjectMocks
-  private CaretakerRRuleService rruleService;
+  private RRuleService rruleService;
 
   private UUID caretakerId;
   private UUID rruleId;

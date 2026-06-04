@@ -3,14 +3,13 @@ package com.peti.backend.controller.user;
 import com.peti.backend.dto.caretaker.CaretakerDto;
 import com.peti.backend.dto.caretaker.CaretakerPreferences;
 import com.peti.backend.dto.caretaker.SimpleCaretakerDto;
-import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.model.projection.UserProjection;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
 import com.peti.backend.security.annotation.CurrentUser;
 import com.peti.backend.security.annotation.HasAdminRole;
 import com.peti.backend.security.annotation.HasCaretakerRole;
 import com.peti.backend.security.annotation.HasUserRole;
-import com.peti.backend.service.rrule.CaretakerRRuleService;
+import com.peti.backend.service.rrule.RRuleService;
 import com.peti.backend.service.user.CaretakerService;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CaretakerController {
 
   private final CaretakerService caretakerService;
-  private final CaretakerRRuleService rruleService;
+  private final RRuleService rruleService;
 
   @HasAdminRole
   @GetMapping

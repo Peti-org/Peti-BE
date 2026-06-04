@@ -1,7 +1,7 @@
 package com.peti.backend.service.slot.builder;
 
 import com.peti.backend.model.elastic.model.TimeRange;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeSegment;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +21,8 @@ public final class SlotRangeResolver {
    * For each capacity level 1..maxCapacity, build a list of continuous time ranges
    * where available capacity is at least that level.
    */
-  public static Map<Integer, List<TimeRange>> resolveRangesByCapacity(List<TimeSegmentWithPricing> segments) {
-    int maxCapacity = segments.stream().mapToInt(TimeSegmentWithPricing::capacity).max().orElse(0);
+  public static Map<Integer, List<TimeRange>> resolveRangesByCapacity(List<TimeSegment> segments) {
+    int maxCapacity = segments.stream().mapToInt(TimeSegment::capacity).max().orElse(0);
     Map<Integer, List<TimeRange>> result = new TreeMap<>();
     for (int capacity = 1; capacity <= maxCapacity; capacity++) {
       result.put(capacity, findContinuousRanges(segments, capacity));
@@ -30,14 +30,18 @@ public final class SlotRangeResolver {
     return result;
   }
 
-  private static List<TimeRange> findContinuousRanges(List<TimeSegmentWithPricing> segments, int selectedCapacity) {
+  /**
+   * Scans segments left-to-right. Opens a range when capacity meets the threshold,
+   * extends it while consecutive segments qualify, and closes it on the first gap or drop below threshold.
+   */
+  private static List<TimeRange> findContinuousRanges(List<TimeSegment> segments, int selectedCapacity) {
     List<TimeRange> ranges = new ArrayList<>();
     LocalDateTime rangeStart = null;
     LocalDateTime rangeEnd = null;
 
-    for (TimeSegmentWithPricing segment : segments) {
+    for (TimeSegment segment : segments) {
       if (segment.capacity() >= selectedCapacity) {
-        if (rangeStart == null) {//todo if one segmet is missing like 8-9,10-11,12-13 and we are looking for capacity 2, then we will have two ranges 8-9 and 12-13, but actually it should be one range 8-13
+        if (rangeStart == null) {
           rangeStart = segment.timeFrom();
         }
         rangeEnd = segment.timeTo();

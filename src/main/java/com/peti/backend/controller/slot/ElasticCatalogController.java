@@ -6,7 +6,7 @@ import com.peti.backend.dto.rrule.RRuleDto;
 import com.peti.backend.dto.rrule.RequestRRuleDto;
 import com.peti.backend.security.annotation.CurrentCaretakerId;
 import com.peti.backend.security.annotation.HasCaretakerRole;
-import com.peti.backend.service.rrule.CaretakerRRuleService;
+import com.peti.backend.service.rrule.RRuleService;
 import com.peti.backend.service.slot.SlotSearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ElasticCatalogController {
 
   private final SlotSearchService searchService;
-  private final CaretakerRRuleService rruleService;
+  private final RRuleService rruleService;
 
   @PostMapping("/api/v2/catalog/search")
   @Operation(summary = "Search available slots",

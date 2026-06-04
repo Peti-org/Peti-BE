@@ -8,7 +8,7 @@ import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.elastic.model.BookingInput;
 import com.peti.backend.model.elastic.model.TimeRange;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeSegment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -46,18 +46,16 @@ public class SlotGenerationService {
   public List<ElasticSlotDocument> generateSlotsForDay(LocalDate date, List<CaretakerRRule> rrules,
       List<BookingInput> bookings, Caretaker caretaker) {
     List<CaretakerRRule> validRules = filterValidRules(rrules);
-    if (validRules.isEmpty()) {
-      return List.of();
-    }
-
-    if (isEmpty(caretaker.getCaretakerPreference()) || caretaker.getCaretakerPreference().services() == null) {
+    if (validRules.isEmpty()
+        || isEmpty(caretaker.getCaretakerPreference())
+        || caretaker.getCaretakerPreference().services() == null) {
       return List.of();
     }
 
     // Each type of slot should be generated separately because if two slots with different type overlap
     // we need to generate two separate segments for each type
-    Map<String, List<CaretakerRRule>> rulesByType = validRules.stream().collect(Collectors.groupingBy(
-        CaretakerRRule::getSlotType, Collectors.toList()));
+    Map<String, List<CaretakerRRule>> rulesByType = validRules.stream()
+        .collect(Collectors.groupingBy(CaretakerRRule::getSlotType, Collectors.toList()));
 
     return rulesByType.values().stream()
         .map(rules -> buildSlotsForSpecificType(date, rules, bookings, caretaker))
@@ -75,9 +73,9 @@ public class SlotGenerationService {
       return List.of();
     }
 
-    List<TimeSegmentWithPricing> segments = CapacityTimelineBuilder.buildSegments(rrules, bookings, date);
+    List<TimeSegment> segments = CapacityTimelineBuilder.buildSegments(rrules, bookings, date);
     Map<Integer, List<TimeRange>> capacityRanges = SlotRangeResolver.resolveRangesByCapacity(segments);
-    return ElasticSlotAssembler.assemble(capacityRanges, caretaker, serviceConfig);
+    return SlotAssembler.assemble(capacityRanges, caretaker, serviceConfig);
   }
 
   /**
@@ -90,6 +88,7 @@ public class SlotGenerationService {
     return rrules.stream()
         .filter(r -> Boolean.TRUE.equals(r.getIsEnabled()))
         .filter(r -> r.getPetCapacity() != null && r.getPetCapacity() > 0)
+        .filter(r -> r.getPeopleCapacity() != null && r.getPeopleCapacity() > 0)
         .filter(r -> r.getSlotStartTime() != null && r.getSlotDuration() != null)
         .toList();
   }

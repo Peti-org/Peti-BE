@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CaretakerRRuleService {
+public class RRuleService {
 
   private final CaretakerRRuleRepository rruleRepository;
   private final EntityManager entityManager;
@@ -90,6 +90,7 @@ public class CaretakerRRuleService {
     CaretakerRRule rrule = new CaretakerRRule();
     rrule.setCaretaker(entityManager.getReference(Caretaker.class, caretakerId));
     rrule.setCreatedAt(LocalDateTime.now());
+    rrule.setIsEnabled(true);
     applyFields(rrule, request);
     return rrule;
   }
@@ -102,7 +103,6 @@ public class CaretakerRRuleService {
     rrule.setSlotType(dto.slotType().name());
     rrule.setPetCapacity(dto.petCapacity());
     rrule.setPeopleCapacity(dto.peopleCapacity());
-    rrule.setIsEnabled(dto.isEnabled());
     rrule.setIsSchedule(dto.isSchedule());
     rrule.setIsBusy(dto.isBusy());
     rrule.setPriority(dto.priority());

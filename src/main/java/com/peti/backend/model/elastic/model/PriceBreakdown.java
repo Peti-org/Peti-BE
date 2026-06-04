@@ -1,11 +1,12 @@
 package com.peti.backend.model.elastic.model;
 
+import lombok.Builder;
 import java.math.BigDecimal;
 
 /**
  * Detailed breakdown of a calculated slot price.
  */
-@lombok.Builder
+@Builder
 public record PriceBreakdown(
     BigDecimal basePrice,
     int stepsCount,
