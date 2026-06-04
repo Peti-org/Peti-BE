@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,7 @@ public class PlatformStatisticsService {
     return stats;
   }
 
+  @EventListener(ApplicationReadyEvent.class)
   public PlatformStatisticsDto regenerate() {
     log.info("Regenerating platform statistics");
     long totalSlots = elasticSlotRepository.count();
