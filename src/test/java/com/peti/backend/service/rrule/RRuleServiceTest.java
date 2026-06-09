@@ -67,7 +67,6 @@ class RRuleServiceTest {
     rrule.setSlotType(requestRRuleDto.slotType().name());
     rrule.setPetCapacity(requestRRuleDto.petCapacity());
     rrule.setPeopleCapacity(requestRRuleDto.peopleCapacity());
-    rrule.setIsEnabled(requestRRuleDto.isEnabled());
     rrule.setIsSchedule(requestRRuleDto.isSchedule());
     rrule.setIsBusy(requestRRuleDto.isBusy());
     rrule.setPriority(requestRRuleDto.priority());
@@ -84,7 +83,6 @@ class RRuleServiceTest {
     assertEquals(requestRRuleDto.rrule(), result.rrule());
     assertEquals(requestRRuleDto.petCapacity(), result.petCapacity());
     assertEquals(requestRRuleDto.peopleCapacity(), result.peopleCapacity());
-    assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
     assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
     assertEquals(requestRRuleDto.priority(), result.priority());
@@ -208,7 +206,6 @@ class RRuleServiceTest {
     assertEquals(requestRRuleDto.rrule(), result.rrule());
     assertEquals(requestRRuleDto.petCapacity(), result.petCapacity());
     assertEquals(requestRRuleDto.peopleCapacity(), result.peopleCapacity());
-    assertEquals(requestRRuleDto.isEnabled(), result.isEnabled());
     assertEquals(requestRRuleDto.isSchedule(), result.isSchedule());
     assertEquals(requestRRuleDto.isBusy(), result.isBusy());
     assertEquals(requestRRuleDto.priority(), result.priority());

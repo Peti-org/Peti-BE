@@ -29,7 +29,7 @@ public record ServiceConfig(
     @Schema(description = "Maximum pets handled simultaneously")
     @Min(value = 1, message = "Must handle at least 1 pet simultaneously")
     @Max(value = 20, message = "Cannot handle more than 20 pets simultaneously")
-    int maxSimultaneousPets,
+    Integer maxSimultaneousPets,
 
     @Schema(description = "Maximum people (owners) served simultaneously; defaults to 20 when absent")
     @Min(value = 1, message = "Must handle at least 1 person simultaneously")

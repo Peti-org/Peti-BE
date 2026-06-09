@@ -27,7 +27,7 @@ class RRuleDtoValidationTest {
   private static RequestRRuleDto valid(String rrule, LocalTime start, Duration duration,
       String description) {
     return new RequestRRuleDto(rrule, start, duration, description,
-        ServiceType.WALKING, 3, 4, true, false, false, 0);
+        ServiceType.WALKING, 3, 4, true, false,  0);
   }
 
   @Test

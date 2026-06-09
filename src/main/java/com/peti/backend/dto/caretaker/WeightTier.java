@@ -9,7 +9,7 @@ public enum WeightTier {
 
   SMALL(0, 10),
   MEDIUM(10, 30),
-  LARGE(30, Integer.MAX_VALUE);
+  LARGE(30, 200);
 
   private final int minKgInclusive;
   private final int maxKgExclusive;

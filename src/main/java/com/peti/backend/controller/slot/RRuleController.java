@@ -32,17 +32,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping()
 @Tag(name = "Catalog V2 (Elasticsearch)", description = "Elasticsearch-based catalog with flexible slots")
-public class ElasticCatalogController {
+public class RRuleController {
 
-  private final SlotSearchService searchService;
   private final RRuleService rruleService;
-
-  @PostMapping("/api/v2/catalog/search")
-  @Operation(summary = "Search available slots",
-      description = "Search for available slots with filters. Returns aggregated results grouped by caretaker.")
-  public ResponseEntity<ElasticSlotSearchResponse> searchSlots(@Valid @RequestBody ElasticSlotSearchRequest request) {
-    return ResponseEntity.ok(searchService.searchSlots(request));
-  }
 
   @GetMapping("/api/caretakers/{caretakerId}/rrules")
   public ResponseEntity<List<RRuleDto>> getRRules(@PathVariable UUID caretakerId) {

@@ -27,33 +27,24 @@ public class RequestRRuleDtoValidationTest {
 
   private static RequestRRuleDto build(String rrule, LocalTime start, Duration duration,
       ServiceType type, Integer petCap, Integer peopleCap,
-      Boolean enabled, Boolean schedule, Boolean busy, Integer priority) {
+      Boolean schedule, Boolean busy, Integer priority) {
     return new RequestRRuleDto(rrule, start, duration, "Test", type, petCap, peopleCap,
-        enabled, schedule, busy, priority);
+        schedule, busy, priority);
   }
 
   @Test
   public void testValidRRuleDto() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, 5, 4, true, false, false, 0);
+        ServiceType.WALKING, 5, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.isEmpty());
   }
 
   @Test
-  public void testPeopleCapacityNullAllowed() {
-    RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, 5, null, true, false, false, 0);
-
-    Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-    assertTrue(violations.isEmpty(), "people capacity is optional");
-  }
-
-  @Test
   public void testPeopleCapacityZero_Invalid() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, 5, 0, true, false, false, 0);
+        ServiceType.WALKING, 5, 0, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -63,7 +54,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testRRuleBlank() {
     RequestRRuleDto dto = build("", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, 5, 4, true, false, false, 0);
+        ServiceType.WALKING, 5, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -73,7 +64,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testSlotStartTimeNull() {
     RequestRRuleDto dto = build("FREQ=DAILY", null, Duration.ofHours(8),
-        ServiceType.WALKING, 5, 4, true, false, false, 0);
+        ServiceType.WALKING, 5, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -83,7 +74,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testSlotDurationNull() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), null,
-        ServiceType.WALKING, 5, 4, true, false, false, 0);
+        ServiceType.WALKING, 5, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -93,7 +84,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testSlotTypeNull() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        null, 5, 4, true, false, false, 0);
+        null, 5, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -103,7 +94,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testPetCapacityNull() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, null, 4, true, false, false, 0);
+        ServiceType.WALKING, null, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -113,7 +104,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testPetCapacityZero() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, 0, 4, true, false, false, 0);
+        ServiceType.WALKING, 0, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertTrue(violations.stream()
@@ -123,7 +114,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testPetCapacityNegative() {
     RequestRRuleDto dto = build("FREQ=DAILY", LocalTime.of(9, 0), Duration.ofHours(8),
-        ServiceType.WALKING, -1, 4, true, false, false, 0);
+        ServiceType.WALKING, -1, 4, false, false, 0);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertFalse(violations.isEmpty());
@@ -132,7 +123,7 @@ public class RequestRRuleDtoValidationTest {
   @Test
   public void testMultipleViolations() {
     RequestRRuleDto dto = build("", null, null, ServiceType.WALKING, -1, -1,
-        null, null, null, -1);
+        null, null, -1);
 
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
     assertThat(violations).hasSizeGreaterThanOrEqualTo(8);
