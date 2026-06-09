@@ -2,12 +2,13 @@ package com.peti.backend.service.slot.search;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.BreedConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PetConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PickupDelivery;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.PriceInfo;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
-import com.peti.backend.dto.caretaker.CaretakerPreferences.WeightTier;
+import com.peti.backend.dto.caretaker.BreedConfig;
+import com.peti.backend.dto.caretaker.DeliveryOption;
+import com.peti.backend.dto.caretaker.PetConfig;
+import com.peti.backend.dto.caretaker.PriceInfo;
+import com.peti.backend.dto.caretaker.ServiceConfig;
+import com.peti.backend.dto.caretaker.WeightTier;
+import com.peti.backend.dto.caretaker.WeightTierConfig;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
 import com.peti.backend.model.internal.ServiceType;
 import com.peti.backend.model.elastic.model.PetInfo;
@@ -194,7 +195,7 @@ class PriceCalculationServiceTest {
   private ServiceConfig serviceConfig(Duration baseDuration, Duration stepDuration,
                                        Map<String, PetConfig> configs) {
     return new ServiceConfig(
-        ServiceType.WALKING, false, true, false, 3,
+        ServiceType.WALKING, false, true, false, 3, 20,
         baseDuration, stepDuration, Duration.ofHours(2),
         configs, List.of("feeding")
     );
@@ -202,9 +203,10 @@ class PriceCalculationServiceTest {
 
   private PetConfig petConfig(String weightCategory, BigDecimal basePrice, BigDecimal stepPrice) {
     PriceInfo priceInfo = new PriceInfo(basePrice, stepPrice, null, "UAH", null);
-    WeightTier tier = new WeightTier(priceInfo, true);
+    WeightTier tier = WeightTier.valueOf(weightCategory.toUpperCase());
+    java.util.EnumMap<WeightTier, WeightTierConfig> tiers = new java.util.EnumMap<>(WeightTier.class);
+    tiers.put(tier, new WeightTierConfig(true, priceInfo));
     BreedConfig breeds = new BreedConfig(true, List.of(), List.of());
-    PickupDelivery pickup = new PickupDelivery(false, false);
-    return new PetConfig(true, breeds, false, null, pickup, Map.of(weightCategory, tier));
+    return new PetConfig(true, breeds, false, null, java.util.EnumSet.noneOf(DeliveryOption.class), tiers);
   }
 }

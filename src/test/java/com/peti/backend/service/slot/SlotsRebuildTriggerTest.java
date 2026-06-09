@@ -60,9 +60,9 @@ class SlotsRebuildTriggerTest {
     LocalDate to = LocalDate.of(2026, 5, 3);
 
     when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
-    when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(CARETAKER_ID))
         .thenReturn(List.of());
-    when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
+    when(eventRepository.findApprovedOverlapping(eq(CARETAKER_ID), any(), any()))
         .thenReturn(List.of());
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of());
@@ -88,9 +88,9 @@ class SlotsRebuildTriggerTest {
         petWithId(UUID.randomUUID()))));
 
     when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
-    when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(CARETAKER_ID))
         .thenReturn(List.of());
-    when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
+    when(eventRepository.findApprovedOverlapping(eq(CARETAKER_ID), any(), any()))
         .thenReturn(List.of(event));
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of());
@@ -117,9 +117,9 @@ class SlotsRebuildTriggerTest {
     LocalDate day = LocalDate.of(2026, 5, 2);
 
     when(caretakerRepository.findById(CARETAKER_ID)).thenReturn(Optional.of(caretaker));
-    when(rruleRepository.findAllByCaretaker_CaretakerId(CARETAKER_ID))
+    when(rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(CARETAKER_ID))
         .thenReturn(List.of(new CaretakerRRule()));
-    when(eventRepository.findActiveOverlapping(eq(CARETAKER_ID), any(), any()))
+    when(eventRepository.findApprovedOverlapping(eq(CARETAKER_ID), any(), any()))
         .thenReturn(List.of());
     when(slotGenerationService.generateSlotsForDay(any(), any(), any(), any()))
         .thenReturn(List.of(new ElasticSlotDocument()));

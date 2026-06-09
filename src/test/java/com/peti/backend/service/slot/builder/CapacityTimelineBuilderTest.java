@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.peti.backend.model.domain.CaretakerRRule;
 import com.peti.backend.model.elastic.model.BookingInput;
-import com.peti.backend.model.elastic.model.TimeSegmentWithPricing;
+import com.peti.backend.model.elastic.model.TimeSegment;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ class CapacityTimelineBuilderTest {
   @DisplayName("Single RRule, no bookings - one segment spanning full range")
   void singleRRule_noBookings() {
     CaretakerRRule rrule = createRRule(LocalTime.of(8, 0), Duration.ofHours(12), 3);
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), List.of(), DATE);
 
     assertThat(segments).hasSize(1);
@@ -36,7 +36,7 @@ class CapacityTimelineBuilderTest {
   void overlappingRRules() {
     CaretakerRRule r1 = createRRule(LocalTime.of(8, 0), Duration.ofHours(12), 3);
     CaretakerRRule r2 = createRRule(LocalTime.of(18, 0), Duration.ofHours(4), 2);
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(r1, r2), List.of(), DATE);
 
     // 8-18 cap=3, 18-20 cap=5, 20-22 cap=2
@@ -61,7 +61,7 @@ class CapacityTimelineBuilderTest {
     BookingInput booking = new BookingInput(
         LocalDateTime.of(DATE, LocalTime.of(10, 0)),
         LocalDateTime.of(DATE, LocalTime.of(14, 0)), 2);
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), List.of(booking), DATE);
 
     assertThat(segments).hasSize(2);
@@ -81,7 +81,7 @@ class CapacityTimelineBuilderTest {
     BookingInput booking = new BookingInput(
         LocalDateTime.of(DATE, LocalTime.of(12, 0)),
         LocalDateTime.of(DATE, LocalTime.of(16, 0)), 3);
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), List.of(booking), DATE);
 
     assertThat(segments).hasSize(3);
@@ -93,7 +93,7 @@ class CapacityTimelineBuilderTest {
   @Test
   @DisplayName("Empty rrules returns empty segments")
   void emptyRRules() {
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(), List.of(), DATE);
     assertThat(segments).isEmpty();
   }
@@ -110,7 +110,7 @@ class CapacityTimelineBuilderTest {
             LocalDateTime.of(DATE, LocalTime.of(15, 0)),
             LocalDateTime.of(DATE, LocalTime.of(17, 0)), 2)
     );
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), bookings, DATE);
 
     assertThat(segments).hasSize(3);
@@ -128,7 +128,7 @@ class CapacityTimelineBuilderTest {
     CaretakerRRule rrule = createRRule(LocalTime.of(8, 0), Duration.ofHours(12), 3);
     rrule.setRrule("FREQ=WEEKLY;BYDAY=MO");
 
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), List.of(), DATE);
 
     assertThat(segments).isEmpty();
@@ -140,7 +140,7 @@ class CapacityTimelineBuilderTest {
     CaretakerRRule rrule = createRRule(LocalTime.of(9, 0), Duration.ofHours(8), 2);
     rrule.setRrule("FREQ=DAILY");
 
-    List<TimeSegmentWithPricing> segments =
+    List<TimeSegment> segments =
         CapacityTimelineBuilder.buildSegments(List.of(rrule), List.of(), DATE);
 
     assertThat(segments).hasSize(1);
@@ -152,11 +152,13 @@ class CapacityTimelineBuilderTest {
     rrule.setRruleId(UUID.randomUUID());
     rrule.setSlotStartTime(startTime);
     rrule.setSlotDuration(duration);
-    rrule.setCapacity(capacity);
+    rrule.setPetCapacity(capacity);
+    rrule.setPeopleCapacity(20);
     rrule.setIsEnabled(true);
     rrule.setSlotType("WALKING");
     rrule.setPriority(0);
     rrule.setCreatedAt(DATE.minusDays(10).atStartOfDay());
+    rrule.setRrule("FREQ=DAILY");
     return rrule;
   }
 }

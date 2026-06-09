@@ -8,11 +8,12 @@
   "slotDuration": "PT9H",
   "description": "Daily morning slots",
   "slotType": "walk",
-  "capacity": 5,
-  "intervalMinutes": 30,
+  "petCapacity": 5,
+  "peopleCapacity": 4,
   "createdAt": "2026-02-03T08:00:00",
   "isEnabled": true,
   "isSchedule": false,
   "isBusy": false,
   "priority": 10
 }
+

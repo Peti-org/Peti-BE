@@ -32,9 +32,10 @@ public class RRuleMatcher {
       LocalDateTime from, LocalDateTime to) {
 
     List<CaretakerRRule> candidates = rruleRepository
-        .findAllByCaretaker_CaretakerIdAndSlotTypeAndIsEnabledTrue(caretakerId, slotType);
+        .findAllByCaretaker_CaretakerIdAndSlotType(caretakerId, slotType);
 
     List<CaretakerRRule> matching = candidates.stream()
+        .filter(r -> Boolean.TRUE.equals(r.getIsEnabled()))
         .filter(rule -> RRuleUtils.isActiveOnDate(rule, from.toLocalDate()))
         .filter(rule -> overlapsTimeWindow(rule, from, to))
         .toList();

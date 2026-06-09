@@ -1,6 +1,6 @@
 package com.peti.backend.service.slot.builder;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.User;
 import com.peti.backend.model.elastic.ElasticSlotDocument;
@@ -13,11 +13,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * Assembles {@link ElasticSlotDocument} instances from resolved capacity ranges,
- * caretaker domain entity, and service configuration.
+ * Assembles {@link ElasticSlotDocument} instances from resolved capacity ranges, caretaker domain entity, and service
+ * configuration.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class ElasticSlotAssembler {
+public class SlotAssembler {
 
   /**
    * Build the final list of slot documents for one caretaker on one day.
@@ -26,11 +26,8 @@ public class ElasticSlotAssembler {
    * @param caretaker      domain entity — source of all caretaker data
    * @return assembled slot documents ready for indexing
    */
-  public static List<ElasticSlotDocument> assemble(
-      Map<Integer, List<TimeRange>> capacityRanges,
-      Caretaker caretaker,
-      ServiceConfig serviceConfig
-  ) {
+  public static List<ElasticSlotDocument> assemble(Map<Integer, List<TimeRange>> capacityRanges, Caretaker caretaker,
+      ServiceConfig serviceConfig) {
     List<ElasticSlotDocument> slots = new ArrayList<>();
     Instant now = Instant.now();
     User user = caretaker.getUserReference();
@@ -45,27 +42,17 @@ public class ElasticSlotAssembler {
     return slots;
   }
 
-  private static ElasticSlotDocument buildDocument(
-      int capacity,
-      TimeRange range,
-      ServiceConfig serviceConfig,
-      Caretaker caretaker,
-      User user,
-      Instant now
-  ) {
-    String cityId = user.getCityByCityId() != null
-        ? String.valueOf(user.getCityByCityId().getCityId()) : null;
-    String cityName = user.getCityByCityId() != null
-        ? user.getCityByCityId().getCity() : null;
-
+  private static ElasticSlotDocument buildDocument(int capacity, TimeRange range, ServiceConfig serviceConfig,
+      Caretaker caretaker, User user, Instant now) {
     return ElasticSlotDocument.builder()
         .id(null)
         .caretakerId(caretaker.getCaretakerId().toString())
         .caretakerFirstName(user.getFirstName())
         .caretakerLastName(user.getLastName())
         .caretakerRating(caretaker.getRating())
-        .caretakerCityId(cityId)
-        .caretakerCityName(cityName)
+        .caretakerCityId(String.valueOf(user.getCityByCityId().getCityId()))
+        .caretakerCityName(user.getCityByCityId().getCity())
+        .serviceType(serviceConfig.type() != null ? serviceConfig.type().name() : null)
         .serviceConfig(serviceConfig)
         .fromDateTime(range.timeFrom())
         .toDateTime(range.timeTo())

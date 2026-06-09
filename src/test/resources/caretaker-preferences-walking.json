@@ -1,0 +1,17 @@
+{
+  "services": [
+    {
+      "type": "WALKING",
+      "frozen": false,
+      "priceNegotiable": true,
+      "isVip": false,
+      "maxSimultaneousPets": 3,
+      "baseDuration": "PT1H",
+      "stepDuration": "PT30M",
+      "minAdvanceMinutesBeforeSalesClose": "PT2H",
+      "configs": {},
+      "tasksIncluded": []
+    }
+  ]
+}
+

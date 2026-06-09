@@ -1,4 +1,4 @@
-package com.peti.backend.service.slot.builder;
+package com.peti.backend.service.slot.search;
 
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;

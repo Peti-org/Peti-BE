@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.peti.backend.ResourceLoader;
+import com.peti.backend.model.domain.Caretaker;
 import com.peti.backend.model.domain.Pet;
 import com.peti.backend.model.exception.BadRequestException;
 import java.time.LocalDateTime;
@@ -85,6 +86,77 @@ class EventValidatorTest {
     assertThatThrownBy(() -> validator.validateTimeOrder(same, same))
         .isInstanceOf(BadRequestException.class)
         .hasMessageContaining("strictly before");
+  }
+
+  // ---------- validateDuration ----------
+
+  private Caretaker walkingCaretaker() {
+    return ResourceLoader.loadResource("caretaker-walking-entity.json", Caretaker.class);
+  }
+
+  @Test
+  @DisplayName("validateDuration - exact base duration passes")
+  void validateDuration_exactBase() {
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusHours(1);
+
+    assertThatCode(() -> validator.validateDuration(walkingCaretaker(), "WALKING", from, to))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("validateDuration - base + multiple of step passes")
+  void validateDuration_baseMultipleOfStep() {
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusHours(2).plusMinutes(30);
+
+    assertThatCode(() -> validator.validateDuration(walkingCaretaker(), "WALKING", from, to))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("validateDuration - shorter than base throws BadRequestException")
+  void validateDuration_shorterThanBase() {
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusMinutes(45);
+
+    assertThatThrownBy(() -> validator.validateDuration(walkingCaretaker(), "WALKING", from, to))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("shorter than");
+  }
+
+  @Test
+  @DisplayName("validateDuration - excess not aligned to step throws BadRequestException")
+  void validateDuration_excessNotAligned() {
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusMinutes(75);
+
+    assertThatThrownBy(() -> validator.validateDuration(walkingCaretaker(), "WALKING", from, to))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("multiple of step");
+  }
+
+  @Test
+  @DisplayName("validateDuration - unknown slot type throws BadRequestException")
+  void validateDuration_unknownSlotType() {
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusHours(1);
+
+    assertThatThrownBy(() -> validator.validateDuration(walkingCaretaker(), "GROOMING", from, to))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("does not offer");
+  }
+
+  @Test
+  @DisplayName("validateDuration - missing preferences throws BadRequestException")
+  void validateDuration_noPreferences() {
+    Caretaker caretaker = new Caretaker();
+    LocalDateTime from = LocalDateTime.of(2026, 5, 2, 10, 0);
+    LocalDateTime to = from.plusHours(1);
+
+    assertThatThrownBy(() -> validator.validateDuration(caretaker, "WALKING", from, to))
+        .isInstanceOf(BadRequestException.class)
+        .hasMessageContaining("no service preferences");
   }
 }
 

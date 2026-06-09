@@ -70,7 +70,7 @@ public class SlotsRebuildTrigger {
       return;
     }
     List<CaretakerRRule> rrules =
-        rruleRepository.findAllByCaretaker_CaretakerId(caretaker.getCaretakerId());
+        rruleRepository.findAllByCaretaker_CaretakerIdAndIsEnabledTrue(caretaker.getCaretakerId());
 
     LocalDate cursor = from;
     while (!cursor.isAfter(to)) {
@@ -93,7 +93,7 @@ public class SlotsRebuildTrigger {
   private List<BookingInput> collectBookings(UUID caretakerId, LocalDate date) {
     LocalDateTime dayStart = date.atStartOfDay();
     LocalDateTime dayEnd = date.plusDays(1).atStartOfDay();
-    List<Event> events = eventRepository.findActiveOverlapping(caretakerId, dayStart, dayEnd);
+    List<Event> events = eventRepository.findApprovedOverlapping(caretakerId, dayStart, dayEnd);
 
     return events.stream()
         .map(e -> toBookingInput(e, dayStart, dayEnd))

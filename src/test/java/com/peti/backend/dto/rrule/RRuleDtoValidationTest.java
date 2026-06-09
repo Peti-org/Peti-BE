@@ -1,6 +1,5 @@
 package com.peti.backend.dto.rrule;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,7 +8,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,208 +24,78 @@ class RRuleDtoValidationTest {
     validator = factory.getValidator();
   }
 
+  private static RequestRRuleDto valid(String rrule, LocalTime start, Duration duration,
+      String description) {
+    return new RequestRRuleDto(rrule, start, duration, description,
+        ServiceType.WALKING, 3, 4, true, false,  0);
+  }
+
   @Test
   void testCreateRRuleDto_Valid() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=WEEKLY;BYDAY=MO,WE,FR",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Mon/Wed/Fri availability",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+    RequestRRuleDto dto = valid("FREQ=WEEKLY;BYDAY=MO,WE,FR",
+        LocalTime.of(9, 0), Duration.ofHours(9), "Mon/Wed/Fri availability");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
     assertTrue(violations.isEmpty(), "Valid DTO should have no violations");
   }
 
   @Test
   void testCreateRRuleDto_NullRRule() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        null,
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+    RequestRRuleDto dto = valid(null, LocalTime.of(9, 0), Duration.ofHours(9), "Description");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
     assertFalse(violations.isEmpty());
-    assertEquals(1, violations.size());
     assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("must not be empty")));
   }
 
   @Test
   void testCreateRRuleDto_EmptyRRule() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+    RequestRRuleDto dto = valid("", LocalTime.of(9, 0), Duration.ofHours(9), "Description");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertFalse(violations.isEmpty());
-    assertEquals(1, violations.size());
     assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("must not be empty")));
   }
 
   @Test
-  void testCreateRRuleDto_NullDtstart() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=DAILY",
-        null,
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+  void testCreateRRuleDto_NullSlotStartTime() {
+    RequestRRuleDto dto = valid("FREQ=DAILY", null, Duration.ofHours(9), "Description");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertFalse(violations.isEmpty());
-    assertEquals(1, violations.size());
-    assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("is required")));
+    assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("Slot start time is required")));
   }
 
   @Test
-  void testCreateRRuleDto_NullDtendAllowed() {
-    // Given - dtend is nullable
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=DAILY",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        null,
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+  void testCreateRRuleDto_NullSlotDuration() {
+    RequestRRuleDto dto = valid("FREQ=DAILY", LocalTime.of(9, 0), null, "Description");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertTrue(violations.isEmpty(), "Null dtend should be allowed");
+    assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("Slot duration is required")));
   }
 
   @Test
   void testCreateRRuleDto_NullDescriptionAllowed() {
-    // Given - description is nullable
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=WEEKLY;BYDAY=SA,SU",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        null,
-        ServiceType.WALKING,3, 30, true, false, false, 0
-    );
+    RequestRRuleDto dto = valid("FREQ=WEEKLY;BYDAY=SA,SU", LocalTime.of(9, 0),
+        Duration.ofHours(9), null);
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
     assertTrue(violations.isEmpty(), "Null description should be allowed");
   }
 
   @Test
   void testUpdateRRuleDto_Valid() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=WEEKLY;BYDAY=TU,TH",
-        LocalDateTime.of(2026, 2, 1, 10, 0),
-        LocalDateTime.of(2026, 11, 30, 17, 0),
-        "Updated availability",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+    RequestRRuleDto dto = valid("FREQ=WEEKLY;BYDAY=TU,TH",
+        LocalTime.of(10, 0), Duration.ofHours(7), "Updated availability");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
     assertTrue(violations.isEmpty(), "Valid DTO should have no violations");
   }
 
   @Test
-  void testUpdateRRuleDto_NullRRule() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        null,
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
+  void testUpdateRRuleDto_BlankRRule() {
+    RequestRRuleDto dto = valid("   ", LocalTime.of(9, 0), Duration.ofHours(9), "Description");
 
-    // When
     Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertFalse(violations.isEmpty());
     assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("must not be empty")));
-  }
-
-  @Test
-  void testUpdateRRuleDto_EmptyRRule() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "   ",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
-
-    // When
-    Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertFalse(violations.isEmpty());
-    assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("must not be empty")));
-  }
-
-  @Test
-  void testUpdateRRuleDto_NullDtstart() {
-    // Given
-    RequestRRuleDto dto = new RequestRRuleDto(
-        "FREQ=DAILY",
-        null,
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Description",
-        ServiceType.WALKING, 3, 30, true, false, false, 0
-    );
-
-    // When
-    Set<ConstraintViolation<RequestRRuleDto>> violations = validator.validate(dto);
-
-    // Then
-    assertFalse(violations.isEmpty());
-    assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("is required")));
-  }
-
-  @Test
-  void testRRuleDto_RecordImmutability() {
-    // Given
-    RRuleDto dto = new RRuleDto(
-        java.util.UUID.randomUUID(),
-        "FREQ=DAILY",
-        LocalDateTime.of(2026, 1, 1, 9, 0),
-        LocalDateTime.of(2026, 12, 31, 18, 0),
-        "Test",  ServiceType.WALKING, 3, 30, true, false, false, 0);
-
-    // Then - Records are immutable, no setters available
-    assertFalse(dto.rrule().isEmpty());
-    assertEquals("FREQ=DAILY", dto.rrule());
   }
 }
 

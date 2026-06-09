@@ -1,6 +1,6 @@
 package com.peti.backend.model.elastic;
 
-import com.peti.backend.dto.caretaker.CaretakerPreferences.ServiceConfig;
+import com.peti.backend.dto.caretaker.ServiceConfig;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -45,6 +45,9 @@ public class ElasticSlotDocument {
 
   @Field(type = FieldType.Text, analyzer = "standard")
   private String caretakerCityName;
+
+  @Field(type = FieldType.Keyword)
+  private String serviceType;
 
   // The specific service config that is active for this slot (stored as opaque JSON)
   @Field(type = FieldType.Object, enabled = false)
